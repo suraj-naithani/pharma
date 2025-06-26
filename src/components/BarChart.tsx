@@ -33,7 +33,6 @@ export default function BarChart({
     title = "Sales Performance",
     barLabel = "Sales Volume",
     trendLabel = "Market Share",
-    className = "",
     showTrendline = true,
     barColor = "#7ae2e2",
     trendColor = "#8b5cf6",

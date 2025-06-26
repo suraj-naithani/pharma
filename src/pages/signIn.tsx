@@ -7,7 +7,7 @@ export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const [signIn, { isLoading, isError, error }] = useUserLoginMutation();
+    const [signIn, { isLoading}] = useUserLoginMutation();
 
     const dispatch = useDispatch();
 

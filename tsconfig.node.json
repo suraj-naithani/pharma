@@ -19,7 +19,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "composite": true,
+
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": ["vite.config.ts"]
 }
