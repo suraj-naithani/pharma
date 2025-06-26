@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Geist", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+}
+
+/* ===========================
+     Windows Compatibility Fixes
+  =========================== */
+@media screen and (min-width: 1024px) {
+    body {
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+
+    p,
+    span,
+    li,
+    a {
+        font-size: 0.95rem;
+    }
+}
+
+:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ::-webkit-scrollbar {
+    width: 8px;
+    border-radius: 50px;
+    background-color: #f9fafb;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #2a408c;
+    border-radius: 4px;
+} */
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
