@@ -15,7 +15,7 @@ const Contact = lazy(() => import("./pages/contact"));
 const Countries = lazy(() => import("./pages/countries"));
 const IndianPorts = lazy(() => import("./pages/indianPorts"));
 const SignIn = lazy(() => import("./pages/signIn"));
-const SignUp = lazy(() => import("./pages/signUp"));
+// const SignUp = lazy(() => import("./pages/signUp"));
 const Dashboard = lazy(() => import("./pages/dashboard"));
 
 const App = () => {

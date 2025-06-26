@@ -8,32 +8,6 @@ import type { RootState } from "@/redux/store";
 import { useMemo } from "react";
 import { transformDynamicData } from "@/utils/helper";
 
-const quarterlySales = {
-    labels: ["Q1 2024", "Q2 2024", "Q3 2024", "Q4 2024"],
-    data: [125000, 180000, 95000, 220000],
-    trendData: [0, 12.3, 6.2, 15.7],
-}
-
-const quarterlySales3 = {
-    labels: [
-        "Ankaleshwar Icd",
-        "Ahemdabad Icd",
-        "Sahar Air Cargo Air",
-        "Sandkhera Kashipur Icd",
-        "Delhi Air Cargo Air",
-        "Hyderabad Icd"
-    ],
-    data: [125000, 180000, 95000, 220000, 300000, 350000],
-    trendData: [0, 12.3, 6.2, 15.7, 20.1, 25.4],
-}
-
-const quarterlySales2 = {
-    labels: ["Q1 2024", "Q2 2024", "Q3 2024", "Q4 2024", "Q1 2025", "Q2 2025", "Q3 2025", "Q4 2025", "Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026", "Q1 2027", "Q2 2027", "Q3 2027", "Q4 2027"],
-    data: [125000, 180000, 95000, 220000, 300000, 350000, 400000, 450000, 500000, 550000, 600000, 650000, 700000, 750000, 800000, 850000],
-    trendData: [0, 12.3, 6.2, 15.7, 20.1, 25.4, 30.2, 35.6, 40.8, 45.1, 50.3, 55.6, 60.9, 65.2, 70.4, 75.7],
-}
-
-
 const Dashboard = () => {
     const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity, topBuyersByValue, topYearsByValue, topHSCodeByValue, topSuppliersByValue, topCountryByValue, topIndianPortByValue } = useSelector((state: RootState) => state.dashboard);
 
