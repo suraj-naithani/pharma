@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { RootState } from "@/redux/store";
+import { formatNumber } from "@/utils/helper";
 import { BarChart3, Building, Building2, DollarSign, Package, TrendingUp } from "lucide-react";
 import { useSelector } from "react-redux";
 
@@ -23,7 +24,7 @@ const Stats = () => {
                                     <TrendingUp className={cn("w-5 h-5", "text-red-500")} />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? summaryStats?.totalQuantity : "0"}</p>
+                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0"}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -42,7 +43,7 @@ const Stats = () => {
                                     <DollarSign className={cn("w-5 h-5", "text-amber-500")} />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-[#008000]">${summaryStats?.totalValueUSD ? summaryStats?.totalValueUSD : "0.0"}</p>
+                            <p className="text-lg font-bold text-[#008000]">${summaryStats?.totalValueUSD ? formatNumber(summaryStats?.totalValueUSD) : "0.0"}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -80,7 +81,7 @@ const Stats = () => {
                                     <Package className={cn("w-5 h-5", "text-purple-500")} />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalRecords ? summaryStats?.totalRecords : "0"}</p>
+                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalRecords ? formatNumber(summaryStats?.totalRecords) : "0"}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -99,7 +100,7 @@ const Stats = () => {
                                     <Building className={cn("w-5 h-5", "text-emerald-500")} />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? summaryStats?.totalQuantity : "0"}</p>
+                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0"}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -118,7 +119,7 @@ const Stats = () => {
                                     <Building2 className={cn("w-5 h-5", "text-slate-500")} />
                                 </div>
                             </div>
-                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? summaryStats?.totalQuantity : "0"}</p>
+                            <p className="text-lg font-bold text-[#008000]">{summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0"}</p>
                         </div>
                     </div>
                 </CardContent>

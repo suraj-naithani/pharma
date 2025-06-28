@@ -1,3 +1,5 @@
+import numeral from 'numeral';
+
 type RawDataItem = {
     count: number;
     [key: string]: any;
@@ -24,4 +26,8 @@ export function transformDynamicData(
 
     return { labels, data, trendData };
 }
-  
+
+export const formatNumber = (value: number | undefined | null): string => {
+  if (value === null || value === undefined || isNaN(value)) return "0";
+    return numeral(value).format("0.[0]a").toUpperCase();
+};

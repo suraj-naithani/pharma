@@ -77,7 +77,7 @@ const Navbar = () => {
             <div className="text-white flex items-center justify-between h-16 px-4 md:px-8 bg-[#2A408C]">
                 <div className="text-xl font-bold">Chemys</div>
 
-                <div className="hidden md:flex items-center space-x-6">
+                <div className="hidden xl:flex items-center space-x-6">
                     {navLinks.slice(0, 2).map(link => (
                         <NavLink key={link.label} {...link} />
                     ))}
@@ -110,7 +110,7 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                <div className="hidden md:flex items-center space-x-4">
+                <div className="hidden xl:flex items-center space-x-4">
                     {currencyData.map(data => (
                         <CurrencyBox key={data.label} {...data} />
                     ))}
@@ -132,7 +132,7 @@ const Navbar = () => {
                     )}
                 </div>
 
-                <div className="md:hidden">
+                <div className="xl:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-white">

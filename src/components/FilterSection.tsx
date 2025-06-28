@@ -239,7 +239,7 @@ export default function FilterSection() {
 
     return (
         <div className="p-4 w-full">
-            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-7">
+            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-6">
                 <ToggleGroup
                     type="single"
                     value={filterState.selectedToggle}
@@ -263,7 +263,7 @@ export default function FilterSection() {
                         Export
                     </ToggleGroupItem>
                 </ToggleGroup>
-
+                {/* 
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -353,7 +353,65 @@ export default function FilterSection() {
                             </div>
                         </div>
                     </PopoverContent>
-                </Popover>
+                </Popover> */}
+
+                <div className="flex flex-row gap-1">
+                    {/* Start Date Picker */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={`max-w-max justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.from ? "text-gray-500" : ""
+                                    }`}
+                            >
+                                <CalendarDays className="mr-2 h-4 w-3" />
+                                {filterState.dateRange.from ? (
+                                    moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
+                                ) : (
+                                    <span>Start date</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
+                                onSelect={(date) =>
+                                    dispatch(setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD")))
+                                }
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+
+                    {/* End Date Picker */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={`max-w-max justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.to ? "text-gray-500" : ""
+                                    }`}
+                            >
+                                <CalendarDays className="mr-2 h-4 w-4" />
+                                {filterState.dateRange.to ? (
+                                    moment(new Date(filterState.dateRange.to)).format("D MMM YYYY")
+                                ) : (
+                                    <span>End date</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
+                                onSelect={(date) =>
+                                    dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
+                                }
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
