@@ -9,67 +9,68 @@ import { useMemo } from "react";
 import { transformDynamicData } from "@/utils/helper";
 
 const Dashboard = () => {
-    const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity, topBuyersByValue, topYearsByValue, topHSCodeByValue, topSuppliersByValue, topCountryByValue, topIndianPortByValue } = useSelector((state: RootState) => state.dashboard);
+    // const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity, topBuyersByValue, topYearsByValue, topHSCodeByValue, topSuppliersByValue, topCountryByValue, topIndianPortByValue } = useSelector((state: RootState) => state.dashboard);
+    const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity} = useSelector((state: RootState) => state.dashboard);
 
     const yearsByQuantity = useMemo(() => {
         if (!topYearsByQuantity?.length) return null;
         return transformDynamicData(topYearsByQuantity, "year");
     }, [topYearsByQuantity]);
 
-    const yearsByValue = useMemo(() => {
-        if (!topYearsByValue?.length) return null;
-        return transformDynamicData(topYearsByValue, "year");
-    }, [topYearsByValue]);
+    // const yearsByValue = useMemo(() => {
+    //     if (!topYearsByValue?.length) return null;
+    //     return transformDynamicData(topYearsByValue, "year");
+    // }, [topYearsByValue]);
 
     const buyersByQuantity = useMemo(() => {
         if (!topBuyersByQuantity?.length) return null;
         return transformDynamicData(topBuyersByQuantity, "buyer");
     }, [topBuyersByQuantity]);
 
-    const buyersByValue = useMemo(() => {
-        if (!topBuyersByValue?.length) return null;
-        return transformDynamicData(topBuyersByValue, "buyer");
-    }, [topBuyersByValue]);
+    // const buyersByValue = useMemo(() => {
+    //     if (!topBuyersByValue?.length) return null;
+    //     return transformDynamicData(topBuyersByValue, "buyer");
+    // }, [topBuyersByValue]);
 
     const supplierByQuantity = useMemo(() => {
         if (!topSuppliersByQuantity?.length) return null;
         return transformDynamicData(topSuppliersByQuantity, "buyer");
     }, [topSuppliersByQuantity]);
 
-    const supplierByValue = useMemo(() => {
-        if (!topSuppliersByValue?.length) return null;
-        return transformDynamicData(topSuppliersByValue, "buyer");
-    }, [topSuppliersByValue]);
+    // const supplierByValue = useMemo(() => {
+    //     if (!topSuppliersByValue?.length) return null;
+    //     return transformDynamicData(topSuppliersByValue, "buyer");
+    // }, [topSuppliersByValue]);
 
     const indianPortByQuantity = useMemo(() => {
         if (!topIndianPortByQuantity?.length) return null;
         return transformDynamicData(topIndianPortByQuantity, "buyer");
     }, [topIndianPortByQuantity]);
 
-    const indianPortByValue = useMemo(() => {
-        if (!topIndianPortByValue?.length) return null;
-        return transformDynamicData(topIndianPortByValue, "buyer");
-    }, [topIndianPortByValue]);
+    // const indianPortByValue = useMemo(() => {
+    //     if (!topIndianPortByValue?.length) return null;
+    //     return transformDynamicData(topIndianPortByValue, "buyer");
+    // }, [topIndianPortByValue]);
 
     const countryByQuantity = useMemo(() => {
         if (!topCountryByQuantity?.length) return null;
         return transformDynamicData(topCountryByQuantity, "buyer");
     }, [topCountryByQuantity]);
 
-    const countryByValue = useMemo(() => {
-        if (!topCountryByValue?.length) return null;
-        return transformDynamicData(topCountryByValue, "buyer");
-    }, [topCountryByValue]);
+    // const countryByValue = useMemo(() => {
+    //     if (!topCountryByValue?.length) return null;
+    //     return transformDynamicData(topCountryByValue, "buyer");
+    // }, [topCountryByValue]);
 
     const hsCodeByQuantity = useMemo(() => {
         if (!topHSCodeByQuantity?.length) return null;
         return transformDynamicData(topHSCodeByQuantity, "buyer");
     }, [topHSCodeByQuantity]);
 
-    const hsCodeByValue = useMemo(() => {
-        if (!topHSCodeByValue?.length) return null;
-        return transformDynamicData(topHSCodeByValue, "buyer");
-    }, [topHSCodeByValue]);
+    // const hsCodeByValue = useMemo(() => {
+    //     if (!topHSCodeByValue?.length) return null;
+    //     return transformDynamicData(topHSCodeByValue, "buyer");
+    // }, [topHSCodeByValue]);
 
     return (
         <div className='bg-[#f9fafb] w-full min-h-[100vh] '>
@@ -84,7 +85,7 @@ const Dashboard = () => {
 
                 <div className="flex-6 w-full flex flex-col gap-5 overflow-hidden">
                     {
-                        yearsByQuantity && yearsByValue && buyersByQuantity && buyersByValue && supplierByQuantity && supplierByValue && indianPortByQuantity && indianPortByValue && countryByQuantity && countryByValue && hsCodeByQuantity && hsCodeByValue &&
+                        yearsByQuantity && buyersByQuantity && supplierByQuantity && indianPortByQuantity && countryByQuantity && hsCodeByQuantity &&
                             <div className="flex flex-col gap-5">
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -98,7 +99,7 @@ const Dashboard = () => {
                                         barColor="#6366f1"
                                         trendColor="#10b981"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top Years By Value"
                                         labels={yearsByValue.labels}
                                         data={yearsByValue.data}
@@ -108,7 +109,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#0ea5e9"
                                         trendColor="#facc15"
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -122,7 +123,7 @@ const Dashboard = () => {
                                         barColor="#0891b2"
                                         trendColor="#c084fc"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top Buyer By Value"
                                         labels={buyersByValue.labels}
                                         data={buyersByValue.data}
@@ -132,7 +133,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#64748b"
                                         trendColor="#f97316"
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -146,7 +147,7 @@ const Dashboard = () => {
                                         barColor="#7c3aed"
                                         trendColor="#f472b6"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top Supplier By Value"
                                         labels={supplierByValue.labels}
                                         data={supplierByValue.data}
@@ -156,7 +157,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#1e40af"
                                         trendColor="#10b981"
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -170,7 +171,7 @@ const Dashboard = () => {
                                         barColor="#2563eb"
                                         trendColor="#f87171"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top Indian Port By Value"
                                         labels={indianPortByValue.labels}
                                         data={indianPortByValue.data}
@@ -180,7 +181,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#a855f7"
                                         trendColor="#22d3ee"
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -194,7 +195,7 @@ const Dashboard = () => {
                                         barColor="#14b8a6"
                                         trendColor="#eab308"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top Country By Value"
                                         labels={countryByValue.labels}
                                         data={countryByValue.data}
@@ -204,7 +205,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#8b5cf6"
                                         trendColor="#34d399"
-                                    />
+                                    /> */}
                                 </div>
                                 <div className="flex gap-5 flex-col md:flex-row">
                                     <BarChart
@@ -218,7 +219,7 @@ const Dashboard = () => {
                                         barColor="#334155"
                                         trendColor="#2dd4bf"
                                     />
-                                    <BarChart
+                                    {/* <BarChart
                                         title="Top HS Code By Value"
                                         labels={hsCodeByValue.labels}
                                         data={hsCodeByValue.data}
@@ -228,7 +229,7 @@ const Dashboard = () => {
                                         showTrendline={true}
                                         barColor="#fda4af"
                                         trendColor="#1e293b"
-                                    />
+                                    /> */}
                                 </div>
                             </div>
                     }

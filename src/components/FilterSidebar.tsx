@@ -90,12 +90,12 @@ export default function FilterSidebar() {
     const [triggerTopCountryByQuantity] = useLazyGetTopCountryByQuantityQuery();
     const [triggerTopIndianPortByQuantity] = useLazyGetTopIndianPortByQuantityQuery();
 
-    const [triggerTopBuyersByValue] = useLazyGetTopBuyersByValueQuery();
-    const [triggerTopYearsByValue] = useLazyGetTopYearsByValueQuery();
-    const [triggerTopHSCodeByValue] = useLazyGetTopHSCodeByValueQuery();
-    const [triggerTopSuppliersByValue] = useLazyGetTopSuppliersByValueQuery();
-    const [triggerTopCountryByValue] = useLazyGetTopCountryByValueQuery();
-    const [triggerTopIndianPortByValue] = useLazyGetTopIndianPortByValueQuery();
+    // const [triggerTopBuyersByValue] = useLazyGetTopBuyersByValueQuery();
+    // const [triggerTopYearsByValue] = useLazyGetTopYearsByValueQuery();
+    // const [triggerTopHSCodeByValue] = useLazyGetTopHSCodeByValueQuery();
+    // const [triggerTopSuppliersByValue] = useLazyGetTopSuppliersByValueQuery();
+    // const [triggerTopCountryByValue] = useLazyGetTopCountryByValueQuery();
+    // const [triggerTopIndianPortByValue] = useLazyGetTopIndianPortByValueQuery();
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
@@ -161,41 +161,41 @@ export default function FilterSidebar() {
                     dispatch(setTopIndianPortByQuantity(res.metrics.topIndianPortByQuantity))
                 );
 
-            triggerTopBuyersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopBuyersByValue(res.metrics.topBuyersByValue))
-                );
+            // triggerTopBuyersByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopBuyersByValue(res.metrics.topBuyersByValue))
+            //     );
 
-            triggerTopYearsByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopYearsByValue(res.metrics.topYearsByValue))
-                );
+            // triggerTopYearsByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopYearsByValue(res.metrics.topYearsByValue))
+            //     );
 
-            triggerTopHSCodeByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopHSCodeByValue(res.metrics.topHSCodeByValue))
-                );
+            // triggerTopHSCodeByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopHSCodeByValue(res.metrics.topHSCodeByValue))
+            //     );
 
-            triggerTopSuppliersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopSuppliersByValue(res.metrics.topSuppliersByValue))
-                );
+            // triggerTopSuppliersByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopSuppliersByValue(res.metrics.topSuppliersByValue))
+            //     );
 
-            triggerTopCountryByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopCountryByValue(res.metrics.topCountryByValue))
-                );
+            // triggerTopCountryByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopCountryByValue(res.metrics.topCountryByValue))
+            //     );
 
-            triggerTopIndianPortByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopIndianPortByValue(res.metrics.topIndianPortByValue))
-                );
+            // triggerTopIndianPortByValue(data)
+            //     .unwrap()
+            //     .then((res) =>
+            //         dispatch(setTopIndianPortByValue(res.metrics.topIndianPortByValue))
+            //     );
         } catch (err) {
             console.error("getRecordData error:", err);
         } finally {

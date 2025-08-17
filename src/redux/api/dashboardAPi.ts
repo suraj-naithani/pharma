@@ -41,42 +41,42 @@ export const dashboardApi = createApi({
 
         getTopBuyersByQuantity: builder.query({
             query: (params) => ({
-                url: "top-buyers-by-quantity",
+                url: "top-buyers",
                 method: "GET",
                 params,
             }),
         }),
         getTopYearsByQuantity: builder.query({
             query: (params) => ({
-                url: "top-years-by-quantity",
+                url: "top-years",
                 method: "GET",
                 params,
             }),
         }),
         getTopHSCodeByQuantity: builder.query({
             query: (params) => ({
-                url: "top-HSCode-by-quantity",
+                url: "top-HSCode",
                 method: "GET",
                 params,
             }),
         }),
         getTopSuppliersByQuantity: builder.query({
             query: (params) => ({
-                url: "top-suppliers-by-quantity",
+                url: "top-suppliers",
                 method: "GET",
                 params,
             }),
         }),
         getTopCountryByQuantity: builder.query({
             query: (params) => ({
-                url: "top-country-by-quantity",
+                url: "top-country",
                 method: "GET",
                 params,
             }),
         }),
         getTopIndianPortByQuantity: builder.query({
             query: (params) => ({
-                url: "top-indian-port-by-quantity",
+                url: "top-indian-port",
                 method: "GET",
                 params,
             }),
