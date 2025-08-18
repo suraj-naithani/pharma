@@ -9,68 +9,112 @@ import { useMemo } from "react";
 import { transformDynamicData } from "@/utils/helper";
 
 const Dashboard = () => {
-    // const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity, topBuyersByValue, topYearsByValue, topHSCodeByValue, topSuppliersByValue, topCountryByValue, topIndianPortByValue } = useSelector((state: RootState) => state.dashboard);
-    const { topYearsByQuantity, topBuyersByQuantity, topHSCodeByQuantity, topSuppliersByQuantity, topCountryByQuantity, topIndianPortByQuantity} = useSelector((state: RootState) => state.dashboard);
+    const {
+        topYears,
+        topBuyers,
+        topHSCode,
+        topSuppliers,
+        topCountry,
+        topIndianPort,
+    } = useSelector((state: RootState) => state.dashboard);
 
+    // Transform quantity data - sorted by quantity descending, top 6
     const yearsByQuantity = useMemo(() => {
-        if (!topYearsByQuantity?.length) return null;
-        return transformDynamicData(topYearsByQuantity, "year");
-    }, [topYearsByQuantity]);
-
-    // const yearsByValue = useMemo(() => {
-    //     if (!topYearsByValue?.length) return null;
-    //     return transformDynamicData(topYearsByValue, "year");
-    // }, [topYearsByValue]);
+        if (!topYears?.length) return null;
+        const sortedData = [...topYears]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "year", "quantity");
+    }, [topYears]);
 
     const buyersByQuantity = useMemo(() => {
-        if (!topBuyersByQuantity?.length) return null;
-        return transformDynamicData(topBuyersByQuantity, "buyer");
-    }, [topBuyersByQuantity]);
-
-    // const buyersByValue = useMemo(() => {
-    //     if (!topBuyersByValue?.length) return null;
-    //     return transformDynamicData(topBuyersByValue, "buyer");
-    // }, [topBuyersByValue]);
+        if (!topBuyers?.length) return null;
+        const sortedData = [...topBuyers]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "buyer", "quantity");
+    }, [topBuyers]);
 
     const supplierByQuantity = useMemo(() => {
-        if (!topSuppliersByQuantity?.length) return null;
-        return transformDynamicData(topSuppliersByQuantity, "buyer");
-    }, [topSuppliersByQuantity]);
-
-    // const supplierByValue = useMemo(() => {
-    //     if (!topSuppliersByValue?.length) return null;
-    //     return transformDynamicData(topSuppliersByValue, "buyer");
-    // }, [topSuppliersByValue]);
+        if (!topSuppliers?.length) return null;
+        const sortedData = [...topSuppliers]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "supplier", "quantity");
+    }, [topSuppliers]);
 
     const indianPortByQuantity = useMemo(() => {
-        if (!topIndianPortByQuantity?.length) return null;
-        return transformDynamicData(topIndianPortByQuantity, "buyer");
-    }, [topIndianPortByQuantity]);
-
-    // const indianPortByValue = useMemo(() => {
-    //     if (!topIndianPortByValue?.length) return null;
-    //     return transformDynamicData(topIndianPortByValue, "buyer");
-    // }, [topIndianPortByValue]);
+        if (!topIndianPort?.length) return null;
+        const sortedData = [...topIndianPort]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "portOfOrigin", "quantity");
+    }, [topIndianPort]);
 
     const countryByQuantity = useMemo(() => {
-        if (!topCountryByQuantity?.length) return null;
-        return transformDynamicData(topCountryByQuantity, "buyer");
-    }, [topCountryByQuantity]);
-
-    // const countryByValue = useMemo(() => {
-    //     if (!topCountryByValue?.length) return null;
-    //     return transformDynamicData(topCountryByValue, "buyer");
-    // }, [topCountryByValue]);
+        if (!topCountry?.length) return null;
+        const sortedData = [...topCountry]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "buyerCountry", "quantity");
+    }, [topCountry]);
 
     const hsCodeByQuantity = useMemo(() => {
-        if (!topHSCodeByQuantity?.length) return null;
-        return transformDynamicData(topHSCodeByQuantity, "buyer");
-    }, [topHSCodeByQuantity]);
+        if (!topHSCode?.length) return null;
+        const sortedData = [...topHSCode]
+            .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "H_S_Code", "quantity");
+    }, [topHSCode]);
 
-    // const hsCodeByValue = useMemo(() => {
-    //     if (!topHSCodeByValue?.length) return null;
-    //     return transformDynamicData(topHSCodeByValue, "buyer");
-    // }, [topHSCodeByValue]);
+    // Transform value data - sorted by value descending, top 6
+    const yearsByValue = useMemo(() => {
+        if (!topYears?.length) return null;
+        const sortedData = [...topYears]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "year", "value");
+    }, [topYears]);
+
+    const buyersByValue = useMemo(() => {
+        if (!topBuyers?.length) return null;
+        const sortedData = [...topBuyers]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "buyer", "value");
+    }, [topBuyers]);
+
+    const supplierByValue = useMemo(() => {
+        if (!topSuppliers?.length) return null;
+        const sortedData = [...topSuppliers]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "supplier", "value");
+    }, [topSuppliers]);
+
+    const indianPortByValue = useMemo(() => {
+        if (!topIndianPort?.length) return null;
+        const sortedData = [...topIndianPort]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "portOfOrigin", "value");
+    }, [topIndianPort]);
+
+    const countryByValue = useMemo(() => {
+        if (!topCountry?.length) return null;
+        const sortedData = [...topCountry]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "buyerCountry", "value");
+    }, [topCountry]);
+
+    const hsCodeByValue = useMemo(() => {
+        if (!topHSCode?.length) return null;
+        const sortedData = [...topHSCode]
+            .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
+            .slice(0, 6);
+        return transformDynamicData(sortedData, "H_S_Code", "value");
+    }, [topHSCode]);
 
     return (
         <div className='bg-[#f9fafb] w-full min-h-[100vh] '>
@@ -86,152 +130,164 @@ const Dashboard = () => {
                 <div className="flex-6 w-full flex flex-col gap-5 overflow-hidden">
                     {
                         yearsByQuantity && buyersByQuantity && supplierByQuantity && indianPortByQuantity && countryByQuantity && hsCodeByQuantity &&
-                            <div className="flex flex-col gap-5">
-                                <div className="flex gap-5 flex-col md:flex-row">
+                        <div className="flex flex-col gap-5">
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top Years By Quantity"
+                                    labels={yearsByQuantity.labels}
+                                    data={yearsByQuantity.data}
+                                    trendData={yearsByQuantity.trendData}
+                                    barLabel="Top Year By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#6366f1"
+                                    trendColor="#10b981"
+                                />
+                                {yearsByValue && (
                                     <BarChart
-                                        title="Top Years By Quantity"
-                                        labels={yearsByQuantity.labels}
-                                        data={yearsByQuantity.data}
-                                        trendData={yearsByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#6366f1"
-                                        trendColor="#10b981"
-                                    />
-                                    {/* <BarChart
                                         title="Top Years By Value"
                                         labels={yearsByValue.labels}
                                         data={yearsByValue.data}
                                         trendData={yearsByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top Year By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#0ea5e9"
                                         trendColor="#facc15"
-                                    /> */}
-                                </div>
-                                <div className="flex gap-5 flex-col md:flex-row">
-                                    <BarChart
-                                        title="Top Buyer By Quantity"
-                                        labels={buyersByQuantity.labels}
-                                        data={buyersByQuantity.data}
-                                        trendData={buyersByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#0891b2"
-                                        trendColor="#c084fc"
                                     />
-                                    {/* <BarChart
+                                )}
+                            </div>
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top Buyer By Quantity"
+                                    labels={buyersByQuantity.labels}
+                                    data={buyersByQuantity.data}
+                                    trendData={buyersByQuantity.trendData}
+                                    barLabel="Top Buyer By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#0891b2"
+                                    trendColor="#c084fc"
+                                />
+                                {buyersByValue && (
+                                    <BarChart
                                         title="Top Buyer By Value"
                                         labels={buyersByValue.labels}
                                         data={buyersByValue.data}
                                         trendData={buyersByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top Buyer By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#64748b"
                                         trendColor="#f97316"
-                                    /> */}
-                                </div>
-                                <div className="flex gap-5 flex-col md:flex-row">
-                                    <BarChart
-                                        title="Top Supplier By Quantity"
-                                        labels={supplierByQuantity.labels}
-                                        data={supplierByQuantity.data}
-                                        trendData={supplierByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#7c3aed"
-                                        trendColor="#f472b6"
                                     />
-                                    {/* <BarChart
+                                )}
+                            </div>
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top Supplier By Quantity"
+                                    labels={supplierByQuantity.labels}
+                                    data={supplierByQuantity.data}
+                                    trendData={supplierByQuantity.trendData}
+                                    barLabel="Top Supplier By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#7c3aed"
+                                    trendColor="#f472b6"
+                                />
+                                {supplierByValue && (
+                                    <BarChart
                                         title="Top Supplier By Value"
                                         labels={supplierByValue.labels}
                                         data={supplierByValue.data}
                                         trendData={supplierByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top Supplier By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#1e40af"
                                         trendColor="#10b981"
-                                    /> */}
-                                </div>
-                                <div className="flex gap-5 flex-col md:flex-row">
-                                    <BarChart
-                                        title="Top Indian Port By Quantity"
-                                        labels={indianPortByQuantity.labels}
-                                        data={indianPortByQuantity.data}
-                                        trendData={indianPortByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#2563eb"
-                                        trendColor="#f87171"
                                     />
-                                    {/* <BarChart
+                                )}
+                            </div>
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top Indian Port By Quantity"
+                                    labels={indianPortByQuantity.labels}
+                                    data={indianPortByQuantity.data}
+                                    trendData={indianPortByQuantity.trendData}
+                                    barLabel="Top Indian Port By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#2563eb"
+                                    trendColor="#f87171"
+                                />
+                                {indianPortByValue && (
+                                    <BarChart
                                         title="Top Indian Port By Value"
                                         labels={indianPortByValue.labels}
                                         data={indianPortByValue.data}
                                         trendData={indianPortByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top Indian Port By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#a855f7"
                                         trendColor="#22d3ee"
-                                    /> */}
-                                </div>
-                                <div className="flex gap-5 flex-col md:flex-row">
-                                    <BarChart
-                                        title="Top Country By Quantity"
-                                        labels={countryByQuantity.labels}
-                                        data={countryByQuantity.data}
-                                        trendData={countryByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#14b8a6"
-                                        trendColor="#eab308"
                                     />
-                                    {/* <BarChart
+                                )}
+                            </div>
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top Country By Quantity"
+                                    labels={countryByQuantity.labels}
+                                    data={countryByQuantity.data}
+                                    trendData={countryByQuantity.trendData}
+                                    barLabel="Top Country By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#14b8a6"
+                                    trendColor="#eab308"
+                                />
+                                {countryByValue && (
+                                    <BarChart
                                         title="Top Country By Value"
                                         labels={countryByValue.labels}
                                         data={countryByValue.data}
                                         trendData={countryByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top Country By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#8b5cf6"
                                         trendColor="#34d399"
-                                    /> */}
-                                </div>
-                                <div className="flex gap-5 flex-col md:flex-row">
-                                    <BarChart
-                                        title="Top HS Code By Quantity"
-                                        labels={hsCodeByQuantity.labels}
-                                        data={hsCodeByQuantity.data}
-                                        trendData={hsCodeByQuantity.trendData}
-                                        barLabel="Top Year By Quantity"
-                                        trendLabel="Trendline"
-                                        showTrendline={true}
-                                        barColor="#334155"
-                                        trendColor="#2dd4bf"
                                     />
-                                    {/* <BarChart
+                                )}
+                            </div>
+                            <div className="flex gap-5 flex-col md:flex-row">
+                                <BarChart
+                                    title="Top HS Code By Quantity"
+                                    labels={hsCodeByQuantity.labels}
+                                    data={hsCodeByQuantity.data}
+                                    trendData={hsCodeByQuantity.trendData}
+                                    barLabel="Top HS Code By Quantity"
+                                    trendLabel="Trendline"
+                                    showTrendline={true}
+                                    barColor="#334155"
+                                    trendColor="#2dd4bf"
+                                />
+                                {hsCodeByValue && (
+                                    <BarChart
                                         title="Top HS Code By Value"
                                         labels={hsCodeByValue.labels}
                                         data={hsCodeByValue.data}
                                         trendData={hsCodeByValue.trendData}
-                                        barLabel="Top Year By Quantity"
+                                        barLabel="Top HS Code By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
                                         barColor="#fda4af"
                                         trendColor="#1e293b"
-                                    /> */}
-                                </div>
+                                    />
+                                )}
                             </div>
+                        </div>
                     }
                     <ShipmentTable />
                 </div>

@@ -1,12 +1,6 @@
 import type {
-    Buyer,
-    Country,
     DashboardState,
-    HSCode,
-    Port,
-    Summary,
-    Supplier,
-    Year
+    Summary
 } from '@/types/dashboard';
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from '@reduxjs/toolkit';
@@ -14,20 +8,13 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState: DashboardState = {
     summary: null,
     filter: null,
-
-    topBuyersByQuantity: null,
-    topYearsByQuantity: null,
-    topHSCodeByQuantity: null,
-    topSuppliersByQuantity: null,
-    topCountryByQuantity: null,
-    topIndianPortByQuantity: null,
-
-    topBuyersByValue: null,
-    topYearsByValue: null,
-    topHSCodeByValue: null,
-    topSuppliersByValue: null,
-    topCountryByValue: null,
-    topIndianPortByValue: null,
+    topBuyers: null,
+    topYears: null,
+    topHSCode: null,
+    topSuppliers: null,
+    topCountry: null,
+    topIndianPort: null,
+    valueMetrics: null,
 };
 
 const dashboardSlice = createSlice({
@@ -40,41 +27,26 @@ const dashboardSlice = createSlice({
         setFilterData: (state, action: PayloadAction<any>) => {
             state.filter = action.payload;
         },
-        setTopBuyersByQuantity: (state, action: PayloadAction<Buyer[]>) => {
-            state.topBuyersByQuantity = action.payload;
+        setTopBuyers: (state, action: PayloadAction<any>) => {
+            state.topBuyers = action.payload;
         },
-        setTopYearsByQuantity: (state, action: PayloadAction<Year[]>) => {
-            state.topYearsByQuantity = action.payload;
+        setTopYears: (state, action: PayloadAction<any>) => {
+            state.topYears = action.payload;
         },
-        setTopHSCodeByQuantity: (state, action: PayloadAction<HSCode[]>) => {
-            state.topHSCodeByQuantity = action.payload;
+        setTopHSCode: (state, action: PayloadAction<any>) => {
+            state.topHSCode = action.payload;
         },
-        setTopSuppliersByQuantity: (state, action: PayloadAction<Supplier[]>) => {
-            state.topSuppliersByQuantity = action.payload;
+        setTopSuppliers: (state, action: PayloadAction<any>) => {
+            state.topSuppliers = action.payload;
         },
-        setTopCountryByQuantity: (state, action: PayloadAction<Country[]>) => {
-            state.topCountryByQuantity = action.payload;
+        setTopCountry: (state, action: PayloadAction<any>) => {
+            state.topCountry = action.payload;
         },
-        setTopIndianPortByQuantity: (state, action: PayloadAction<Port[]>) => {
-            state.topIndianPortByQuantity = action.payload;
+        setTopIndianPort: (state, action: PayloadAction<any>) => {
+            state.topIndianPort = action.payload;
         },
-        setTopBuyersByValue: (state, action: PayloadAction<Buyer[]>) => {
-            state.topBuyersByValue = action.payload;
-        },
-        setTopYearsByValue: (state, action: PayloadAction<Year[]>) => {
-            state.topYearsByValue = action.payload;
-        },
-        setTopHSCodeByValue: (state, action: PayloadAction<HSCode[]>) => {
-            state.topHSCodeByValue = action.payload;
-        },
-        setTopSuppliersByValue: (state, action: PayloadAction<Supplier[]>) => {
-            state.topSuppliersByValue = action.payload;
-        },
-        setTopCountryByValue: (state, action: PayloadAction<Country[]>) => {
-            state.topCountryByValue = action.payload;
-        },
-        setTopIndianPortByValue: (state, action: PayloadAction<Port[]>) => {
-            state.topIndianPortByValue = action.payload;
+        setValueMetrics: (state, action: PayloadAction<any>) => {
+            state.valueMetrics = action.payload;
         },
         clearDashboardStats: (state) => {
             Object.assign(state, initialState);
@@ -85,18 +57,13 @@ const dashboardSlice = createSlice({
 export const {
     setSummaryStats,
     setFilterData,
-    setTopBuyersByQuantity,
-    setTopYearsByQuantity,
-    setTopHSCodeByQuantity,
-    setTopSuppliersByQuantity,
-    setTopCountryByQuantity,
-    setTopIndianPortByQuantity,
-    setTopBuyersByValue,
-    setTopYearsByValue,
-    setTopHSCodeByValue,
-    setTopSuppliersByValue,
-    setTopCountryByValue,
-    setTopIndianPortByValue,
+    setTopBuyers,
+    setTopYears,
+    setTopHSCode,
+    setTopSuppliers,
+    setTopCountry,
+    setTopIndianPort,
+    setValueMetrics,
     clearDashboardStats
 } = dashboardSlice.actions;
 

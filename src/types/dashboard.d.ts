@@ -13,33 +13,16 @@ export interface FilterState {
     session: string;
 }
 
-// export interface ApiResponse {
-//     statusCode: number;
-//     filters: Filters;
-//     metrics: Metrics;
-// }
-
 export interface DashboardState {
     summary: Summary | null;
     filter: Filters | null;
-
-    topBuyersByQuantity: Buyer[] | null;
-    topBuyersByValue: Buyer[] | null;
-
-    topSuppliersByQuantity: Supplier[] | null;
-    topSuppliersByValue: Supplier[] | null;
-
-    topCountryByQuantity: Country[] | null;
-    topCountryByValue: Country[] | null;
-
-    topIndianPortByQuantity: Port[] | null;
-    topIndianPortByValue: Port[] | null;
-
-    topYearsByQuantity: Year[] | null;
-    topYearsByValue: Year[] | null;
-
-    topHSCodeByQuantity: HSCode[] | null;
-    topHSCodeByValue: HSCode[] | null;
+    topBuyers: any | null;
+    topYears: any | null;
+    topHSCode: any | null;
+    topSuppliers: any | null;
+    topCountry: any | null;
+    topIndianPort: any | null;
+    valueMetrics: any | null;
 }
 
 export interface Filters {
@@ -57,22 +40,6 @@ export interface Filters {
     QuantityUnits: string[];
     UnitPrice: string[];
 }
-
-// export interface Metrics {
-//     summary: Summary;
-//     topBuyersByQuantity: Buyer[];
-//     topBuyersByValue: Buyer[];
-//     topCountryByQuantity: Country[];
-//     topCountryByValue: Country[];
-//     topIndianPortByQuantity: Port[];
-//     topIndianPortByValue: Port[];
-//     topSuppliersByQuantity: Supplier[];
-//     topSuppliersByValue: Supplier[];
-//     topYearsByQuantity: Year[];
-//     topYearsByValue: Year[];
-//     topHSCodeByQuantity: HSCode[];
-//     topHSCodeByValue: HSCode[];
-// }
 
 export interface Summary {
     totalQuantity: number;

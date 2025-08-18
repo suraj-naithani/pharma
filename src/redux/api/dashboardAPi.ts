@@ -4,7 +4,7 @@ import { server } from "../../constants/config";
 export const dashboardApi = createApi({
     reducerPath: "dashboardApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: `${server}/api/data/`,
+        baseUrl: `${server}/api/`,
         credentials: "include",
         prepareHeaders: (headers) => {
             const token = localStorage.getItem("token");
@@ -18,7 +18,7 @@ export const dashboardApi = createApi({
     endpoints: (builder) => ({
         getAllRecords: builder.mutation({
             query: (body) => ({
-                url: "records-metrics",
+                url: "data/records-metrics",
                 method: "POST",
                 body,
             }),
@@ -26,7 +26,7 @@ export const dashboardApi = createApi({
         }),
         getSuggestions: builder.query({
             query: ({ informationOf, chapter, searchType, suggestion, session }) => ({
-                url: `suggestion`,
+                url: `data/suggestion`,
                 method: "GET",
                 params: {
                     informationOf,
@@ -39,100 +39,59 @@ export const dashboardApi = createApi({
             providesTags: ["dashboard"],
         }),
 
-        getTopBuyersByQuantity: builder.query({
+        // New merged metrics routes
+        getTopBuyers: builder.query({
             query: (params) => ({
-                url: "top-buyers",
+                url: "metrics/top-buyers",
                 method: "GET",
                 params,
             }),
         }),
-        getTopYearsByQuantity: builder.query({
+        getTopYears: builder.query({
             query: (params) => ({
-                url: "top-years",
+                url: "metrics/top-years",
                 method: "GET",
                 params,
             }),
         }),
-        getTopHSCodeByQuantity: builder.query({
+        getTopHSCode: builder.query({
             query: (params) => ({
-                url: "top-HSCode",
+                url: "metrics/top-HSCode",
                 method: "GET",
                 params,
             }),
         }),
-        getTopSuppliersByQuantity: builder.query({
+        getTopSuppliers: builder.query({
             query: (params) => ({
-                url: "top-suppliers",
+                url: "metrics/top-suppliers",
                 method: "GET",
                 params,
             }),
         }),
-        getTopCountryByQuantity: builder.query({
+        getTopCountry: builder.query({
             query: (params) => ({
-                url: "top-country",
+                url: "metrics/top-country",
                 method: "GET",
                 params,
             }),
         }),
-        getTopIndianPortByQuantity: builder.query({
+        getTopIndianPort: builder.query({
             query: (params) => ({
-                url: "top-indian-port",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopBuyersByValue: builder.query({
-            query: (params) => ({
-                url: "top-buyers-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopYearsByValue: builder.query({
-            query: (params) => ({
-                url: "top-years-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopHSCodeByValue: builder.query({
-            query: (params) => ({
-                url: "top-HSCode-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopSuppliersByValue: builder.query({
-            query: (params) => ({
-                url: "top-suppliers-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopCountryByValue: builder.query({
-            query: (params) => ({
-                url: "top-country-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopIndianPortByValue: builder.query({
-            query: (params) => ({
-                url: "top-indian-port-by-value",
+                url: "metrics/top-indian-port",
                 method: "GET",
                 params,
             }),
         }),
         getSummaryStats: builder.query({
             query: (params) => ({
-                url: "summary-stats",
+                url: "metrics/summary-stats",
                 method: "GET",
                 params,
             }),
         }),
         getFilterValues: builder.query({
             query: (params) => ({
-                url: "filter-values",
+                url: "metrics/filter-values",
                 method: "GET",
                 params,
             }),
@@ -144,20 +103,13 @@ export const {
     useGetAllRecordsMutation,
     useLazyGetSuggestionsQuery,
 
-    useLazyGetTopBuyersByQuantityQuery,
-    useLazyGetTopYearsByQuantityQuery,
-    useLazyGetTopHSCodeByQuantityQuery,
-    useLazyGetTopSuppliersByQuantityQuery,
-    useLazyGetTopCountryByQuantityQuery,
-    useLazyGetTopIndianPortByQuantityQuery,
-
-    useLazyGetTopBuyersByValueQuery,
-    useLazyGetTopYearsByValueQuery,
-    useLazyGetTopHSCodeByValueQuery,
-    useLazyGetTopSuppliersByValueQuery,
-    useLazyGetTopCountryByValueQuery,
-    useLazyGetTopIndianPortByValueQuery,
-
+    // New merged metrics hooks
+    useLazyGetTopBuyersQuery,
+    useLazyGetTopYearsQuery,
+    useLazyGetTopHSCodeQuery,
+    useLazyGetTopSuppliersQuery,
+    useLazyGetTopCountryQuery,
+    useLazyGetTopIndianPortQuery,
     useLazyGetSummaryStatsQuery,
     useLazyGetFilterValuesQuery,
 } = dashboardApi;
