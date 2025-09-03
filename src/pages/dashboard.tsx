@@ -10,111 +10,118 @@ import { transformDynamicData } from "@/utils/helper";
 
 const Dashboard = () => {
     const {
-        topYears,
-        topBuyers,
-        topHSCode,
-        topSuppliers,
-        topCountry,
-        topIndianPort,
+        topBuyersByQuantity,
+        topBuyersByValue,
+        topYearsByQuantity,
+        topYearsByValue,
+        topHSCodeByQuantity,
+        topHSCodeByValue,
+        topSuppliersByQuantity,
+        topSuppliersByValue,
+        topCountryByQuantity,
+        topCountryByValue,
+        topIndianPortByQuantity,
+        topIndianPortByValue,
+        valueMetrics
     } = useSelector((state: RootState) => state.dashboard);
 
     // Transform quantity data - sorted by quantity descending, top 6
     const yearsByQuantity = useMemo(() => {
-        if (!topYears?.length) return null;
-        const sortedData = [...topYears]
+        if (!topYearsByQuantity?.length) return null;
+        const sortedData = [...topYearsByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "year", "quantity");
-    }, [topYears]);
+    }, [topYearsByQuantity]);
 
     const buyersByQuantity = useMemo(() => {
-        if (!topBuyers?.length) return null;
-        const sortedData = [...topBuyers]
+        if (!topBuyersByQuantity?.length) return null;
+        const sortedData = [...topBuyersByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "buyer", "quantity");
-    }, [topBuyers]);
+    }, [topBuyersByQuantity]);
 
     const supplierByQuantity = useMemo(() => {
-        if (!topSuppliers?.length) return null;
-        const sortedData = [...topSuppliers]
+        if (!topSuppliersByQuantity?.length) return null;
+        const sortedData = [...topSuppliersByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "supplier", "quantity");
-    }, [topSuppliers]);
+    }, [topSuppliersByQuantity]);
 
     const indianPortByQuantity = useMemo(() => {
-        if (!topIndianPort?.length) return null;
-        const sortedData = [...topIndianPort]
+        if (!topIndianPortByQuantity?.length) return null;
+        const sortedData = [...topIndianPortByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "portOfOrigin", "quantity");
-    }, [topIndianPort]);
+    }, [topIndianPortByQuantity]);
 
     const countryByQuantity = useMemo(() => {
-        if (!topCountry?.length) return null;
-        const sortedData = [...topCountry]
+        if (!topCountryByQuantity?.length) return null;
+        const sortedData = [...topCountryByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "buyerCountry", "quantity");
-    }, [topCountry]);
+    }, [topCountryByQuantity]);
 
     const hsCodeByQuantity = useMemo(() => {
-        if (!topHSCode?.length) return null;
-        const sortedData = [...topHSCode]
+        if (!topHSCodeByQuantity?.length) return null;
+        const sortedData = [...topHSCodeByQuantity]
             .sort((a, b) => (b.totalQuantity || 0) - (a.totalQuantity || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "H_S_Code", "quantity");
-    }, [topHSCode]);
+    }, [topHSCodeByQuantity]);
 
     // Transform value data - sorted by value descending, top 6
     const yearsByValue = useMemo(() => {
-        if (!topYears?.length) return null;
-        const sortedData = [...topYears]
+        if (!topYearsByValue?.length) return null;
+        const sortedData = [...topYearsByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "year", "value");
-    }, [topYears]);
+    }, [topYearsByValue]);
 
     const buyersByValue = useMemo(() => {
-        if (!topBuyers?.length) return null;
-        const sortedData = [...topBuyers]
+        if (!topBuyersByValue?.length) return null;
+        const sortedData = [...topBuyersByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "buyer", "value");
-    }, [topBuyers]);
+    }, [topBuyersByValue]);
 
     const supplierByValue = useMemo(() => {
-        if (!topSuppliers?.length) return null;
-        const sortedData = [...topSuppliers]
+        if (!topSuppliersByValue?.length) return null;
+        const sortedData = [...topSuppliersByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "supplier", "value");
-    }, [topSuppliers]);
+    }, [topSuppliersByValue]);
 
     const indianPortByValue = useMemo(() => {
-        if (!topIndianPort?.length) return null;
-        const sortedData = [...topIndianPort]
+        if (!topIndianPortByValue?.length) return null;
+        const sortedData = [...topIndianPortByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "portOfOrigin", "value");
-    }, [topIndianPort]);
+    }, [topIndianPortByValue]);
 
     const countryByValue = useMemo(() => {
-        if (!topCountry?.length) return null;
-        const sortedData = [...topCountry]
+        if (!topCountryByValue?.length) return null;
+        const sortedData = [...topCountryByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "buyerCountry", "value");
-    }, [topCountry]);
+    }, [topCountryByValue]);
 
     const hsCodeByValue = useMemo(() => {
-        if (!topHSCode?.length) return null;
-        const sortedData = [...topHSCode]
+        if (!topHSCodeByValue?.length) return null;
+        const sortedData = [...topHSCodeByValue]
             .sort((a, b) => (b.totalValue || 0) - (a.totalValue || 0))
             .slice(0, 6);
         return transformDynamicData(sortedData, "H_S_Code", "value");
-    }, [topHSCode]);
+    }, [topHSCodeByValue]);
 
     return (
         <div className='bg-[#f9fafb] w-full min-h-[100vh] '>

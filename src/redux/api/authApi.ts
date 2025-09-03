@@ -5,7 +5,7 @@ import type { Credentials, LoginResponse, RegisterData, RegisterResponse, User }
 export const authApi = createApi({
     reducerPath: "authApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: `${server}/api/roles/`,
+        baseUrl: `${server}/api/auth/`,
         credentials: "include",
         prepareHeaders: (headers) => {
             const token = localStorage.getItem("token");

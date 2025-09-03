@@ -16,12 +16,18 @@ export interface FilterState {
 export interface DashboardState {
     summary: Summary | null;
     filter: Filters | null;
-    topBuyers: any | null;
-    topYears: any | null;
-    topHSCode: any | null;
-    topSuppliers: any | null;
-    topCountry: any | null;
-    topIndianPort: any | null;
+    topBuyersByQuantity: any | null;
+    topBuyersByValue: any | null;
+    topYearsByQuantity: any | null;
+    topYearsByValue: any | null;
+    topHSCodeByQuantity: any | null;
+    topHSCodeByValue: any | null;
+    topSuppliersByQuantity: any | null;
+    topSuppliersByValue: any | null;
+    topCountryByQuantity: any | null;
+    topCountryByValue: any | null;
+    topIndianPortByQuantity: any | null;
+    topIndianPortByValue: any | null;
     valueMetrics: any | null;
 }
 

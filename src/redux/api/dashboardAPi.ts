@@ -4,7 +4,7 @@ import { server } from "../../constants/config";
 export const dashboardApi = createApi({
     reducerPath: "dashboardApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: `${server}/api/`,
+        baseUrl: `${server}/api/clickhouse-metrics/`,
         credentials: "include",
         prepareHeaders: (headers) => {
             const token = localStorage.getItem("token");
@@ -18,7 +18,7 @@ export const dashboardApi = createApi({
     endpoints: (builder) => ({
         getAllRecords: builder.mutation({
             query: (body) => ({
-                url: "data/records-metrics",
+                url: "records-metrics",
                 method: "POST",
                 body,
             }),
@@ -26,7 +26,7 @@ export const dashboardApi = createApi({
         }),
         getSuggestions: builder.query({
             query: ({ informationOf, chapter, searchType, suggestion, session }) => ({
-                url: `data/suggestion`,
+                url: `suggestion`,
                 method: "GET",
                 params: {
                     informationOf,
@@ -39,59 +39,26 @@ export const dashboardApi = createApi({
             providesTags: ["dashboard"],
         }),
 
-        // New merged metrics routes
-        getTopBuyers: builder.query({
+        getAllTopMetrics: builder.query({
             query: (params) => ({
-                url: "metrics/top-buyers",
+                url: "all-top-metrics",
                 method: "GET",
                 params,
             }),
+            providesTags: ["dashboard"],
         }),
-        getTopYears: builder.query({
-            query: (params) => ({
-                url: "metrics/top-years",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopHSCode: builder.query({
-            query: (params) => ({
-                url: "metrics/top-HSCode",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopSuppliers: builder.query({
-            query: (params) => ({
-                url: "metrics/top-suppliers",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopCountry: builder.query({
-            query: (params) => ({
-                url: "metrics/top-country",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopIndianPort: builder.query({
-            query: (params) => ({
-                url: "metrics/top-indian-port",
-                method: "GET",
-                params,
-            }),
-        }),
+
+
         getSummaryStats: builder.query({
             query: (params) => ({
-                url: "metrics/summary-stats",
+                url: "summary-stats",
                 method: "GET",
                 params,
             }),
         }),
         getFilterValues: builder.query({
             query: (params) => ({
-                url: "metrics/filter-values",
+                url: "filter-values",
                 method: "GET",
                 params,
             }),
@@ -102,14 +69,7 @@ export const dashboardApi = createApi({
 export const {
     useGetAllRecordsMutation,
     useLazyGetSuggestionsQuery,
-
-    // New merged metrics hooks
-    useLazyGetTopBuyersQuery,
-    useLazyGetTopYearsQuery,
-    useLazyGetTopHSCodeQuery,
-    useLazyGetTopSuppliersQuery,
-    useLazyGetTopCountryQuery,
-    useLazyGetTopIndianPortQuery,
+    useLazyGetAllTopMetricsQuery,
     useLazyGetSummaryStatsQuery,
     useLazyGetFilterValuesQuery,
 } = dashboardApi;

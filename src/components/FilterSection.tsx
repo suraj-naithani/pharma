@@ -6,16 +6,22 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
-import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetTopBuyersQuery, useLazyGetTopCountryQuery, useLazyGetTopHSCodeQuery, useLazyGetTopIndianPortQuery, useLazyGetTopSuppliersQuery, useLazyGetTopYearsQuery } from "@/redux/api/dashboardAPi"
+import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery } from "@/redux/api/dashboardAPi"
 import {
     setFilterData,
     setSummaryStats,
-    setTopBuyers,
-    setTopCountry,
-    setTopHSCode,
-    setTopIndianPort,
-    setTopSuppliers,
-    setTopYears
+    setTopBuyersByQuantity,
+    setTopBuyersByValue,
+    setTopCountryByQuantity,
+    setTopCountryByValue,
+    setTopHSCodeByQuantity,
+    setTopHSCodeByValue,
+    setTopIndianPortByQuantity,
+    setTopIndianPortByValue,
+    setTopSuppliersByQuantity,
+    setTopSuppliersByValue,
+    setTopYearsByQuantity,
+    setTopYearsByValue
 } from "@/redux/reducers/dashboardReducer"
 import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter } from "@/redux/reducers/filterReducer"
 import type { RootState } from "@/redux/store"
@@ -34,15 +40,8 @@ export default function FilterSection() {
 
     const [triggerSuggestions, { data: suggestions, isFetching }] = useLazyGetSuggestionsQuery();
 
-    // New merged metrics hooks
-    const [triggerTopBuyers] = useLazyGetTopBuyersQuery();
-    const [triggerTopYears] = useLazyGetTopYearsQuery();
-    const [triggerTopHSCode] = useLazyGetTopHSCodeQuery();
-    const [triggerTopSuppliers] = useLazyGetTopSuppliersQuery();
-    const [triggerTopCountry] = useLazyGetTopCountryQuery();
-    const [triggerTopIndianPort] = useLazyGetTopIndianPortQuery();
-
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
+    const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -78,48 +77,44 @@ export default function FilterSection() {
         const data = {
             informationOf: filterState.selectedToggle,
             dataType: filterState.selectedDataType,
-            duration: `${moment(filterState.dateRange.from).format("DD/MM/YYYY")}-${moment(filterState.dateRange.to).format("DD/MM/YYYY")}`,
+            duration: `${moment(filterState.dateRange.from).format("DD/MM/YYYY")}-${moment(
+                filterState.dateRange.to
+            ).format("DD/MM/YYYY")}`,
             chapter: filterState.selectedChapters,
             searchType: filterState.selectedSearchType,
-            searchValue: filterState.selectedSearchItems.length > 0 ? filterState.selectedSearchItems : [],
-            filters: filterState.filters || {},
-            session: localStorage.getItem("sessionId"),
+            searchValue: Array.isArray(filterState.selectedSearchItems)
+                ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
+                : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
+            filters: JSON.stringify(filterState.filters),
+            session: localStorage.getItem("sessionId")
         };
 
         const toastId = toast.loading("Fetching data...");
 
         try {
-            const [summaryRes, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
-                triggerFilterValues(data).unwrap(),
-            ]);
-            dispatch(setSummaryStats(summaryRes.metrics.summary));
-            dispatch(setFilterData(filtersRes.filters));
-
-            // Fetch all metrics data using new merged endpoints
-            const [
-                topBuyersRes,
-                topYearsRes,
-                topHSCodeRes,
-                topSuppliersRes,
-                topCountryRes,
-                topIndianPortRes
-            ] = await Promise.all([
-                triggerTopBuyers(data).unwrap(),
-                triggerTopYears(data).unwrap(),
-                triggerTopHSCode(data).unwrap(),
-                triggerTopSuppliers(data).unwrap(),
-                triggerTopCountry(data).unwrap(),
-                triggerTopIndianPort(data).unwrap(),
+                triggerAllTopMetrics(data).unwrap(),
+                // triggerFilterValues(data).unwrap(),
             ]);
 
-            // Dispatch the new merged data
-            dispatch(setTopBuyers(topBuyersRes.metrics.topBuyers));
-            dispatch(setTopYears(topYearsRes.metrics.topYears));
-            dispatch(setTopHSCode(topHSCodeRes.metrics.topHSCode));
-            dispatch(setTopSuppliers(topSuppliersRes.metrics.topSuppliers));
-            dispatch(setTopCountry(topCountryRes.metrics.topCountry));
-            dispatch(setTopIndianPort(topIndianPortRes.metrics.topIndianPort));
+            // Dispatch summary stats and filter data
+            dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
+            // dispatch(setFilterData(filtersRes.filters));
+
+            // Dispatch all top metrics data from the single all-top-metrics API
+            dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
+            dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
+            dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
+            dispatch(setTopYearsByValue(allTopMetricsRes.metrics.topYearsByValue));
+            dispatch(setTopHSCodeByQuantity(allTopMetricsRes.metrics.topHSCodeByQuantity));
+            dispatch(setTopHSCodeByValue(allTopMetricsRes.metrics.topHSCodeByValue));
+            dispatch(setTopSuppliersByQuantity(allTopMetricsRes.metrics.topSuppliersByQuantity));
+            dispatch(setTopSuppliersByValue(allTopMetricsRes.metrics.topSuppliersByValue));
+            dispatch(setTopCountryByQuantity(allTopMetricsRes.metrics.topCountryByQuantity));
+            dispatch(setTopCountryByValue(allTopMetricsRes.metrics.topCountryByValue));
+            dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
+            dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
 
             toast.success("Data fetched successfully!", { id: toastId });
         } catch (err: any) {

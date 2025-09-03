@@ -12,16 +12,21 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
-import { useLazyGetFilterValuesQuery, useLazyGetSummaryStatsQuery, useLazyGetTopBuyersQuery, useLazyGetTopCountryQuery, useLazyGetTopHSCodeQuery, useLazyGetTopIndianPortQuery, useLazyGetTopSuppliersQuery, useLazyGetTopYearsQuery } from "@/redux/api/dashboardAPi";
+import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetSummaryStatsQuery } from "@/redux/api/dashboardAPi";
 import {
-    setFilterData,
     setSummaryStats,
-    setTopBuyers,
-    setTopCountry,
-    setTopHSCode,
-    setTopIndianPort,
-    setTopSuppliers,
-    setTopYears
+    setTopBuyersByQuantity,
+    setTopBuyersByValue,
+    setTopCountryByQuantity,
+    setTopCountryByValue,
+    setTopHSCodeByQuantity,
+    setTopHSCodeByValue,
+    setTopIndianPortByQuantity,
+    setTopIndianPortByValue,
+    setTopSuppliersByQuantity,
+    setTopSuppliersByValue,
+    setTopYearsByQuantity,
+    setTopYearsByValue
 } from "@/redux/reducers/dashboardReducer";
 import {
     clearFilterCategory,
@@ -77,14 +82,8 @@ export default function FilterSidebar() {
     const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
     const filterValues = filterState.filters || {};
 
-    const [triggerTopBuyers] = useLazyGetTopBuyersQuery();
-    const [triggerTopYears] = useLazyGetTopYearsQuery();
-    const [triggerTopHSCode] = useLazyGetTopHSCodeQuery();
-    const [triggerTopSuppliers] = useLazyGetTopSuppliersQuery();
-    const [triggerTopCountry] = useLazyGetTopCountryQuery();
-    const [triggerTopIndianPort] = useLazyGetTopIndianPortQuery();
-
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
+    const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
 
     const getRecordData = async (filtersOverride?: Record<string, string[]>) => {
@@ -99,41 +98,37 @@ export default function FilterSidebar() {
             ).format("DD/MM/YYYY")}`,
             chapter: filterState.selectedChapters,
             searchType: filterState.selectedSearchType,
-            searchValue: filterState.selectedSearchItems,
-            filters,
+            searchValue: Array.isArray(filterState.selectedSearchItems)
+                ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
+                : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
+            filters: JSON.stringify(filters),
             session: localStorage.getItem("sessionId"),
         };
 
         try {
-            const [summaryRes, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
-                triggerFilterValues(data).unwrap(),
+                triggerAllTopMetrics(data).unwrap(),
+                // triggerFilterValues(data).unwrap(),
             ]);
-            dispatch(setSummaryStats(summaryRes.metrics.summary));
-            dispatch(setFilterData(filtersRes.filters));
 
-            const [
-                topBuyersRes,
-                topYearsRes,
-                topHSCodeRes,
-                topSuppliersRes,
-                topCountryRes,
-                topIndianPortRes] = await Promise.all([
-                    triggerTopBuyers(data).unwrap(),
-                    triggerTopYears(data).unwrap(),
-                    triggerTopHSCode(data).unwrap(),
-                    triggerTopSuppliers(data).unwrap(),
-                    triggerTopCountry(data).unwrap(),
-                    triggerTopIndianPort(data).unwrap(),
-                ]);
+            // Dispatch summary stats and filter data
+            dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
+            // dispatch(setFilterData(filtersRes.filters));
 
-            // Dispatch the new merged data
-            dispatch(setTopBuyers(topBuyersRes.metrics.topBuyers));
-            dispatch(setTopYears(topYearsRes.metrics.topYears));
-            dispatch(setTopHSCode(topHSCodeRes.metrics.topHSCode));
-            dispatch(setTopSuppliers(topSuppliersRes.metrics.topSuppliers));
-            dispatch(setTopCountry(topCountryRes.metrics.topCountry));
-            dispatch(setTopIndianPort(topIndianPortRes.metrics.topIndianPort));
+            // Dispatch all top metrics data from the single all-top-metrics API
+            dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
+            dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
+            dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
+            dispatch(setTopYearsByValue(allTopMetricsRes.metrics.topYearsByValue));
+            dispatch(setTopHSCodeByQuantity(allTopMetricsRes.metrics.topHSCodeByQuantity));
+            dispatch(setTopHSCodeByValue(allTopMetricsRes.metrics.topHSCodeByValue));
+            dispatch(setTopSuppliersByQuantity(allTopMetricsRes.metrics.topSuppliersByQuantity));
+            dispatch(setTopSuppliersByValue(allTopMetricsRes.metrics.topSuppliersByValue));
+            dispatch(setTopCountryByQuantity(allTopMetricsRes.metrics.topCountryByQuantity));
+            dispatch(setTopCountryByValue(allTopMetricsRes.metrics.topCountryByValue));
+            dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
+            dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
 
         } catch (err) {
             console.error("getRecordData error:", err);
