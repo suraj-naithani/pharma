@@ -73,7 +73,7 @@ export const dashboardApi = createApi({
         }),
         downloadDataAsCSV: builder.mutation({
             query: (params) => ({
-                url: "download-xlsx",
+                url: "download-csv",
                 method: "GET",
                 params,
                 responseHandler: async (response) => {

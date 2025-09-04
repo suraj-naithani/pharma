@@ -98,7 +98,7 @@ export default function FilterSection() {
             searchValue: data.searchValue,  // Now a string (joined if array)
             informationOf: data.informationOf,
             page: 1,
-            limit: 20,
+            limit: 10,
             filters: data.filters,
         };
 
