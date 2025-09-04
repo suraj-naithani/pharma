@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
-import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery } from "@/redux/api/dashboardAPi"
+import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
 import {
     setFilterData,
     setSummaryStats,
@@ -24,6 +24,7 @@ import {
     setTopYearsByValue
 } from "@/redux/reducers/dashboardReducer"
 import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter } from "@/redux/reducers/filterReducer"
+import { setShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
 import moment from "moment"
@@ -43,6 +44,7 @@ export default function FilterSection() {
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
+    const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -85,16 +87,28 @@ export default function FilterSection() {
             searchValue: Array.isArray(filterState.selectedSearchItems)
                 ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
                 : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
-            filters: JSON.stringify(filterState.filters),
+            filters: filterState.filters,
             session: localStorage.getItem("sessionId")
+        };
+
+        const shipmentParams = {
+            startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+            endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+            searchType: data.searchType,
+            searchValue: data.searchValue,  // Now a string (joined if array)
+            informationOf: data.informationOf,
+            page: 1,
+            limit: 20,
+            filters: data.filters,
         };
 
         const toastId = toast.loading("Fetching data...");
 
         try {
-            const [summaryRes, allTopMetricsRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
+                triggerShipmentTable(shipmentParams).unwrap()
                 // triggerFilterValues(data).unwrap(),
             ]);
 
@@ -115,6 +129,16 @@ export default function FilterSection() {
             dispatch(setTopCountryByValue(allTopMetricsRes.metrics.topCountryByValue));
             dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
             dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
+
+            dispatch(
+                setShipmentTable({
+                    page: shipmentTable.page,
+                    limit: shipmentTable.limit,
+                    totalRecords: shipmentTable.totalRecords,
+                    totalPages: shipmentTable.totalPages,
+                    data: shipmentTable.data,
+                })
+            );
 
             toast.success("Data fetched successfully!", { id: toastId });
         } catch (err: any) {

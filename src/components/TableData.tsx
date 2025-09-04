@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import {
     Search,
     ChevronDown,
@@ -46,12 +46,28 @@ export interface ReusableDataTableProps<TData> {
     data: TData[]
     columns: ColumnDef<TData>[]
     title?: string
+    onDownload?: (params?: any) => void
+    isDownloading?: boolean
+    currentPage?: number
+    totalPages?: number
+    totalRecords?: number
+    onPageChange?: (page: number, pageSize?: number) => void
+    isLoading?: boolean
+    pageSize?: number
 }
 
 export default function TableData<TData extends Record<string, any>>({
     data,
     columns: propColumns,
     title = "Data Table",
+    onDownload,
+    isDownloading = false,
+    currentPage = 1,
+    totalPages = 1,
+    totalRecords = 0,
+    onPageChange,
+    isLoading = false,
+    pageSize: externalPageSize,
 }: ReusableDataTableProps<TData>) {
     const [globalFilter, setGlobalFilter] = useState("")
     const [density, setDensity] = useState<DensityType>("default")
@@ -62,8 +78,25 @@ export default function TableData<TData extends Record<string, any>>({
     const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({})
     const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
 
-    const [currentPage, setCurrentPage] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
+    const [internalPageSize, setInternalPageSize] = useState(10)
+    const [internalCurrentPage, setInternalCurrentPage] = useState(1)
+
+    // Use external values if provided, otherwise use internal
+    const actualCurrentPage = onPageChange ? currentPage : internalCurrentPage
+    const actualPageSize = externalPageSize !== undefined ? externalPageSize : internalPageSize
+    const setCurrentPage = onPageChange ? onPageChange : setInternalCurrentPage
+
+    // Debug pagination props
+    useEffect(() => {
+        if (onPageChange) {
+            console.log('TableData pagination props:', {
+                currentPage,
+                totalPages,
+                totalRecords,
+                hasOnPageChange: !!onPageChange
+            })
+        }
+    }, [currentPage, totalPages, totalRecords, onPageChange])
 
     const filteredData = useMemo(() => {
         if (!globalFilter) return data
@@ -91,12 +124,21 @@ export default function TableData<TData extends Record<string, any>>({
         })
     }, [filteredData, sorting])
 
-    const totalPages = Math.ceil(sortedData.length / pageSize)
+    // Use external pagination if onPageChange is provided, otherwise use internal pagination
     const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize
-        const endIndex = startIndex + pageSize
-        return sortedData.slice(startIndex, endIndex)
-    }, [sortedData, currentPage, pageSize])
+        if (onPageChange) {
+            // External pagination - use data as is (already paginated from API)
+            return sortedData
+        } else {
+            // Internal pagination - slice data locally
+            const startIndex = (actualCurrentPage - 1) * actualPageSize
+            const endIndex = startIndex + actualPageSize
+            return sortedData.slice(startIndex, endIndex)
+        }
+    }, [sortedData, actualCurrentPage, actualPageSize, onPageChange])
+
+    // Use external totalPages if provided, otherwise calculate from data
+    const actualTotalPages = onPageChange ? totalPages : Math.ceil(sortedData.length / actualPageSize)
 
     const columns: ColumnDef<TData>[] = useMemo(
         () => [
@@ -157,7 +199,11 @@ export default function TableData<TData extends Record<string, any>>({
             if (currentSort === "desc") return {}
             return { [columnId]: "asc" }
         })
-        setCurrentPage(1)
+        if (onPageChange) {
+            onPageChange(1)
+        } else {
+            setCurrentPage(1)
+        }
     }, [])
 
     const handleColumnVisibilityChange = useCallback((columnId: string, isVisible: boolean) => {
@@ -231,46 +277,23 @@ export default function TableData<TData extends Record<string, any>>({
                             value={globalFilter ?? ""}
                             onChange={(event) => {
                                 setGlobalFilter(String(event.target.value))
-                                setCurrentPage(1)
+                                if (onPageChange) {
+                                    onPageChange(1)
+                                } else {
+                                    setCurrentPage(1)
+                                }
                             }}
                             className="pl-10 h-9 border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 rounded-lg bg-slate-50 w-full"
                         />
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50">
-                                <Download className="h-4 w-4" />
-                                <span className="sr-only">Export</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px] p-0 bg-white border border-slate-200">
-                            <DropdownMenuItem
-                                className="py-2.5 px-3 cursor-pointer hover:bg-slate-50"
-                                onSelect={() => alert("Exporting all data...")}
-                            >
-                                Export All Data
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="py-2.5 px-3 cursor-pointer hover:bg-slate-50"
-                                onSelect={() => alert("Exporting all rows...")}
-                            >
-                                Export All Rows
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="py-2.5 px-3 cursor-pointer hover:bg-slate-50"
-                                onSelect={() => alert("Exporting page rows...")}
-                            >
-                                Export Page Rows
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="py-2.5 px-3 cursor-pointer hover:bg-slate-50"
-                                onSelect={() => alert("Exporting selected rows...")}
-                                disabled={Object.keys(rowSelection).length === 0}
-                            >
-                                Export Selected Rows
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                        variant="outline"
+                        className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50"
+                        disabled={isDownloading || !onDownload}
+                        onClick={() => onDownload && onDownload()}
+                    >
+                        <Download className="h-4 w-4" />
+                    </Button>
                     <DropdownMenu open={columnDropdownOpen} onOpenChange={setColumnDropdownOpen}>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50">
@@ -311,7 +334,7 @@ export default function TableData<TData extends Record<string, any>>({
                                         <DropdownMenuItem
                                             key={column.id as string}
                                             className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50"
-                                            onSelect={(e) => e.preventDefault()} // Prevent closing on select
+                                            onSelect={(e: Event) => e.preventDefault()} // Prevent closing on select
                                         >
                                             <label
                                                 htmlFor={`checkbox-${column.id as string}`}
@@ -451,14 +474,25 @@ export default function TableData<TData extends Record<string, any>>({
                 <div className="flex items-center space-x-2">
                     <p className="text-sm font-medium">Rows per page:</p>
                     <Select
-                        value={`${pageSize}`}
+                        value={`${actualPageSize}`}
                         onValueChange={(value) => {
-                            setPageSize(Number(value))
-                            setCurrentPage(1)
+                            const newPageSize = Number(value)
+                            if (onPageChange) {
+                                // Calculate which page would show similar data
+                                const currentRecord = (actualCurrentPage - 1) * actualPageSize + 1
+                                const newPage = Math.max(1, Math.ceil(currentRecord / newPageSize))
+                                onPageChange(newPage, newPageSize)
+                            } else {
+                                setInternalPageSize(newPageSize)
+                                // Calculate new page for internal pagination too
+                                const currentRecord = (actualCurrentPage - 1) * actualPageSize + 1
+                                const newPage = Math.max(1, Math.ceil(currentRecord / newPageSize))
+                                setCurrentPage(newPage)
+                            }
                         }}
                     >
                         <SelectTrigger className="h-9 w-[70px] rounded-lg bg-white border border-slate-200">
-                            <SelectValue placeholder={pageSize} />
+                            <SelectValue placeholder={actualPageSize} />
                         </SelectTrigger>
                         <SelectContent side="top" className="bg-white border border-slate-200">
                             {[10, 20, 30, 40, 50].map((size) => (
@@ -472,16 +506,28 @@ export default function TableData<TData extends Record<string, any>>({
 
                 <div className="flex items-center space-x-6 lg:space-x-8">
                     <div className="text-sm text-slate-600">
-                        {sortedData.length > 0
-                            ? `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedData.length)} of ${sortedData.length}`
-                            : "0-0 of 0"}
+                        {onPageChange ? (
+                            totalRecords > 0
+                                ? `${(actualCurrentPage - 1) * actualPageSize + 1}-${Math.min(actualCurrentPage * actualPageSize, totalRecords)} of ${totalRecords}`
+                                : "0-0 of 0"
+                        ) : (
+                            sortedData.length > 0
+                                ? `${(actualCurrentPage - 1) * actualPageSize + 1}-${Math.min(actualCurrentPage * actualPageSize, sortedData.length)} of ${sortedData.length}`
+                                : "0-0 of 0"
+                        )}
                     </div>
                     <div className="flex items-center space-x-1">
                         <Button
                             variant="outline"
                             className="h-9 w-9 p-0 rounded-lg border-slate-300 bg-slate-50"
-                            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                            disabled={currentPage === 1}
+                            onClick={() => {
+                                if (onPageChange) {
+                                    onPageChange(Math.max(1, actualCurrentPage - 1))
+                                } else {
+                                    setCurrentPage(Math.max(1, actualCurrentPage - 1))
+                                }
+                            }}
+                            disabled={actualCurrentPage === 1 || isLoading}
                         >
                             <span className="sr-only">Go to previous page</span>
                             <ChevronLeft className="h-4 w-4" />
@@ -489,8 +535,14 @@ export default function TableData<TData extends Record<string, any>>({
                         <Button
                             variant="outline"
                             className="h-9 w-9 p-0 rounded-lg border-slate-300 bg-slate-50"
-                            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                            disabled={currentPage === totalPages || totalPages === 0}
+                            onClick={() => {
+                                if (onPageChange) {
+                                    onPageChange(Math.min(actualTotalPages, actualCurrentPage + 1))
+                                } else {
+                                    setCurrentPage(Math.min(actualTotalPages, actualCurrentPage + 1))
+                                }
+                            }}
+                            disabled={actualCurrentPage === actualTotalPages || actualTotalPages === 0 || isLoading}
                         >
                             <span className="sr-only">Go to next page</span>
                             <ChevronRight className="h-4 w-4" />

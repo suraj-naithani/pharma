@@ -63,6 +63,35 @@ export const dashboardApi = createApi({
                 params,
             }),
         }),
+
+        getShipmentTable: builder.query({
+            query: (params) => ({
+                url: "clickhouse",
+                method: "GET",
+                params,
+            }),
+        }),
+        downloadDataAsCSV: builder.mutation({
+            query: (params) => ({
+                url: "download-xlsx",
+                method: "GET",
+                params,
+                responseHandler: async (response) => {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'pharmaceutical_data.csv';
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+
+                    return { blob, filename };
+                },
+            }),
+        }),
     }),
 });
 
@@ -72,4 +101,6 @@ export const {
     useLazyGetAllTopMetricsQuery,
     useLazyGetSummaryStatsQuery,
     useLazyGetFilterValuesQuery,
+    useLazyGetShipmentTableQuery,
+    useDownloadDataAsCSVMutation,
 } = dashboardApi;

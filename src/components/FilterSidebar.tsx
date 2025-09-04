@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
-import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetSummaryStatsQuery } from "@/redux/api/dashboardAPi";
+import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery } from "@/redux/api/dashboardAPi";
 import {
     setSummaryStats,
     setTopBuyersByQuantity,
@@ -85,6 +85,7 @@ export default function FilterSidebar() {
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
+    const [triggerShipmentTable, { error }] = useLazyGetShipmentTableQuery();
 
     const getRecordData = async (filtersOverride?: Record<string, string[]>) => {
         setIsLoading(true);
@@ -101,17 +102,29 @@ export default function FilterSidebar() {
             searchValue: Array.isArray(filterState.selectedSearchItems)
                 ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
                 : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
-            filters: JSON.stringify(filters),
+            filters,
             session: localStorage.getItem("sessionId"),
         };
 
+        const shipmentParams = {
+            startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+            endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+            searchType: data.searchType,
+            searchValue: data.searchValue,
+            informationOf: data.informationOf,
+            page: 1,
+            limit: 10,
+            filters: data.filters,
+        };
+
         try {
-            const [summaryRes, allTopMetricsRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
-                // triggerFilterValues(data).unwrap(),
+                triggerShipmentTable(shipmentParams).unwrap()
             ]);
-
+            console.log(error)
+            console.log(shipmentTable)
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             // dispatch(setFilterData(filtersRes.filters));

@@ -3,70 +3,136 @@
 import TableData, { type ColumnDef } from "./TableData"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import type { RootState } from "@/redux/store"
+import { useSelector } from "react-redux"
+import { useDownloadDataAsCSVMutation, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
+import moment from "moment"
+import { useState, useEffect } from "react"
 
 type TradeData = {
     id: string
-    billDate: string
-    hsCode: string
-    product: string
+    shippingBillDate: string
+    H_S_Code: string
+    productName: string
     productDescription: string
     quantity: number
     quantityUnit: string
-    indianPorts: string
+    portOfOrigin: string
     currency: string
-    indianCompany: string
-    foreignCompany: string
-    foreignCountry: string
-}
-
-const generateMockData = (count: number): TradeData[] => {
-    const products = ["Electronics", "Textiles", "Machinery", "Chemicals", "Food Products"]
-    const units = ["KG", "PCS", "MT", "LTR", "SET"]
-    const ports = ["Mumbai", "Chennai", "Kolkata", "Cochin", "Kandla"]
-    const currencies = ["USD", "EUR", "GBP", "JPY", "CNY"]
-    const countries = ["USA", "Germany", "China", "Japan", "UK"]
-
-    const longDescriptions = [
-        "High-quality industrial grade electronic components designed for automotive applications with advanced safety features and durability testing",
-        "Premium cotton textiles manufactured using sustainable processes with eco-friendly dyes and advanced weaving techniques for superior quality",
-        "Heavy-duty machinery parts engineered for industrial manufacturing with precision tolerances and extended operational life",
-        "Specialized chemical compounds formulated for pharmaceutical applications meeting international quality standards and regulatory requirements",
-        "Organic food products processed using traditional methods while maintaining nutritional value and natural flavor profiles",
-    ]
-
-    return Array.from({ length: count }, (_, i) => ({
-        id: `TD${String(i + 1).padStart(4, "0")}`,
-        billDate: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString(),
-        hsCode: `${Math.floor(Math.random() * 9999)
-            .toString()
-            .padStart(4, "0")}.${Math.floor(Math.random() * 99)
-                .toString()
-                .padStart(2, "0")}`,
-        product: products[Math.floor(Math.random() * products.length)],
-        productDescription: longDescriptions[Math.floor(Math.random() * longDescriptions.length)],
-        quantity: Math.floor(Math.random() * 10000) + 1,
-        quantityUnit: units[Math.floor(Math.random() * units.length)],
-        indianPorts: ports[Math.floor(Math.random() * ports.length)],
-        currency: currencies[Math.floor(Math.random() * currencies.length)],
-        indianCompany: `Indian Manufacturing Corp ${String.fromCharCode(65 + Math.floor(Math.random() * 26))} Ltd`,
-        foreignCompany: `International Trading Co ${String.fromCharCode(65 + Math.floor(Math.random() * 26))} Inc`,
-        foreignCountry: countries[Math.floor(Math.random() * countries.length)],
-    }))
+    supplier: string
+    buyer: string
+    buyerCountry: string
 }
 
 export default function ShipmentDTable() {
-    const data = generateMockData(5)
+    const shipmentState = useSelector((state: RootState) => state.shipmentTable)
+    const filterState = useSelector((state: RootState) => state.filter)
+    const [downloadDataAsCSV, { isLoading: isDownloading }] = useDownloadDataAsCSVMutation()
+    const [getShipmentTable, { isLoading: isPaginationLoading }] = useLazyGetShipmentTableQuery()
+
+    // Local state for pagination data
+    const [paginationData, setPaginationData] = useState<any[]>([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [totalRecords, setTotalRecords] = useState(0)
+    const [pageSize, setPageSize] = useState(10)
+    const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+    // Use redux data on initial load, pagination data afterwards
+    const data = isInitialLoad ? shipmentState.data : paginationData
+
+    // Initialize pagination data from redux when it changes
+    useEffect(() => {
+        if (shipmentState.data.length > 0 && isInitialLoad) {
+            setCurrentPage(shipmentState.page || 1)
+            setTotalRecords(parseInt(shipmentState.totalRecords || '0'))
+            setTotalPages(shipmentState.totalPages || 1)
+        }
+    }, [shipmentState, isInitialLoad])
+
+    const handlePageChange = async (page: number, newPageSize?: number) => {
+        try {
+            setIsInitialLoad(false)
+
+            // Update page size if provided
+            const currentPageSize = newPageSize || pageSize
+            if (newPageSize) {
+                setPageSize(newPageSize)
+            }
+            setCurrentPage(page)
+
+            const params = {
+                startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+                endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+                searchType: filterState.selectedSearchType,
+                searchValue: Array.isArray(filterState.selectedSearchItems)
+                    ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
+                    : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
+                informationOf: filterState.selectedToggle,
+                page: page,
+                limit: currentPageSize,
+                filters: filterState.filters,
+            }
+
+            const result = await getShipmentTable(params).unwrap()
+
+            setPaginationData(result.data || [])
+            setTotalPages(result.totalPages || 1)
+            setTotalRecords(result.totalRecords || 0)
+        } catch (error) {
+            console.error('Pagination failed:', error)
+        }
+    }
+
+    const handleDownload = async (downloadParams?: any) => {
+        try {
+            // Use current filter state for download parameters
+            const params = downloadParams || {
+                startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+                endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+                searchType: filterState.selectedSearchType,
+                searchValue: Array.isArray(filterState.selectedSearchItems)
+                    ? filterState.selectedSearchItems.join(',')
+                    : filterState.selectedSearchItems,
+                informationOf: filterState.selectedToggle,
+                // Add filters
+                ...Object.keys(filterState.filters || {}).reduce((acc, key) => {
+                    const filterValues = filterState.filters?.[key];
+                    if (filterValues && filterValues.length > 0) {
+                        acc[`filters[${key}]`] = filterValues.join(',');
+                    }
+                    return acc;
+                }, {} as Record<string, string>)
+            }
+
+            const result = await downloadDataAsCSV(params).unwrap()
+
+            // Create download link
+            const url = window.URL.createObjectURL(result.blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', result.filename)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+
+        } catch (error) {
+            console.error('Download failed:', error)
+            // You can add toast notification here
+        }
+    }
 
     const columns: ColumnDef<TradeData>[] = [
         {
-            id: "billDate",
+            id: "shippingBillDate",
             header: "S.Bill_Date",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "hsCode",
+            id: "H_S_Code",
             header: "HS Code",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
@@ -77,7 +143,7 @@ export default function ShipmentDTable() {
             enableHiding: true,
         },
         {
-            id: "product",
+            id: "productName",
             header: "Product",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
@@ -109,7 +175,7 @@ export default function ShipmentDTable() {
             enableHiding: true,
         },
         {
-            id: "indianPorts",
+            id: "portOfOrigin",
             header: "Indian Ports",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
@@ -123,21 +189,21 @@ export default function ShipmentDTable() {
             enableHiding: true,
         },
         {
-            id: "indianCompany",
+            id: "supplier",
             header: "Indian Company",
             cell: ({ value }) => <div className="text-slate-600">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "foreignCompany",
+            id: "buyer",
             header: "Foreign Company",
             cell: ({ value }) => <div className="text-slate-600">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "foreignCountry",
+            id: "buyerCountry",
             header: "Foreign Country",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
@@ -145,5 +211,19 @@ export default function ShipmentDTable() {
         },
     ]
 
-    return <TableData data={data} columns={columns} title="Trade Chart" />
+    return (
+        <TableData
+            data={data}
+            columns={columns}
+            title="Trade Chart"
+            onDownload={handleDownload}
+            isDownloading={isDownloading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalRecords={totalRecords}
+            onPageChange={handlePageChange}
+            isLoading={isPaginationLoading}
+            pageSize={pageSize}
+        />
+    )
 }

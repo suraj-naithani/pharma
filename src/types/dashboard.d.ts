@@ -90,3 +90,58 @@ export interface HSCode {
     H_S_Code: string
     total: number
 }
+export interface ShipmentRecord {
+    id: string;
+    informationOf: string;
+    yearMonth: string;
+    year: number;
+    portOfOrigin: string;
+    modeOfShipment: string;
+    indianPortCode: string;
+    shippingBillDate: string;
+    shippingBillNumber: string;
+    shippingBillStatus: string;
+    invoiceNumber: string;
+    itemNumber: string;
+    H_S_Code: string;
+    productDescription: string;
+    productName: string;
+    CAS_Number: string;
+    quantity: number;
+    quantityUnit: string;
+    standardQuantity: number;
+    standardQuantityUnit: string;
+    standardUnitRateINR: number;
+    standardUnitRateUSD: number;
+    itemRateINR: number;
+    itemRateUSD: number;
+    totalValueINR: number;
+    totalValueUSD: number;
+    itemRateInvoice: number;
+    currency: string;
+    totalValueInvoice: number;
+    freightOnBoardINR: number;
+    freightOnBoardUSD: number;
+    importExportCode: string;
+    supplier: string;
+    supplierRaw: string;
+    supplierAddress: string;
+    supplierCity: string;
+    supplierCountry: string;
+    buyer: string;
+    buyerRaw: string;
+    companyStatus: string;
+    portOfDeparture: string;
+    buyerCountry: string;
+    region: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ShipmentTableState {
+    page: number | null;
+    limit: number | null;
+    totalRecords: string | null;
+    totalPages: number | null;
+    data: ShipmentRecord[];
+}
