@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useCallback } from "react"
 import {
     Search,
     ChevronDown,
@@ -85,18 +85,6 @@ export default function TableData<TData extends Record<string, any>>({
     const actualCurrentPage = onPageChange ? currentPage : internalCurrentPage
     const actualPageSize = externalPageSize !== undefined ? externalPageSize : internalPageSize
     const setCurrentPage = onPageChange ? onPageChange : setInternalCurrentPage
-
-    // Debug pagination props
-    useEffect(() => {
-        if (onPageChange) {
-            console.log('TableData pagination props:', {
-                currentPage,
-                totalPages,
-                totalRecords,
-                hasOnPageChange: !!onPageChange
-            })
-        }
-    }, [currentPage, totalPages, totalRecords, onPageChange])
 
     const filteredData = useMemo(() => {
         if (!globalFilter) return data

@@ -13,7 +13,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery } from "@/redux/api/dashboardAPi";
+import { convertFiltersToUrlParams } from "@/utils/helper";
 import {
+    setFilterData,
     setSummaryStats,
     setTopBuyersByQuantity,
     setTopBuyersByValue,
@@ -28,6 +30,7 @@ import {
     setTopYearsByQuantity,
     setTopYearsByValue
 } from "@/redux/reducers/dashboardReducer";
+import { setShipmentTable } from "@/redux/reducers/shipmentReducer";
 import {
     clearFilterCategory,
     selectAllFilterCategory,
@@ -85,9 +88,9 @@ export default function FilterSidebar() {
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
-    const [triggerShipmentTable, { error }] = useLazyGetShipmentTableQuery();
+    const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
 
-    const getRecordData = async (filtersOverride?: Record<string, string[]>) => {
+    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
         setIsLoading(true);
         const filters = filtersOverride ?? filterValues;
 
@@ -102,7 +105,7 @@ export default function FilterSidebar() {
             searchValue: Array.isArray(filterState.selectedSearchItems)
                 ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
                 : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
-            filters,
+            ...convertFiltersToUrlParams(filters),
             session: localStorage.getItem("sessionId"),
         };
 
@@ -114,20 +117,19 @@ export default function FilterSidebar() {
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
-            filters: data.filters,
+            ...convertFiltersToUrlParams(filters),
         };
 
         try {
-            const [summaryRes, allTopMetricsRes, shipmentTable] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
-                triggerShipmentTable(shipmentParams).unwrap()
+                triggerShipmentTable(shipmentParams).unwrap(),
+                triggerFilterValues(data).unwrap()
             ]);
-            console.log(error)
-            console.log(shipmentTable)
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
-            // dispatch(setFilterData(filtersRes.filters));
+            dispatch(setFilterData(filtersRes.filters));
 
             // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
@@ -143,12 +145,35 @@ export default function FilterSidebar() {
             dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
             dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
 
+            dispatch(
+                setShipmentTable({
+                    page: shipmentTable.page,
+                    limit: shipmentTable.limit,
+                    totalRecords: shipmentTable.totalRecords,
+                    totalPages: shipmentTable.totalPages,
+                    data: shipmentTable.data,
+                })
+            );
         } catch (err) {
             console.error("getRecordData error:", err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [
+        filterState.selectedToggle,
+        filterState.selectedDataType,
+        filterState.dateRange.from,
+        filterState.dateRange.to,
+        filterState.selectedChapters,
+        filterState.selectedSearchType,
+        filterState.selectedSearchItems,
+        filterValues,
+        triggerSummaryStats,
+        triggerAllTopMetrics,
+        triggerShipmentTable,
+        triggerFilterValues,
+        dispatch
+    ]);
 
     const handleCheckboxChange = useCallback(
         (category: string, value: string, checked: boolean) => {
@@ -165,7 +190,7 @@ export default function FilterSidebar() {
             dispatch(setFilterValues({ category, values: updatedValues }));
             getRecordData(updatedFilters);
         },
-        [dispatch, filterValues]
+        [dispatch, filterValues, getRecordData]
     );
 
     const handleSelectAll = useCallback(
@@ -190,7 +215,7 @@ export default function FilterSidebar() {
 
             getRecordData(updatedFilters);
         },
-        [dispatch, filterOptions, categorySearchTerms, filterValues]
+        [dispatch, filterOptions, categorySearchTerms, filterValues, getRecordData]
     );
 
     const handleClearSelection = useCallback(
@@ -198,7 +223,7 @@ export default function FilterSidebar() {
             dispatch(clearFilterCategory(category));
             getRecordData();
         },
-        [dispatch]
+        [dispatch, getRecordData]
     );
 
     const handleSearchChange = useCallback(
@@ -342,6 +367,7 @@ export default function FilterSidebar() {
             handleCheckboxChange,
             getFilteredOptions,
             filterOptions,
+            isLoading,
         ]
     );
 

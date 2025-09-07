@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import type { RootState } from "@/redux/store"
 import { useSelector } from "react-redux"
 import { useDownloadDataAsCSVMutation, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
+import { convertFiltersToUrlParams } from "@/utils/helper"
 import moment from "moment"
 import { useState, useEffect } from "react"
 
@@ -71,7 +72,7 @@ export default function ShipmentDTable() {
                 informationOf: filterState.selectedToggle,
                 page: page,
                 limit: currentPageSize,
-                filters: filterState.filters,
+                ...convertFiltersToUrlParams(filterState.filters || {}),
             }
 
             const result = await getShipmentTable(params).unwrap()
@@ -96,13 +97,7 @@ export default function ShipmentDTable() {
                     : filterState.selectedSearchItems,
                 informationOf: filterState.selectedToggle,
                 // Add filters
-                ...Object.keys(filterState.filters || {}).reduce((acc, key) => {
-                    const filterValues = filterState.filters?.[key];
-                    if (filterValues && filterValues.length > 0) {
-                        acc[`filters[${key}]`] = filterValues.join(',');
-                    }
-                    return acc;
-                }, {} as Record<string, string>)
+                ...convertFiltersToUrlParams(filterState.filters || {}),
             }
 
             const result = await downloadDataAsCSV(params).unwrap()

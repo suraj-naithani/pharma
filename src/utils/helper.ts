@@ -41,3 +41,23 @@ export const formatNumber = (value: number | undefined | null): string => {
     if (value === null || value === undefined || isNaN(value)) return "0";
     return numeral(value).format("0.[0]a").toUpperCase();
 };
+
+/**
+ * Converts filter object to URL parameters format
+ * From: { "Foreign Country": ["Afghanistan", "China"], "Indian Port": ["Nhava Sheva Sea"] }
+ * To: { "filters[Foreign Country]": "Afghanistan,China", "filters[Indian Port]": "Nhava Sheva Sea" }
+ */
+export const convertFiltersToUrlParams = (filters?: Record<string, string[]>): Record<string, string> => {
+    const urlParams: Record<string, string> = {};
+
+    if (!filters) return urlParams;
+
+    Object.keys(filters).forEach((key) => {
+        const filterValues = filters[key];
+        if (filterValues && filterValues.length > 0) {
+            urlParams[`filters[${key}]`] = filterValues.join(',');
+        }
+    });
+
+    return urlParams;
+};

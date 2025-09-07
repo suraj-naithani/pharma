@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
 import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
+import { convertFiltersToUrlParams } from "@/utils/helper"
 import {
     setFilterData,
     setSummaryStats,
@@ -76,45 +77,59 @@ export default function FilterSection() {
         e.preventDefault();
         setIsLoading(true);
 
+        // Ensure we have proper default values even if Redux state isn't fully initialized
+        const safeFilterState = {
+            selectedToggle: filterState.selectedToggle || "import",
+            selectedDataType: filterState.selectedDataType || null,
+            dateRange: {
+                from: filterState.dateRange?.from || moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                to: filterState.dateRange?.to || moment(new Date()).format("YYYY-MM-DD")
+            },
+            selectedChapters: filterState.selectedChapters || [],
+            selectedSearchType: filterState.selectedSearchType || null,
+            selectedSearchItems: filterState.selectedSearchItems || [],
+            filters: filterState.filters || {}
+        };
+
         const data = {
-            informationOf: filterState.selectedToggle,
-            dataType: filterState.selectedDataType,
-            duration: `${moment(filterState.dateRange.from).format("DD/MM/YYYY")}-${moment(
-                filterState.dateRange.to
+            informationOf: safeFilterState.selectedToggle,
+            dataType: safeFilterState.selectedDataType,
+            duration: `${moment(safeFilterState.dateRange.from).format("DD/MM/YYYY")}-${moment(
+                safeFilterState.dateRange.to
             ).format("DD/MM/YYYY")}`,
-            chapter: filterState.selectedChapters,
-            searchType: filterState.selectedSearchType,
-            searchValue: Array.isArray(filterState.selectedSearchItems)
-                ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
-                : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
-            filters: filterState.filters,
+            chapter: safeFilterState.selectedChapters,
+            searchType: safeFilterState.selectedSearchType,
+            searchValue: Array.isArray(safeFilterState.selectedSearchItems)
+                ? safeFilterState.selectedSearchItems.map(item => typeof item === 'string' ? item.replace(/'/g, "''") : String(item).replace(/'/g, "''")) // Escape single quotes
+                : (safeFilterState.selectedSearchItems as string).replace(/'/g, "''"),
+            ...convertFiltersToUrlParams(safeFilterState.filters),
             session: localStorage.getItem("sessionId")
         };
 
         const shipmentParams = {
-            startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
-            endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+            startDate: moment(safeFilterState.dateRange.from).format("YYYY-MM-DD"),
+            endDate: moment(safeFilterState.dateRange.to).format("YYYY-MM-DD"),
             searchType: data.searchType,
             searchValue: data.searchValue,  // Now a string (joined if array)
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
-            filters: data.filters,
+            ...convertFiltersToUrlParams(safeFilterState.filters),
         };
 
         const toastId = toast.loading("Fetching data...");
 
         try {
-            const [summaryRes, allTopMetricsRes, shipmentTable] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
-                triggerShipmentTable(shipmentParams).unwrap()
-                // triggerFilterValues(data).unwrap(),
+                triggerShipmentTable(shipmentParams).unwrap(),
+                triggerFilterValues(data).unwrap(),
             ]);
 
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
-            // dispatch(setFilterData(filtersRes.filters));
+            dispatch(setFilterData(filtersRes.filters));
 
             // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
