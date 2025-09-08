@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const navLinks = [
-    { label: "Home", to: "/home" },
+    { label: "Home", to: "/" },
     { label: "Dashboard", to: "/dashboard" },
     { label: "About Us", to: "/about" },
     { label: "Contact Us", to: "contact" }
@@ -57,6 +57,7 @@ const CurrencyBox = ({ img, label, value }: { img: string; label: string; value:
 
 const Navbar = () => {
     const [showResources, setShowResources] = useState(false);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
@@ -68,8 +69,18 @@ const Navbar = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("sessionId");
         dispatch(userNotExist());
-        refetch(); 
+        refetch();
         navigate("/signin");
+    };
+
+    const handleMouseEnter = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        setShowResources(true);
+    };
+
+    const handleMouseLeave = () => {
+        const id = setTimeout(() => setShowResources(false), 100);
+        setTimeoutId(id);
     };
 
     return (
@@ -84,14 +95,18 @@ const Navbar = () => {
 
                     <div
                         className="relative"
-                        onMouseEnter={() => setShowResources(true)}
-                        onMouseLeave={() => setShowResources(false)}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
                     >
                         <button className="flex items-center hover:text-gray-300 focus:outline-none">
                             Resources <ChevronDown className="ml-1 h-4 w-4" />
                         </button>
                         {showResources && (
-                            <div className="absolute z-50 top-full mt-2 min-w-[160px] bg-[#2A408C] text-white shadow-md rounded-md">
+                            <div
+                                className="absolute z-50 top-full mt-1 min-w-[160px] bg-[#2A408C] text-white shadow-md rounded-md"
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
+                            >
                                 {resourceLinks.map(link => (
                                     <Link
                                         key={link.label}
