@@ -207,6 +207,7 @@ export default function ShipmentDTable() {
     ]
 
     return (
+        data && data.length > 0 &&
         <TableData
             data={data}
             columns={columns}

@@ -135,21 +135,23 @@ const Dashboard = () => {
 
                 <div className="flex-6 w-full flex flex-col gap-5 overflow-hidden">
                     {
-                        yearsByQuantity && buyersByQuantity && supplierByQuantity && indianPortByQuantity && countryByQuantity && hsCodeByQuantity &&
+                        (yearsByQuantity || buyersByQuantity || supplierByQuantity || indianPortByQuantity || countryByQuantity || hsCodeByQuantity || yearsByValue || buyersByValue || supplierByValue || indianPortByValue || countryByValue || hsCodeByValue) &&
                         <div className="flex flex-col gap-5">
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top Years By Quantity"
-                                    labels={yearsByQuantity.labels}
-                                    data={yearsByQuantity.data}
-                                    trendData={yearsByQuantity.trendData}
-                                    barLabel="Top Year By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#6366f1"
-                                    trendColor="#10b981"
-                                />
-                                {yearsByValue && (
+                                {yearsByQuantity && yearsByQuantity.labels && yearsByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top Years By Quantity"
+                                        labels={yearsByQuantity.labels}
+                                        data={yearsByQuantity.data}
+                                        trendData={yearsByQuantity.trendData}
+                                        barLabel="Top Year By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#6366f1"
+                                        trendColor="#10b981"
+                                    />
+                                )}
+                                {yearsByValue && yearsByValue.labels && yearsByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top Years By Value"
                                         labels={yearsByValue.labels}
@@ -164,18 +166,20 @@ const Dashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top Buyer By Quantity"
-                                    labels={buyersByQuantity.labels}
-                                    data={buyersByQuantity.data}
-                                    trendData={buyersByQuantity.trendData}
-                                    barLabel="Top Buyer By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#0891b2"
-                                    trendColor="#c084fc"
-                                />
-                                {buyersByValue && (
+                                {buyersByQuantity && buyersByQuantity.labels && buyersByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top Buyer By Quantity"
+                                        labels={buyersByQuantity.labels}
+                                        data={buyersByQuantity.data}
+                                        trendData={buyersByQuantity.trendData}
+                                        barLabel="Top Buyer By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#0891b2"
+                                        trendColor="#c084fc"
+                                    />
+                                )}
+                                {buyersByValue && buyersByValue.labels && buyersByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top Buyer By Value"
                                         labels={buyersByValue.labels}
@@ -190,18 +194,20 @@ const Dashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top Supplier By Quantity"
-                                    labels={supplierByQuantity.labels}
-                                    data={supplierByQuantity.data}
-                                    trendData={supplierByQuantity.trendData}
-                                    barLabel="Top Supplier By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#7c3aed"
-                                    trendColor="#f472b6"
-                                />
-                                {supplierByValue && (
+                                {supplierByQuantity && supplierByQuantity.labels && supplierByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top Supplier By Quantity"
+                                        labels={supplierByQuantity.labels}
+                                        data={supplierByQuantity.data}
+                                        trendData={supplierByQuantity.trendData}
+                                        barLabel="Top Supplier By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#7c3aed"
+                                        trendColor="#f472b6"
+                                    />
+                                )}
+                                {supplierByValue && supplierByValue.labels && supplierByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top Supplier By Value"
                                         labels={supplierByValue.labels}
@@ -216,18 +222,20 @@ const Dashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top Indian Port By Quantity"
-                                    labels={indianPortByQuantity.labels}
-                                    data={indianPortByQuantity.data}
-                                    trendData={indianPortByQuantity.trendData}
-                                    barLabel="Top Indian Port By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#2563eb"
-                                    trendColor="#f87171"
-                                />
-                                {indianPortByValue && (
+                                {indianPortByQuantity && indianPortByQuantity.labels && indianPortByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top Indian Port By Quantity"
+                                        labels={indianPortByQuantity.labels}
+                                        data={indianPortByQuantity.data}
+                                        trendData={indianPortByQuantity.trendData}
+                                        barLabel="Top Indian Port By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#2563eb"
+                                        trendColor="#f87171"
+                                    />
+                                )}
+                                {indianPortByValue && indianPortByValue.labels && indianPortByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top Indian Port By Value"
                                         labels={indianPortByValue.labels}
@@ -242,18 +250,20 @@ const Dashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top Country By Quantity"
-                                    labels={countryByQuantity.labels}
-                                    data={countryByQuantity.data}
-                                    trendData={countryByQuantity.trendData}
-                                    barLabel="Top Country By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#14b8a6"
-                                    trendColor="#eab308"
-                                />
-                                {countryByValue && (
+                                {countryByQuantity && countryByQuantity.labels && countryByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top Country By Quantity"
+                                        labels={countryByQuantity.labels}
+                                        data={countryByQuantity.data}
+                                        trendData={countryByQuantity.trendData}
+                                        barLabel="Top Country By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#14b8a6"
+                                        trendColor="#eab308"
+                                    />
+                                )}
+                                {countryByValue && countryByValue.labels && countryByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top Country By Value"
                                         labels={countryByValue.labels}
@@ -268,18 +278,20 @@ const Dashboard = () => {
                                 )}
                             </div>
                             <div className="flex gap-5 flex-col md:flex-row">
-                                <BarChart
-                                    title="Top HS Code By Quantity"
-                                    labels={hsCodeByQuantity.labels}
-                                    data={hsCodeByQuantity.data}
-                                    trendData={hsCodeByQuantity.trendData}
-                                    barLabel="Top HS Code By Quantity"
-                                    trendLabel="Trendline"
-                                    showTrendline={true}
-                                    barColor="#334155"
-                                    trendColor="#2dd4bf"
-                                />
-                                {hsCodeByValue && (
+                                {hsCodeByQuantity && hsCodeByQuantity.labels && hsCodeByQuantity.labels.length > 0 && (
+                                    <BarChart
+                                        title="Top HS Code By Quantity"
+                                        labels={hsCodeByQuantity.labels}
+                                        data={hsCodeByQuantity.data}
+                                        trendData={hsCodeByQuantity.trendData}
+                                        barLabel="Top HS Code By Quantity"
+                                        trendLabel="Trendline"
+                                        showTrendline={true}
+                                        barColor="#334155"
+                                        trendColor="#2dd4bf"
+                                    />
+                                )}
+                                {hsCodeByValue && hsCodeByValue.labels && hsCodeByValue.labels.length > 0 && (
                                     <BarChart
                                         title="Top HS Code By Value"
                                         labels={hsCodeByValue.labels}
