@@ -13,33 +13,22 @@ export interface FilterState {
     session: string;
 }
 
-// export interface ApiResponse {
-//     statusCode: number;
-//     filters: Filters;
-//     metrics: Metrics;
-// }
-
 export interface DashboardState {
     summary: Summary | null;
     filter: Filters | null;
-
-    topBuyersByQuantity: Buyer[] | null;
-    topBuyersByValue: Buyer[] | null;
-
-    topSuppliersByQuantity: Supplier[] | null;
-    topSuppliersByValue: Supplier[] | null;
-
-    topCountryByQuantity: Country[] | null;
-    topCountryByValue: Country[] | null;
-
-    topIndianPortByQuantity: Port[] | null;
-    topIndianPortByValue: Port[] | null;
-
-    topYearsByQuantity: Year[] | null;
-    topYearsByValue: Year[] | null;
-
-    topHSCodeByQuantity: HSCode[] | null;
-    topHSCodeByValue: HSCode[] | null;
+    topBuyersByQuantity: any | null;
+    topBuyersByValue: any | null;
+    topYearsByQuantity: any | null;
+    topYearsByValue: any | null;
+    topHSCodeByQuantity: any | null;
+    topHSCodeByValue: any | null;
+    topSuppliersByQuantity: any | null;
+    topSuppliersByValue: any | null;
+    topCountryByQuantity: any | null;
+    topCountryByValue: any | null;
+    topIndianPortByQuantity: any | null;
+    topIndianPortByValue: any | null;
+    valueMetrics: any | null;
 }
 
 export interface Filters {
@@ -57,22 +46,6 @@ export interface Filters {
     QuantityUnits: string[];
     UnitPrice: string[];
 }
-
-// export interface Metrics {
-//     summary: Summary;
-//     topBuyersByQuantity: Buyer[];
-//     topBuyersByValue: Buyer[];
-//     topCountryByQuantity: Country[];
-//     topCountryByValue: Country[];
-//     topIndianPortByQuantity: Port[];
-//     topIndianPortByValue: Port[];
-//     topSuppliersByQuantity: Supplier[];
-//     topSuppliersByValue: Supplier[];
-//     topYearsByQuantity: Year[];
-//     topYearsByValue: Year[];
-//     topHSCodeByQuantity: HSCode[];
-//     topHSCodeByValue: HSCode[];
-// }
 
 export interface Summary {
     totalQuantity: number;
@@ -116,4 +89,59 @@ export interface HSCode {
     count: number
     H_S_Code: string
     total: number
+}
+export interface ShipmentRecord {
+    id: string;
+    informationOf: string;
+    yearMonth: string;
+    year: number;
+    portOfOrigin: string;
+    modeOfShipment: string;
+    indianPortCode: string;
+    shippingBillDate: string;
+    shippingBillNumber: string;
+    shippingBillStatus: string;
+    invoiceNumber: string;
+    itemNumber: string;
+    H_S_Code: string;
+    productDescription: string;
+    productName: string;
+    CAS_Number: string;
+    quantity: number;
+    quantityUnit: string;
+    standardQuantity: number;
+    standardQuantityUnit: string;
+    standardUnitRateINR: number;
+    standardUnitRateUSD: number;
+    itemRateINR: number;
+    itemRateUSD: number;
+    totalValueINR: number;
+    totalValueUSD: number;
+    itemRateInvoice: number;
+    currency: string;
+    totalValueInvoice: number;
+    freightOnBoardINR: number;
+    freightOnBoardUSD: number;
+    importExportCode: string;
+    supplier: string;
+    supplierRaw: string;
+    supplierAddress: string;
+    supplierCity: string;
+    supplierCountry: string;
+    buyer: string;
+    buyerRaw: string;
+    companyStatus: string;
+    portOfDeparture: string;
+    buyerCountry: string;
+    region: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ShipmentTableState {
+    page: number | null;
+    limit: number | null;
+    totalRecords: string | null;
+    totalPages: number | null;
+    data: ShipmentRecord[];
 }

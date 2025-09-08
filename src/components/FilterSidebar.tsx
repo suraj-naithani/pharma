@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
-import { useLazyGetFilterValuesQuery, useLazyGetSummaryStatsQuery, useLazyGetTopBuyersByQuantityQuery, useLazyGetTopBuyersByValueQuery, useLazyGetTopCountryByQuantityQuery, useLazyGetTopCountryByValueQuery, useLazyGetTopHSCodeByQuantityQuery, useLazyGetTopHSCodeByValueQuery, useLazyGetTopIndianPortByQuantityQuery, useLazyGetTopIndianPortByValueQuery, useLazyGetTopSuppliersByQuantityQuery, useLazyGetTopSuppliersByValueQuery, useLazyGetTopYearsByQuantityQuery, useLazyGetTopYearsByValueQuery } from "@/redux/api/dashboardAPi";
+import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery } from "@/redux/api/dashboardAPi";
+import { convertFiltersToUrlParams } from "@/utils/helper";
 import {
     setFilterData,
     setSummaryStats,
@@ -29,6 +30,7 @@ import {
     setTopYearsByQuantity,
     setTopYearsByValue
 } from "@/redux/reducers/dashboardReducer";
+import { setShipmentTable } from "@/redux/reducers/shipmentReducer";
 import {
     clearFilterCategory,
     selectAllFilterCategory,
@@ -37,17 +39,42 @@ import {
 import type { RootState } from "@/redux/store";
 import { Eraser, Filter, Search } from "lucide-react";
 import moment from "moment";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+// Custom hook for debouncing
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
 
 type SearchInputProps = {
     category: string;
     value: string;
     onChange: (value: string) => void;
+    onDebouncedSearch?: (value: string) => void;
 };
 
-const SearchInput = ({ category, value, onChange }: SearchInputProps) => {
+const SearchInput = ({ category, value, onChange, onDebouncedSearch }: SearchInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const debouncedValue = useDebounce(value, 300); // 300ms debounce delay
+
+    useEffect(() => {
+        if (onDebouncedSearch && debouncedValue !== value) {
+            onDebouncedSearch(debouncedValue);
+        }
+    }, [debouncedValue, onDebouncedSearch, value]);
 
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
@@ -83,24 +110,13 @@ export default function FilterSidebar() {
     const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
     const filterValues = filterState.filters || {};
 
-    const [triggerTopBuyersByQuantity] = useLazyGetTopBuyersByQuantityQuery();
-    const [triggerTopYearsByQuantity] = useLazyGetTopYearsByQuantityQuery();
-    const [triggerTopHSCodeByQuantity] = useLazyGetTopHSCodeByQuantityQuery();
-    const [triggerTopSuppliersByQuantity] = useLazyGetTopSuppliersByQuantityQuery();
-    const [triggerTopCountryByQuantity] = useLazyGetTopCountryByQuantityQuery();
-    const [triggerTopIndianPortByQuantity] = useLazyGetTopIndianPortByQuantityQuery();
-
-    const [triggerTopBuyersByValue] = useLazyGetTopBuyersByValueQuery();
-    const [triggerTopYearsByValue] = useLazyGetTopYearsByValueQuery();
-    const [triggerTopHSCodeByValue] = useLazyGetTopHSCodeByValueQuery();
-    const [triggerTopSuppliersByValue] = useLazyGetTopSuppliersByValueQuery();
-    const [triggerTopCountryByValue] = useLazyGetTopCountryByValueQuery();
-    const [triggerTopIndianPortByValue] = useLazyGetTopIndianPortByValueQuery();
-
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
+    const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
+    const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
+    const [triggerSearchFilters] = useLazySearchFiltersQuery();
 
-    const getRecordData = async (filtersOverride?: Record<string, string[]>) => {
+    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
         setIsLoading(true);
         const filters = filtersOverride ?? filterValues;
 
@@ -112,96 +128,78 @@ export default function FilterSidebar() {
             ).format("DD/MM/YYYY")}`,
             chapter: filterState.selectedChapters,
             searchType: filterState.selectedSearchType,
-            searchValue: filterState.selectedSearchItems,
-            filters,
+            searchValue: Array.isArray(filterState.selectedSearchItems)
+                ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
+                : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
+            ...convertFiltersToUrlParams(filters),
             session: localStorage.getItem("sessionId"),
         };
 
+        const shipmentParams = {
+            startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+            endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+            searchType: data.searchType,
+            searchValue: data.searchValue,
+            informationOf: data.informationOf,
+            page: 1,
+            limit: 10,
+            ...convertFiltersToUrlParams(filters),
+        };
+
         try {
-            const [summaryRes, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
-                triggerFilterValues(data).unwrap(),
+                triggerAllTopMetrics(data).unwrap(),
+                triggerShipmentTable(shipmentParams).unwrap(),
+                triggerFilterValues(data).unwrap()
             ]);
-            dispatch(setSummaryStats(summaryRes.metrics.summary));
+            // Dispatch summary stats and filter data
+            dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
 
-            triggerTopBuyersByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopBuyersByQuantity(res.metrics.topBuyersByQuantity))
-                );
+            // Dispatch all top metrics data from the single all-top-metrics API
+            dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
+            dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
+            dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
+            dispatch(setTopYearsByValue(allTopMetricsRes.metrics.topYearsByValue));
+            dispatch(setTopHSCodeByQuantity(allTopMetricsRes.metrics.topHSCodeByQuantity));
+            dispatch(setTopHSCodeByValue(allTopMetricsRes.metrics.topHSCodeByValue));
+            dispatch(setTopSuppliersByQuantity(allTopMetricsRes.metrics.topSuppliersByQuantity));
+            dispatch(setTopSuppliersByValue(allTopMetricsRes.metrics.topSuppliersByValue));
+            dispatch(setTopCountryByQuantity(allTopMetricsRes.metrics.topCountryByQuantity));
+            dispatch(setTopCountryByValue(allTopMetricsRes.metrics.topCountryByValue));
+            dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
+            dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
 
-            triggerTopYearsByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopYearsByQuantity(res.metrics.topYearByQuantity))
-                );
-
-            triggerTopHSCodeByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopHSCodeByQuantity(res.metrics.topHSCodeByQuantity))
-                );
-
-            triggerTopSuppliersByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopSuppliersByQuantity(res.metrics.topSuppliersByQuantity))
-                );
-
-            triggerTopCountryByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopCountryByQuantity(res.metrics.topCountryByQuantity))
-                );
-
-            triggerTopIndianPortByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopIndianPortByQuantity(res.metrics.topIndianPortByQuantity))
-                );
-
-            triggerTopBuyersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopBuyersByValue(res.metrics.topBuyersByValue))
-                );
-
-            triggerTopYearsByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopYearsByValue(res.metrics.topYearsByValue))
-                );
-
-            triggerTopHSCodeByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopHSCodeByValue(res.metrics.topHSCodeByValue))
-                );
-
-            triggerTopSuppliersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopSuppliersByValue(res.metrics.topSuppliersByValue))
-                );
-
-            triggerTopCountryByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopCountryByValue(res.metrics.topCountryByValue))
-                );
-
-            triggerTopIndianPortByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopIndianPortByValue(res.metrics.topIndianPortByValue))
-                );
+            dispatch(
+                setShipmentTable({
+                    page: shipmentTable.page,
+                    limit: shipmentTable.limit,
+                    totalRecords: shipmentTable.totalRecords,
+                    totalPages: shipmentTable.totalPages,
+                    data: shipmentTable.data,
+                })
+            );
         } catch (err) {
             console.error("getRecordData error:", err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [
+        filterState.selectedToggle,
+        filterState.selectedDataType,
+        filterState.dateRange.from,
+        filterState.dateRange.to,
+        filterState.selectedChapters,
+        filterState.selectedSearchType,
+        filterState.selectedSearchItems,
+        filterValues,
+        triggerSummaryStats,
+        triggerAllTopMetrics,
+        triggerShipmentTable,
+        triggerFilterValues,
+        dispatch
+    ]);
 
     const handleCheckboxChange = useCallback(
         (category: string, value: string, checked: boolean) => {
@@ -210,13 +208,8 @@ export default function FilterSidebar() {
                 ? [...new Set([...currentValues, value])]
                 : currentValues.filter((val) => val !== value);
 
-            const updatedFilters = {
-                ...filterValues,
-                [category]: updatedValues,
-            };
-
             dispatch(setFilterValues({ category, values: updatedValues }));
-            getRecordData(updatedFilters);
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
         [dispatch, filterValues]
     );
@@ -230,28 +223,45 @@ export default function FilterSidebar() {
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
 
-            const updatedFilters = {
-                ...filterValues,
-                [category]: checked ? filteredOptions : [],
-            };
-
             dispatch(
                 checked
                     ? selectAllFilterCategory({ category, values: filteredOptions })
                     : clearFilterCategory(category)
             );
-
-            getRecordData(updatedFilters);
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
-        [dispatch, filterOptions, categorySearchTerms, filterValues]
+        [dispatch, filterOptions, categorySearchTerms]
     );
 
     const handleClearSelection = useCallback(
         (category: string) => {
             dispatch(clearFilterCategory(category));
-            getRecordData();
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
         [dispatch]
+    );
+
+    const handleClearAllFilters = useCallback(
+        async () => {
+            setIsLoading(true);
+            try {
+                // Clear all filter values
+                Object.keys(filterValues).forEach(category => {
+                    dispatch(clearFilterCategory(category));
+                });
+
+                // Clear search terms
+                setCategorySearchTerms({});
+
+                // Call API with empty filters (initial payload)
+                await getRecordData({});
+            } catch (error) {
+                console.error("Clear all filters error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [dispatch, filterValues, getRecordData]
     );
 
     const handleSearchChange = useCallback(
@@ -259,6 +269,52 @@ export default function FilterSidebar() {
             setCategorySearchTerms((prev) => ({ ...prev, [category]: term }));
         },
         []
+    );
+
+    const handleDebouncedSearch = useCallback(
+        async (searchTerm: string) => {
+            // Only call API if search term has at least 2 characters
+            if (!searchTerm.trim() || searchTerm.trim().length < 2) return;
+
+            try {
+                const searchParams = {
+                    search: searchTerm.trim(),
+                    informationOf: filterState.selectedToggle,
+                    startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+                    endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+                };
+
+                const searchResults = await triggerSearchFilters(searchParams).unwrap();
+
+                // Update filter options with search results if they exist
+                if (searchResults?.filters) {
+                    dispatch(setFilterData(searchResults.filters));
+                }
+            } catch (error) {
+                console.error("Search error:", error);
+            }
+        },
+        [
+            filterState.selectedToggle,
+            filterState.dateRange.from,
+            filterState.dateRange.to,
+            triggerSearchFilters,
+            dispatch
+        ]
+    );
+
+    const handleApplyFilters = useCallback(
+        async () => {
+            setIsLoading(true);
+            try {
+                await getRecordData();
+            } catch (error) {
+                console.error("Apply filters error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [getRecordData]
     );
 
     const handleAccordionChange = useCallback(
@@ -280,7 +336,25 @@ export default function FilterSidebar() {
         () => (
             <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40">
                 <CardHeader className="px-4 py-4 border-b border-gray-200">
-                    <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                        <Button
+                            onClick={handleClearAllFilters}
+                            disabled={isLoading}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs px-3 py-1 h-8 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center gap-1">
+                                    <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin" />
+                                    Clearing...
+                                </div>
+                            ) : (
+                                'Clear All'
+                            )}
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-0 overflow-y-auto">
                     <Accordion
@@ -301,7 +375,7 @@ export default function FilterSidebar() {
                                     value={category}
                                     className="border-b border-gray-200 last:border-b-0"
                                 >
-                                    <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground">
+                                    <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground cursor-pointer">
                                         <div className="flex items-center justify-between w-full">{category}</div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
@@ -309,9 +383,10 @@ export default function FilterSidebar() {
                                             category={category}
                                             value={searchTerm}
                                             onChange={(value) => handleSearchChange(category, value)}
+                                            onDebouncedSearch={handleDebouncedSearch}
                                         />
 
-                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2">
+                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
                                             <Label
                                                 htmlFor={`select-all-${category}`}
                                                 className="flex items-center gap-2 font-normal cursor-pointer text-sm"
@@ -335,7 +410,7 @@ export default function FilterSidebar() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleClearSelection(category);
@@ -376,6 +451,24 @@ export default function FilterSidebar() {
                                                 )}
                                             </div>
                                         </ScrollArea>
+
+                                        {/* Apply Filter Button */}
+                                        <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
+                                            <Button
+                                                onClick={handleApplyFilters}
+                                                disabled={isLoading}
+                                                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isLoading ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Applying...
+                                                    </div>
+                                                ) : (
+                                                    'Apply Filter'
+                                                )}
+                                            </Button>
+                                        </div>
                                     </AccordionContent>
                                 </AccordionItem>
                             );
@@ -392,9 +485,11 @@ export default function FilterSidebar() {
             handleSearchChange,
             handleSelectAll,
             handleClearSelection,
+            handleClearAllFilters,
             handleCheckboxChange,
             getFilteredOptions,
             filterOptions,
+            isLoading,
         ]
     );
 

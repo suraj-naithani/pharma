@@ -4,7 +4,7 @@ import { server } from "../../constants/config";
 export const dashboardApi = createApi({
     reducerPath: "dashboardApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: `${server}/api/data/`,
+        baseUrl: `${server}/api/clickhouse-metrics/`,
         credentials: "include",
         prepareHeaders: (headers) => {
             const token = localStorage.getItem("token");
@@ -39,90 +39,16 @@ export const dashboardApi = createApi({
             providesTags: ["dashboard"],
         }),
 
-        getTopBuyersByQuantity: builder.query({
+        getAllTopMetrics: builder.query({
             query: (params) => ({
-                url: "top-buyers-by-quantity",
+                url: "all-top-metrics",
                 method: "GET",
                 params,
             }),
+            providesTags: ["dashboard"],
         }),
-        getTopYearsByQuantity: builder.query({
-            query: (params) => ({
-                url: "top-years-by-quantity",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopHSCodeByQuantity: builder.query({
-            query: (params) => ({
-                url: "top-HSCode-by-quantity",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopSuppliersByQuantity: builder.query({
-            query: (params) => ({
-                url: "top-suppliers-by-quantity",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopCountryByQuantity: builder.query({
-            query: (params) => ({
-                url: "top-country-by-quantity",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopIndianPortByQuantity: builder.query({
-            query: (params) => ({
-                url: "top-indian-port-by-quantity",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopBuyersByValue: builder.query({
-            query: (params) => ({
-                url: "top-buyers-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopYearsByValue: builder.query({
-            query: (params) => ({
-                url: "top-years-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopHSCodeByValue: builder.query({
-            query: (params) => ({
-                url: "top-HSCode-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopSuppliersByValue: builder.query({
-            query: (params) => ({
-                url: "top-suppliers-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopCountryByValue: builder.query({
-            query: (params) => ({
-                url: "top-country-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
-        getTopIndianPortByValue: builder.query({
-            query: (params) => ({
-                url: "top-indian-port-by-value",
-                method: "GET",
-                params,
-            }),
-        }),
+
+
         getSummaryStats: builder.query({
             query: (params) => ({
                 url: "summary-stats",
@@ -137,27 +63,58 @@ export const dashboardApi = createApi({
                 params,
             }),
         }),
+
+        getShipmentTable: builder.query({
+            query: (params) => ({
+                url: "clickhouse",
+                method: "GET",
+                params,
+            }),
+        }),
+        downloadDataAsCSV: builder.mutation({
+            query: (params) => ({
+                url: "download-csv",
+                method: "GET",
+                params,
+                responseHandler: async (response) => {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'pharmaceutical_data.csv';
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+
+                    return { blob, filename };
+                },
+            }),
+        }),
+        searchFilters: builder.query({
+            query: ({ search, informationOf, startDate, endDate }) => ({
+                url: "filters/search",
+                method: "GET",
+                params: {
+                    search,
+                    informationOf,
+                    startDate,
+                    endDate,
+                },
+            }),
+            providesTags: ["dashboard"],
+        }),
     }),
 });
 
 export const {
     useGetAllRecordsMutation,
     useLazyGetSuggestionsQuery,
-
-    useLazyGetTopBuyersByQuantityQuery,
-    useLazyGetTopYearsByQuantityQuery,
-    useLazyGetTopHSCodeByQuantityQuery,
-    useLazyGetTopSuppliersByQuantityQuery,
-    useLazyGetTopCountryByQuantityQuery,
-    useLazyGetTopIndianPortByQuantityQuery,
-
-    useLazyGetTopBuyersByValueQuery,
-    useLazyGetTopYearsByValueQuery,
-    useLazyGetTopHSCodeByValueQuery,
-    useLazyGetTopSuppliersByValueQuery,
-    useLazyGetTopCountryByValueQuery,
-    useLazyGetTopIndianPortByValueQuery,
-
+    useLazyGetAllTopMetricsQuery,
     useLazyGetSummaryStatsQuery,
     useLazyGetFilterValuesQuery,
+    useLazyGetShipmentTableQuery,
+    useDownloadDataAsCSVMutation,
+    useLazySearchFiltersQuery,
 } = dashboardApi;

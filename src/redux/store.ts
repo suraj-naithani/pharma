@@ -4,6 +4,7 @@ import { authReducer } from "./reducers/authReducer";
 import { dashboardApi } from "./api/dashboardAPi";
 import { filterReducer } from "./reducers/filterReducer";
 import { dashboardReducer } from "./reducers/dashboardReducer";
+import { shipmentTableReducer } from "./reducers/shipmentReducer";
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         [authReducer.name]: authReducer.reducer,
         [filterReducer.name]: filterReducer.reducer,
         [dashboardReducer.name]: dashboardReducer.reducer,
+        [shipmentTableReducer.name]: shipmentTableReducer.reducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(authApi.middleware, dashboardApi.middleware),

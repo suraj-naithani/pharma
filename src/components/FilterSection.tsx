@@ -6,7 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
-import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetTopBuyersByQuantityQuery, useLazyGetTopBuyersByValueQuery, useLazyGetTopCountryByQuantityQuery, useLazyGetTopCountryByValueQuery, useLazyGetTopHSCodeByQuantityQuery, useLazyGetTopHSCodeByValueQuery, useLazyGetTopIndianPortByQuantityQuery, useLazyGetTopIndianPortByValueQuery, useLazyGetTopSuppliersByQuantityQuery, useLazyGetTopSuppliersByValueQuery, useLazyGetTopYearsByQuantityQuery, useLazyGetTopYearsByValueQuery } from "@/redux/api/dashboardAPi"
+import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
+import { convertFiltersToUrlParams } from "@/utils/helper"
 import {
     setFilterData,
     setSummaryStats,
@@ -21,9 +22,11 @@ import {
     setTopSuppliersByQuantity,
     setTopSuppliersByValue,
     setTopYearsByQuantity,
-    setTopYearsByValue
+    setTopYearsByValue,
+    clearDashboardStats
 } from "@/redux/reducers/dashboardReducer"
-import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter } from "@/redux/reducers/filterReducer"
+import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData } from "@/redux/reducers/filterReducer"
+import { setShipmentTable, clearShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
 import moment from "moment"
@@ -40,22 +43,10 @@ export default function FilterSection() {
 
     const [triggerSuggestions, { data: suggestions, isFetching }] = useLazyGetSuggestionsQuery();
 
-    const [triggerTopBuyersByQuantity] = useLazyGetTopBuyersByQuantityQuery();
-    const [triggerTopYearsByQuantity] = useLazyGetTopYearsByQuantityQuery();
-    const [triggerTopHSCodeByQuantity] = useLazyGetTopHSCodeByQuantityQuery();
-    const [triggerTopSuppliersByQuantity] = useLazyGetTopSuppliersByQuantityQuery();
-    const [triggerTopCountryByQuantity] = useLazyGetTopCountryByQuantityQuery();
-    const [triggerTopIndianPortByQuantity] = useLazyGetTopIndianPortByQuantityQuery();
-
-    const [triggerTopBuyersByValue] = useLazyGetTopBuyersByValueQuery();
-    const [triggerTopYearsByValue] = useLazyGetTopYearsByValueQuery();
-    const [triggerTopHSCodeByValue] = useLazyGetTopHSCodeByValueQuery();
-    const [triggerTopSuppliersByValue] = useLazyGetTopSuppliersByValueQuery();
-    const [triggerTopCountryByValue] = useLazyGetTopCountryByValueQuery();
-    const [triggerTopIndianPortByValue] = useLazyGetTopIndianPortByValueQuery();
-
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
+    const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
+    const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -87,98 +78,84 @@ export default function FilterSection() {
         e.preventDefault();
         setIsLoading(true);
 
+        // Ensure we have proper default values even if Redux state isn't fully initialized
+        const safeFilterState = {
+            selectedToggle: filterState.selectedToggle || "import",
+            selectedDataType: filterState.selectedDataType || null,
+            dateRange: {
+                from: filterState.dateRange?.from || moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                to: filterState.dateRange?.to || moment(new Date()).format("YYYY-MM-DD")
+            },
+            selectedChapters: filterState.selectedChapters || [],
+            selectedSearchType: filterState.selectedSearchType || null,
+            selectedSearchItems: filterState.selectedSearchItems || [],
+            filters: filterState.filters || {}
+        };
+
         const data = {
-            informationOf: filterState.selectedToggle,
-            dataType: filterState.selectedDataType,
-            duration: `${moment(filterState.dateRange.from).format("DD/MM/YYYY")}-${moment(filterState.dateRange.to).format("DD/MM/YYYY")}`,
-            chapter: filterState.selectedChapters,
-            searchType: filterState.selectedSearchType,
-            searchValue: filterState.selectedSearchItems.length > 0 ? filterState.selectedSearchItems : [],
-            filters: filterState.filters || {},
-            session: localStorage.getItem("sessionId"),
+            informationOf: safeFilterState.selectedToggle,
+            dataType: safeFilterState.selectedDataType,
+            duration: `${moment(safeFilterState.dateRange.from).format("DD/MM/YYYY")}-${moment(
+                safeFilterState.dateRange.to
+            ).format("DD/MM/YYYY")}`,
+            chapter: safeFilterState.selectedChapters,
+            searchType: safeFilterState.selectedSearchType,
+            searchValue: Array.isArray(safeFilterState.selectedSearchItems)
+                ? safeFilterState.selectedSearchItems.map(item => typeof item === 'string' ? item.replace(/'/g, "''") : String(item).replace(/'/g, "''")) // Escape single quotes
+                : (safeFilterState.selectedSearchItems as string).replace(/'/g, "''"),
+            ...convertFiltersToUrlParams(safeFilterState.filters),
+            session: localStorage.getItem("sessionId")
+        };
+
+        const shipmentParams = {
+            startDate: moment(safeFilterState.dateRange.from).format("YYYY-MM-DD"),
+            endDate: moment(safeFilterState.dateRange.to).format("YYYY-MM-DD"),
+            searchType: data.searchType,
+            searchValue: data.searchValue,  // Now a string (joined if array)
+            informationOf: data.informationOf,
+            page: 1,
+            limit: 10,
+            ...convertFiltersToUrlParams(safeFilterState.filters),
         };
 
         const toastId = toast.loading("Fetching data...");
 
         try {
-            const [summaryRes, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
+                triggerAllTopMetrics(data).unwrap(),
+                triggerShipmentTable(shipmentParams).unwrap(),
                 triggerFilterValues(data).unwrap(),
             ]);
-            dispatch(setSummaryStats(summaryRes.metrics.summary));
+
+            // Dispatch summary stats and filter data
+            dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
 
-            triggerTopBuyersByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopBuyersByQuantity(res.metrics.topBuyersByQuantity))
-                );
+            // Dispatch all top metrics data from the single all-top-metrics API
+            dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
+            dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
+            dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
+            dispatch(setTopYearsByValue(allTopMetricsRes.metrics.topYearsByValue));
+            dispatch(setTopHSCodeByQuantity(allTopMetricsRes.metrics.topHSCodeByQuantity));
+            dispatch(setTopHSCodeByValue(allTopMetricsRes.metrics.topHSCodeByValue));
+            dispatch(setTopSuppliersByQuantity(allTopMetricsRes.metrics.topSuppliersByQuantity));
+            dispatch(setTopSuppliersByValue(allTopMetricsRes.metrics.topSuppliersByValue));
+            dispatch(setTopCountryByQuantity(allTopMetricsRes.metrics.topCountryByQuantity));
+            dispatch(setTopCountryByValue(allTopMetricsRes.metrics.topCountryByValue));
+            dispatch(setTopIndianPortByQuantity(allTopMetricsRes.metrics.topIndianPortByQuantity));
+            dispatch(setTopIndianPortByValue(allTopMetricsRes.metrics.topIndianPortByValue));
 
-            triggerTopYearsByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopYearsByQuantity(res.metrics.topYearByQuantity))
-                );
+            dispatch(
+                setShipmentTable({
+                    page: shipmentTable.page,
+                    limit: shipmentTable.limit,
+                    totalRecords: shipmentTable.totalRecords,
+                    totalPages: shipmentTable.totalPages,
+                    data: shipmentTable.data,
+                })
+            );
 
-            triggerTopHSCodeByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopHSCodeByQuantity(res.metrics.topHSCodeByQuantity))
-                );
-
-            triggerTopSuppliersByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopSuppliersByQuantity(res.metrics.topSuppliersByQuantity))
-                );
-
-            triggerTopCountryByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopCountryByQuantity(res.metrics.topCountryByQuantity))
-                );
-
-            triggerTopIndianPortByQuantity(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopIndianPortByQuantity(res.metrics.topIndianPortByQuantity))
-                );
-
-            triggerTopBuyersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopBuyersByValue(res.metrics.topBuyersByValue))
-                );
-
-            triggerTopYearsByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopYearsByValue(res.metrics.topYearsByValue))
-                );
-
-            triggerTopHSCodeByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopHSCodeByValue(res.metrics.topHSCodeByValue))
-                );
-
-            triggerTopSuppliersByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopSuppliersByValue(res.metrics.topSuppliersByValue))
-                );
-
-            triggerTopCountryByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopCountryByValue(res.metrics.topCountryByValue))
-                );
-
-            triggerTopIndianPortByValue(data)
-                .unwrap()
-                .then((res) =>
-                    dispatch(setTopIndianPortByValue(res.metrics.topIndianPortByValue))
-                );
             toast.success("Data fetched successfully!", { id: toastId });
         } catch (err: any) {
             console.error(err);
@@ -218,6 +195,31 @@ export default function FilterSection() {
             if (searchInputRef.current) {
                 searchInputRef.current.focus();
             }
+        }
+    };
+
+    const handleResetAllData = async () => {
+        setIsLoading(true);
+
+        try {
+            // Clear all dashboard data (graphs, tables, stats)
+            dispatch(clearDashboardStats());
+            dispatch(clearShipmentTable());
+
+            // Reset all filter state to initial values
+            dispatch(resetAllData());
+
+            // Clear current input
+            setCurrentInput("");
+
+            // Show success message
+            toast.success("All data has been reset successfully!");
+
+        } catch (err: any) {
+            console.error(err);
+            toast.error("Failed to reset data.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -263,97 +265,6 @@ export default function FilterSection() {
                         Export
                     </ToggleGroupItem>
                 </ToggleGroup>
-                {/* 
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className={`w-[245px] justify-start item-center text-left font-normal border border-gray-200 bg-white rounded-lg ${!filterState.dateRange.from ? "text-gray-500" : ""
-                                }`}
-                        >
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            {filterState.dateRange.from ? (
-                                filterState.dateRange.to ? (
-                                    `${moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")} - ${moment(
-                                        new Date(filterState.dateRange.to)
-                                    ).format("D MMM YYYY")}`
-                                ) : (
-                                    moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
-                                )
-                            ) : (
-                                <span>Select Date Range</span>
-                            )}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-4 border border-gray-200 bg-white" align="start">
-                        <div className="grid gap-4">
-                            <div>
-                                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Start Date
-                                </label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={`w-[180px] justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.from ? "text-gray-500" : ""
-                                                }`}
-                                        >
-                                            <CalendarDays className="mr-2 h-4 w-4" />
-                                            {filterState.dateRange.from ? (
-                                                moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-white border border-gray-200">
-                                        <Calendar
-                                            mode="single"
-                                            selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
-                                            onSelect={(date) =>
-                                                dispatch(
-                                                    setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"))
-                                                )
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                            <div>
-                                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    End Date
-                                </label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={`w-[180px] justify-start text-left border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.to ? "text-gray-500" : ""
-                                                }`}
-                                        >
-                                            <CalendarDays className="mr-2 h-4 w-4" />
-                                            {filterState.dateRange.to ? (
-                                                moment(new Date(filterState.dateRange.to)).format("D MMM YYYY")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-white border border-gray-200">
-                                        <Calendar
-                                            mode="single"
-                                            selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
-                                            onSelect={(date) =>
-                                                dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </div>
-                    </PopoverContent>
-                </Popover> */}
 
                 <div className="flex flex-row gap-1">
                     {/* Start Date Picker */}
@@ -623,8 +534,15 @@ export default function FilterSection() {
                     </Button>
                 </div>
 
-                <Button variant="outline" size="icon" className="rounded-lg border border-gray-200 bg-white hover:bg-gray-100">
-                    <RefreshCw className="h-4 w-4" />
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-lg border border-gray-200 bg-white hover:bg-gray-100"
+                    onClick={handleResetAllData}
+                    disabled={isLoading}
+                    title="Reset all data (graphs, tables, filters)"
+                >
+                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
             </div>
         </div>
