@@ -1,12 +1,12 @@
 import Stats from "@/components/Stats";
+import type { RootState } from "@/redux/store";
+import { transformDynamicData } from "@/utils/helper";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
 import BarChart from "../components/BarChart";
 import FilterSection from '../components/FilterSection';
 import FilterSidebar from "../components/FilterSidebar";
 import ShipmentTable from '../components/ShipmentTable';
-import { useSelector } from "react-redux";
-import type { RootState } from "@/redux/store";
-import { useMemo } from "react";
-import { transformDynamicData } from "@/utils/helper";
 
 const Dashboard = () => {
     const {
@@ -21,8 +21,7 @@ const Dashboard = () => {
         topCountryByQuantity,
         topCountryByValue,
         topIndianPortByQuantity,
-        topIndianPortByValue,
-        valueMetrics
+        topIndianPortByValue
     } = useSelector((state: RootState) => state.dashboard);
 
     // Transform quantity data - sorted by quantity descending, top 6

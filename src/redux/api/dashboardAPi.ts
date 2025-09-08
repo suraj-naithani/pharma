@@ -92,6 +92,19 @@ export const dashboardApi = createApi({
                 },
             }),
         }),
+        searchFilters: builder.query({
+            query: ({ search, informationOf, startDate, endDate }) => ({
+                url: "filters/search",
+                method: "GET",
+                params: {
+                    search,
+                    informationOf,
+                    startDate,
+                    endDate,
+                },
+            }),
+            providesTags: ["dashboard"],
+        }),
     }),
 });
 
@@ -103,4 +116,5 @@ export const {
     useLazyGetFilterValuesQuery,
     useLazyGetShipmentTableQuery,
     useDownloadDataAsCSVMutation,
+    useLazySearchFiltersQuery,
 } = dashboardApi;

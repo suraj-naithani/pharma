@@ -12,7 +12,7 @@ export const searchTypeOptions = [
 export const defaultFilterKeys = [
     "Indian Port",
     "H S Code",
-    "Product Description",
+    // "Product Description",
     "Quantity Units",
     "Quantity",
     "Unit Price",

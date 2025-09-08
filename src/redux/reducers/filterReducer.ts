@@ -117,6 +117,34 @@ const filterSlice = createSlice({
         },
         clearAllFilters(state) {
             state.filters = {};
+        },
+        resetAllData(state) {
+            // Reset to initial state
+            state.dateRange = {
+                from: moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                to: moment(new Date()).format("YYYY-MM-DD"),
+            };
+            state.selectedDataType = null;
+            state.selectedChapters = [];
+            state.selectedSearchType = null;
+            state.searchQuery = "";
+            state.selectedSearchItems = [];
+            state.showSuggestions = false;
+            state.selectedToggle = "import";
+            state.filters = {
+                "Indian Port": [],
+                "H S Code": [],
+                "Product Description": [],
+                "Quantity Units": [],
+                "Quantity": [],
+                "Unit Price": [],
+                "Currency": [],
+                "Product Name": [],
+                "Indian Company": [],
+                "Foreign Company": [],
+                "Foreign Country": [],
+                "CAS Number": [],
+            };
         }
     },
 });
@@ -138,7 +166,8 @@ export const {
     toggleFilterValue,
     clearFilterCategory,
     selectAllFilterCategory,
-    clearAllFilters
+    clearAllFilters,
+    resetAllData
 } = filterSlice.actions;
 
 export const filterReducer = filterSlice;

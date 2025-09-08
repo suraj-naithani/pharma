@@ -22,10 +22,11 @@ import {
     setTopSuppliersByQuantity,
     setTopSuppliersByValue,
     setTopYearsByQuantity,
-    setTopYearsByValue
+    setTopYearsByValue,
+    clearDashboardStats
 } from "@/redux/reducers/dashboardReducer"
-import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter } from "@/redux/reducers/filterReducer"
-import { setShipmentTable } from "@/redux/reducers/shipmentReducer"
+import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData } from "@/redux/reducers/filterReducer"
+import { setShipmentTable, clearShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
 import moment from "moment"
@@ -197,6 +198,31 @@ export default function FilterSection() {
         }
     };
 
+    const handleResetAllData = async () => {
+        setIsLoading(true);
+
+        try {
+            // Clear all dashboard data (graphs, tables, stats)
+            dispatch(clearDashboardStats());
+            dispatch(clearShipmentTable());
+
+            // Reset all filter state to initial values
+            dispatch(resetAllData());
+
+            // Clear current input
+            setCurrentInput("");
+
+            // Show success message
+            toast.success("All data has been reset successfully!");
+
+        } catch (err: any) {
+            console.error(err);
+            toast.error("Failed to reset data.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!currentInput.trim()) return;
 
@@ -239,97 +265,6 @@ export default function FilterSection() {
                         Export
                     </ToggleGroupItem>
                 </ToggleGroup>
-                {/* 
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className={`w-[245px] justify-start item-center text-left font-normal border border-gray-200 bg-white rounded-lg ${!filterState.dateRange.from ? "text-gray-500" : ""
-                                }`}
-                        >
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            {filterState.dateRange.from ? (
-                                filterState.dateRange.to ? (
-                                    `${moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")} - ${moment(
-                                        new Date(filterState.dateRange.to)
-                                    ).format("D MMM YYYY")}`
-                                ) : (
-                                    moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
-                                )
-                            ) : (
-                                <span>Select Date Range</span>
-                            )}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-4 border border-gray-200 bg-white" align="start">
-                        <div className="grid gap-4">
-                            <div>
-                                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Start Date
-                                </label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={`w-[180px] justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.from ? "text-gray-500" : ""
-                                                }`}
-                                        >
-                                            <CalendarDays className="mr-2 h-4 w-4" />
-                                            {filterState.dateRange.from ? (
-                                                moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-white border border-gray-200">
-                                        <Calendar
-                                            mode="single"
-                                            selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
-                                            onSelect={(date) =>
-                                                dispatch(
-                                                    setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"))
-                                                )
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                            <div>
-                                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                                    End Date
-                                </label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={`w-[180px] justify-start text-left border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.to ? "text-gray-500" : ""
-                                                }`}
-                                        >
-                                            <CalendarDays className="mr-2 h-4 w-4" />
-                                            {filterState.dateRange.to ? (
-                                                moment(new Date(filterState.dateRange.to)).format("D MMM YYYY")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-white border border-gray-200">
-                                        <Calendar
-                                            mode="single"
-                                            selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
-                                            onSelect={(date) =>
-                                                dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </div>
-                    </PopoverContent>
-                </Popover> */}
 
                 <div className="flex flex-row gap-1">
                     {/* Start Date Picker */}
@@ -599,8 +534,15 @@ export default function FilterSection() {
                     </Button>
                 </div>
 
-                <Button variant="outline" size="icon" className="rounded-lg border border-gray-200 bg-white hover:bg-gray-100">
-                    <RefreshCw className="h-4 w-4" />
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-lg border border-gray-200 bg-white hover:bg-gray-100"
+                    onClick={handleResetAllData}
+                    disabled={isLoading}
+                    title="Reset all data (graphs, tables, filters)"
+                >
+                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
             </div>
         </div>

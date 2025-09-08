@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
-import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery } from "@/redux/api/dashboardAPi";
+import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams } from "@/utils/helper";
 import {
     setFilterData,
@@ -39,17 +39,42 @@ import {
 import type { RootState } from "@/redux/store";
 import { Eraser, Filter, Search } from "lucide-react";
 import moment from "moment";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+// Custom hook for debouncing
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
 
 type SearchInputProps = {
     category: string;
     value: string;
     onChange: (value: string) => void;
+    onDebouncedSearch?: (value: string) => void;
 };
 
-const SearchInput = ({ category, value, onChange }: SearchInputProps) => {
+const SearchInput = ({ category, value, onChange, onDebouncedSearch }: SearchInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const debouncedValue = useDebounce(value, 300); // 300ms debounce delay
+
+    useEffect(() => {
+        if (onDebouncedSearch && debouncedValue !== value) {
+            onDebouncedSearch(debouncedValue);
+        }
+    }, [debouncedValue, onDebouncedSearch, value]);
 
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
@@ -89,6 +114,7 @@ export default function FilterSidebar() {
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
+    const [triggerSearchFilters] = useLazySearchFiltersQuery();
 
     const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
         setIsLoading(true);
@@ -182,15 +208,10 @@ export default function FilterSidebar() {
                 ? [...new Set([...currentValues, value])]
                 : currentValues.filter((val) => val !== value);
 
-            const updatedFilters = {
-                ...filterValues,
-                [category]: updatedValues,
-            };
-
             dispatch(setFilterValues({ category, values: updatedValues }));
-            getRecordData(updatedFilters);
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
-        [dispatch, filterValues, getRecordData]
+        [dispatch, filterValues]
     );
 
     const handleSelectAll = useCallback(
@@ -202,28 +223,45 @@ export default function FilterSidebar() {
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
 
-            const updatedFilters = {
-                ...filterValues,
-                [category]: checked ? filteredOptions : [],
-            };
-
             dispatch(
                 checked
                     ? selectAllFilterCategory({ category, values: filteredOptions })
                     : clearFilterCategory(category)
             );
-
-            getRecordData(updatedFilters);
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
-        [dispatch, filterOptions, categorySearchTerms, filterValues, getRecordData]
+        [dispatch, filterOptions, categorySearchTerms]
     );
 
     const handleClearSelection = useCallback(
         (category: string) => {
             dispatch(clearFilterCategory(category));
-            getRecordData();
+            // Removed immediate API call - will be called when Apply Filter is clicked
         },
-        [dispatch, getRecordData]
+        [dispatch]
+    );
+
+    const handleClearAllFilters = useCallback(
+        async () => {
+            setIsLoading(true);
+            try {
+                // Clear all filter values
+                Object.keys(filterValues).forEach(category => {
+                    dispatch(clearFilterCategory(category));
+                });
+
+                // Clear search terms
+                setCategorySearchTerms({});
+
+                // Call API with empty filters (initial payload)
+                await getRecordData({});
+            } catch (error) {
+                console.error("Clear all filters error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [dispatch, filterValues, getRecordData]
     );
 
     const handleSearchChange = useCallback(
@@ -231,6 +269,52 @@ export default function FilterSidebar() {
             setCategorySearchTerms((prev) => ({ ...prev, [category]: term }));
         },
         []
+    );
+
+    const handleDebouncedSearch = useCallback(
+        async (searchTerm: string) => {
+            // Only call API if search term has at least 2 characters
+            if (!searchTerm.trim() || searchTerm.trim().length < 2) return;
+
+            try {
+                const searchParams = {
+                    search: searchTerm.trim(),
+                    informationOf: filterState.selectedToggle,
+                    startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+                    endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+                };
+
+                const searchResults = await triggerSearchFilters(searchParams).unwrap();
+
+                // Update filter options with search results if they exist
+                if (searchResults?.filters) {
+                    dispatch(setFilterData(searchResults.filters));
+                }
+            } catch (error) {
+                console.error("Search error:", error);
+            }
+        },
+        [
+            filterState.selectedToggle,
+            filterState.dateRange.from,
+            filterState.dateRange.to,
+            triggerSearchFilters,
+            dispatch
+        ]
+    );
+
+    const handleApplyFilters = useCallback(
+        async () => {
+            setIsLoading(true);
+            try {
+                await getRecordData();
+            } catch (error) {
+                console.error("Apply filters error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [getRecordData]
     );
 
     const handleAccordionChange = useCallback(
@@ -252,7 +336,25 @@ export default function FilterSidebar() {
         () => (
             <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40">
                 <CardHeader className="px-4 py-4 border-b border-gray-200">
-                    <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                        <Button
+                            onClick={handleClearAllFilters}
+                            disabled={isLoading}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs px-3 py-1 h-8 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center gap-1">
+                                    <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin" />
+                                    Clearing...
+                                </div>
+                            ) : (
+                                'Clear All'
+                            )}
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-0 overflow-y-auto">
                     <Accordion
@@ -273,7 +375,7 @@ export default function FilterSidebar() {
                                     value={category}
                                     className="border-b border-gray-200 last:border-b-0"
                                 >
-                                    <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground">
+                                    <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground cursor-pointer">
                                         <div className="flex items-center justify-between w-full">{category}</div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
@@ -281,9 +383,10 @@ export default function FilterSidebar() {
                                             category={category}
                                             value={searchTerm}
                                             onChange={(value) => handleSearchChange(category, value)}
+                                            onDebouncedSearch={handleDebouncedSearch}
                                         />
 
-                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2">
+                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
                                             <Label
                                                 htmlFor={`select-all-${category}`}
                                                 className="flex items-center gap-2 font-normal cursor-pointer text-sm"
@@ -307,7 +410,7 @@ export default function FilterSidebar() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleClearSelection(category);
@@ -348,6 +451,24 @@ export default function FilterSidebar() {
                                                 )}
                                             </div>
                                         </ScrollArea>
+
+                                        {/* Apply Filter Button */}
+                                        <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
+                                            <Button
+                                                onClick={handleApplyFilters}
+                                                disabled={isLoading}
+                                                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isLoading ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        Applying...
+                                                    </div>
+                                                ) : (
+                                                    'Apply Filter'
+                                                )}
+                                            </Button>
+                                        </div>
                                     </AccordionContent>
                                 </AccordionItem>
                             );
@@ -364,6 +485,7 @@ export default function FilterSidebar() {
             handleSearchChange,
             handleSelectAll,
             handleClearSelection,
+            handleClearAllFilters,
             handleCheckboxChange,
             getFilteredOptions,
             filterOptions,
