@@ -1,4 +1,5 @@
 import Stats from "@/components/Stats";
+import AppliedFilters from "@/components/AppliedFilters";
 import type { RootState } from "@/redux/store";
 import { transformDynamicData } from "@/utils/helper";
 import { useMemo } from "react";
@@ -129,6 +130,8 @@ const Dashboard = () => {
             <div className="w-full px-6 py-3 bg-gray-50">
                 <Stats />
             </div>
+
+            <AppliedFilters />
 
             <section className="w-full flex flex-col gap-5 md:flex-row p-6">
                 <FilterSidebar />

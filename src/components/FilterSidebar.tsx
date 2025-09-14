@@ -209,13 +209,12 @@ export default function FilterSidebar() {
                 : currentValues.filter((val) => val !== value);
 
             dispatch(setFilterValues({ category, values: updatedValues }));
-            // Removed immediate API call - will be called when Apply Filter is clicked
         },
         [dispatch, filterValues]
     );
 
     const handleSelectAll = useCallback(
-        (category: string, checked: boolean) => {
+        async (category: string, checked: boolean) => {
             const options = filterOptions[category] || [];
             const filteredOptions = options
                 .map(String)
@@ -223,22 +222,47 @@ export default function FilterSidebar() {
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
 
+            const newValues = checked ? filteredOptions : [];
             dispatch(
                 checked
                     ? selectAllFilterCategory({ category, values: filteredOptions })
                     : clearFilterCategory(category)
             );
-            // Removed immediate API call - will be called when Apply Filter is clicked
+
+            // Create updated filters object for API call
+            const updatedFilters = {
+                ...filterValues,
+                [category]: newValues
+            };
+
+            // Call API immediately with updated filters
+            try {
+                await getRecordData(updatedFilters);
+            } catch (error) {
+                console.error("Select all API error:", error);
+            }
         },
-        [dispatch, filterOptions, categorySearchTerms]
+        [dispatch, filterOptions, categorySearchTerms, filterValues, getRecordData]
     );
 
     const handleClearSelection = useCallback(
-        (category: string) => {
+        async (category: string) => {
             dispatch(clearFilterCategory(category));
-            // Removed immediate API call - will be called when Apply Filter is clicked
+
+            // Create updated filters object for API call
+            const updatedFilters = {
+                ...filterValues,
+                [category]: []
+            };
+
+            // Call API immediately with updated filters
+            try {
+                await getRecordData(updatedFilters);
+            } catch (error) {
+                console.error("Clear selection API error:", error);
+            }
         },
-        [dispatch]
+        [dispatch, filterValues, getRecordData]
     );
 
     const handleClearAllFilters = useCallback(
@@ -334,8 +358,8 @@ export default function FilterSidebar() {
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40">
-                <CardHeader className="px-4 py-4 border-b border-gray-200">
+            <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+                <CardHeader className="px-4 py-4 border-b border-gray-200 flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-bold">Filters</CardTitle>
                         <Button
@@ -356,7 +380,7 @@ export default function FilterSidebar() {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-0 overflow-y-auto">
+                <CardContent className="flex-1 p-0 overflow-y-auto min-h-0">
                     <Accordion
                         type="single"
                         collapsible
@@ -494,8 +518,8 @@ export default function FilterSidebar() {
     );
 
     return (
-        <div className="flex min-h-screen text-foreground flex-1">
-            <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
+        <div className="flex text-foreground flex-1">
+            <aside className="hidden md:block w-full max-w-[20rem]">{FilterPanelContent}</aside>
             <div className="fixed bottom-4 right-4 z-50 md:hidden">
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
