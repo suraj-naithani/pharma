@@ -16,6 +16,7 @@ export interface FilterState {
 export interface DashboardState {
     summary: Summary | null;
     filter: Filters | null;
+    filterMetadata: Record<string, number> | null;
     topBuyersByQuantity: any | null;
     topBuyersByValue: any | null;
     topYearsByQuantity: any | null;

@@ -6,10 +6,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
-import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
+import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi"
 import { convertFiltersToUrlParams } from "@/utils/helper"
 import {
     setFilterData,
+    setFilterMetadata,
     setSummaryStats,
     setTopBuyersByQuantity,
     setTopBuyersByValue,
@@ -47,6 +48,7 @@ export default function FilterSection() {
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
+    const [triggerFilterMetadata] = useLazyGetFilterMetadataQuery();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -121,16 +123,30 @@ export default function FilterSection() {
         const toastId = toast.loading("Fetching data...");
 
         try {
-            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes, metadataRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
                 triggerShipmentTable(shipmentParams).unwrap(),
                 triggerFilterValues(data).unwrap(),
+                triggerFilterMetadata({
+                    informationOf: safeFilterState.selectedToggle,
+                    startDate: moment(safeFilterState.dateRange.from).format("YYYY-MM-DD"),
+                    endDate: moment(safeFilterState.dateRange.to).format("YYYY-MM-DD"),
+                }).unwrap()
             ]);
 
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
+
+            // Process and store filter metadata
+            if (metadataRes?.metadata) {
+                const metadataMap: Record<string, number> = {};
+                metadataRes.metadata.forEach((item: { displayName: string; uniqueValueCount: number }) => {
+                    metadataMap[item.displayName] = item.uniqueValueCount;
+                });
+                dispatch(setFilterMetadata(metadataMap));
+            }
 
             // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));

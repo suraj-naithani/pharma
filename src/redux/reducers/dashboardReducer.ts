@@ -8,6 +8,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState: DashboardState = {
     summary: null,
     filter: null,
+    filterMetadata: null,
     topBuyersByQuantity: null,
     topBuyersByValue: null,
     topYearsByQuantity: null,
@@ -32,6 +33,9 @@ const dashboardSlice = createSlice({
         },
         setFilterData: (state, action: PayloadAction<any>) => {
             state.filter = action.payload;
+        },
+        setFilterMetadata: (state, action: PayloadAction<Record<string, number>>) => {
+            state.filterMetadata = action.payload;
         },
         setTopBuyersByQuantity: (state, action: PayloadAction<any>) => {
             state.topBuyersByQuantity = action.payload;
@@ -81,6 +85,7 @@ const dashboardSlice = createSlice({
 export const {
     setSummaryStats,
     setFilterData,
+    setFilterMetadata,
     setTopBuyersByQuantity,
     setTopBuyersByValue,
     setTopYearsByQuantity,

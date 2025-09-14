@@ -12,10 +12,11 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { defaultFilterKeys } from "@/constants/config";
-import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery } from "@/redux/api/dashboardAPi";
+import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams } from "@/utils/helper";
 import {
     setFilterData,
+    setFilterMetadata,
     setSummaryStats,
     setTopBuyersByQuantity,
     setTopBuyersByValue,
@@ -109,12 +110,14 @@ export default function FilterSidebar() {
     const dashboardData = useSelector((state: RootState) => state.dashboard);
     const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
     const filterValues = filterState.filters || {};
+    const filterMetadata = dashboardData?.filterMetadata || {};
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
     const [triggerSearchFilters] = useLazySearchFiltersQuery();
+    const [triggerFilterMetadata] = useLazyGetFilterMetadataQuery();
 
     const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
         setIsLoading(true);
@@ -147,15 +150,29 @@ export default function FilterSidebar() {
         };
 
         try {
-            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes] = await Promise.all([
+            const [summaryRes, allTopMetricsRes, shipmentTable, filtersRes, metadataRes] = await Promise.all([
                 triggerSummaryStats(data).unwrap(),
                 triggerAllTopMetrics(data).unwrap(),
                 triggerShipmentTable(shipmentParams).unwrap(),
-                triggerFilterValues(data).unwrap()
+                triggerFilterValues(data).unwrap(),
+                triggerFilterMetadata({
+                    informationOf: filterState.selectedToggle,
+                    startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
+                    endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
+                }).unwrap()
             ]);
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
+
+            // Process and store filter metadata
+            if (metadataRes?.metadata) {
+                const metadataMap: Record<string, number> = {};
+                metadataRes.metadata.forEach((item: { displayName: string; uniqueValueCount: number }) => {
+                    metadataMap[item.displayName] = item.uniqueValueCount;
+                });
+                dispatch(setFilterMetadata(metadataMap));
+            }
 
             // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
@@ -198,6 +215,7 @@ export default function FilterSidebar() {
         triggerAllTopMetrics,
         triggerShipmentTable,
         triggerFilterValues,
+        triggerFilterMetadata,
         dispatch
     ]);
 
@@ -400,7 +418,12 @@ export default function FilterSidebar() {
                                     className="border-b border-gray-200 last:border-b-0"
                                 >
                                     <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground cursor-pointer">
-                                        <div className="flex items-center justify-between w-full">{category}</div>
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{category}</span>
+                                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
+                                                ({filterMetadata[category] || 0})
+                                            </span>
+                                        </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
                                         <SearchInput
