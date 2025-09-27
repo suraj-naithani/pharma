@@ -18,6 +18,11 @@ const SignIn = lazy(() => import("./pages/signIn"));
 // const SignUp = lazy(() => import("./pages/signUp"));
 const Dashboard = lazy(() => import("./pages/dashboard"));
 
+// Admin Pages
+const AdminHomePage = lazy(() => import("./pages/admin/home"));
+const AdminUsersPage = lazy(() => import("./pages/admin/users"));
+const AdminUploadPage = lazy(() => import("./pages/admin/upload"));
+
 const App = () => {
   const dispatch = useDispatch();
 
@@ -36,43 +41,73 @@ const App = () => {
 
   useEffect(() => {
     if (user) {
-      import("./pages/dashboard"); 
+      import("./pages/dashboard");
     }
   }, [user]);
 
   return (
     <BrowserRouter>
-      <main className="flex flex-col min-h-screen justify-between bg-[#f9fafb]">
-        <Navbar />
-        <Toaster richColors />
-        <Suspense fallback={<div>Loading...</div>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/countries" element={<Countries />} />
-            <Route path="/indian-ports" element={<IndianPorts />} />
-            <Route
-              path="/signin"
-              element={
-                <ProtectedRoute user={user ?? null} redirect="/dashboard" requireAuth={false}>
-                  <SignIn />
-                </ProtectedRoute>
-              }
-            />
+      <Toaster richColors />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          {/* Admin routes without main layout */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
+                <AdminHomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-dashboard/users"
+            element={
+              <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-dashboard/upload"
+            element={
+              <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
+                <AdminUploadPage />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Suspense>
-        <Footer />
-      </main>
+          {/* All other routes with main layout */}
+          <Route path="/*" element={
+            <main className="flex flex-col min-h-screen justify-between bg-[#f9fafb]">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/countries" element={<Countries />} />
+                <Route path="/indian-ports" element={<IndianPorts />} />
+                <Route
+                  path="/signin"
+                  element={
+                    <ProtectedRoute user={user ?? null} redirect="/dashboard" requireAuth={false}>
+                      <SignIn />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+              <Footer />
+            </main>
+          } />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 };

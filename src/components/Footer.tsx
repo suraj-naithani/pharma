@@ -5,7 +5,7 @@ export default function Footer() {
         <footer className="w-full bg-gray-100 text-gray-700">
             <div className="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div className="flex flex-col items-start">
-                    <img src="./average.png" alt="Company Logo" className="mb-2" width={40} height={40} />
+                    <img src="/average.png" alt="Company Logo" className="mb-2" width={40} height={40} />
                     <p className="text-sm text-gray-800">XYZ Private Ltd.</p>
                 </div>
 

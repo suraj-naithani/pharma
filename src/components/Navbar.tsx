@@ -25,8 +25,8 @@ const resourceLinks = [
 ];
 
 const currencyData = [
-    { img: "./usd.svg", label: "USD", value: "1" },
-    { img: "./euro.png", label: "EUR", value: "0.87" }
+    { img: "/usd.svg", label: "USD", value: "1" },
+    { img: "/euro.png", label: "EUR", value: "0.87" }
 ];
 
 const NavLink = ({ to, label }: { to: string; label: string }) => {
@@ -131,7 +131,7 @@ const Navbar = () => {
                     ))}
 
                     <Button className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]" asChild>
-                        <Link to="#">Admin</Link>
+                        <Link to="/admin-dashboard">Admin</Link>
                     </Button>
                     {user ? (
                         <Button
