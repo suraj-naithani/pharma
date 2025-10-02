@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import HierarchicalHSCode from "@/components/HierarchicalHSCode";
 import { defaultFilterKeys } from "@/constants/config";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams } from "@/utils/helper";
@@ -426,96 +427,130 @@ export default function FilterSidebar() {
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
-                                        <SearchInput
-                                            category={category}
-                                            value={searchTerm}
-                                            onChange={(value) => handleSearchChange(category, value)}
-                                            onDebouncedSearch={handleDebouncedSearch}
-                                        />
-
-                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
-                                            <Label
-                                                htmlFor={`select-all-${category}`}
-                                                className="flex items-center gap-2 font-normal cursor-pointer text-sm"
-                                            >
-                                                <Checkbox
-                                                    id={`select-all-${category}`}
-                                                    checked={
-                                                        filteredOptions.length > 0 &&
-                                                        filteredOptions.every((option) =>
-                                                            filterValues[category]?.includes(option)
-                                                        )
-                                                    }
-                                                    onCheckedChange={(checked: boolean) =>
-                                                        handleSelectAll(category, checked)
-                                                    }
+                                        {category === "H S Code" ? (
+                                            // Special hierarchical component for HS Code
+                                            <div className="space-y-3">
+                                                <HierarchicalHSCode
+                                                    hsCodes={options.map(String)}
+                                                    selectedCodes={filterValues[category] || []}
+                                                    onSelectionChange={(selectedCodes) => {
+                                                        dispatch(setFilterValues({ category, values: selectedCodes }));
+                                                    }}
                                                     disabled={isLoading}
-                                                    className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
                                                 />
-                                                Select All
-                                            </Label>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleClearSelection(category);
-                                                }}
-                                                disabled={isLoading}
-                                                aria-label="Clear selection"
-                                            >
-                                                <Eraser className="h-4 w-4" />
-                                                <span className="sr-only">Clear selection</span>
-                                            </Button>
-                                        </div>
-
-                                        <ScrollArea className="max-h-64 overflow-auto">
-                                            <div className="p-3 space-y-2">
-                                                {filteredOptions.length > 0 ? (
-                                                    filteredOptions.map((option) => (
-                                                        <Label
-                                                            key={option}
-                                                            htmlFor={`${category}-${option}`}
-                                                            className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150"
-                                                        >
-                                                            <Checkbox
-                                                                id={`${category}-${option}`}
-                                                                checked={filterValues[category]?.includes(option) || false}
-                                                                onCheckedChange={(checked: boolean) =>
-                                                                    handleCheckboxChange(category, option, checked)
-                                                                }
-                                                                disabled={isLoading}
-                                                                className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                            />
-                                                            {option}
-                                                        </Label>
-                                                    ))
-                                                ) : (
-                                                    <p className="text-center text-muted-foreground py-4 text-sm">
-                                                        No options found.
-                                                    </p>
-                                                )}
+                                                {/* Apply Filter Button for HS Code */}
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                Applying...
+                                                            </div>
+                                                        ) : (
+                                                            'Apply Filter'
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </ScrollArea>
+                                        ) : (
+                                            // Default filter component for other categories
+                                            <>
+                                                <SearchInput
+                                                    category={category}
+                                                    value={searchTerm}
+                                                    onChange={(value) => handleSearchChange(category, value)}
+                                                    onDebouncedSearch={handleDebouncedSearch}
+                                                />
 
-                                        {/* Apply Filter Button */}
-                                        <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
-                                            <Button
-                                                onClick={handleApplyFilters}
-                                                disabled={isLoading}
-                                                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {isLoading ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                        Applying...
+                                                <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
+                                                    <Label
+                                                        htmlFor={`select-all-${category}`}
+                                                        className="flex items-center gap-2 font-normal cursor-pointer text-sm"
+                                                    >
+                                                        <Checkbox
+                                                            id={`select-all-${category}`}
+                                                            checked={
+                                                                filteredOptions.length > 0 &&
+                                                                filteredOptions.every((option) =>
+                                                                    filterValues[category]?.includes(option)
+                                                                )
+                                                            }
+                                                            onCheckedChange={(checked: boolean) =>
+                                                                handleSelectAll(category, checked)
+                                                            }
+                                                            disabled={isLoading}
+                                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                        />
+                                                        Select All
+                                                    </Label>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleClearSelection(category);
+                                                        }}
+                                                        disabled={isLoading}
+                                                        aria-label="Clear selection"
+                                                    >
+                                                        <Eraser className="h-4 w-4" />
+                                                        <span className="sr-only">Clear selection</span>
+                                                    </Button>
+                                                </div>
+
+                                                <ScrollArea className="max-h-64 overflow-auto">
+                                                    <div className="p-3 space-y-2">
+                                                        {filteredOptions.length > 0 ? (
+                                                            filteredOptions.map((option) => (
+                                                                <Label
+                                                                    key={option}
+                                                                    htmlFor={`${category}-${option}`}
+                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150"
+                                                                >
+                                                                    <Checkbox
+                                                                        id={`${category}-${option}`}
+                                                                        checked={filterValues[category]?.includes(option) || false}
+                                                                        onCheckedChange={(checked: boolean) =>
+                                                                            handleCheckboxChange(category, option, checked)
+                                                                        }
+                                                                        disabled={isLoading}
+                                                                        className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                                    />
+                                                                    {option}
+                                                                </Label>
+                                                            ))
+                                                        ) : (
+                                                            <p className="text-center text-muted-foreground py-4 text-sm">
+                                                                No options found.
+                                                            </p>
+                                                        )}
                                                     </div>
-                                                ) : (
-                                                    'Apply Filter'
-                                                )}
-                                            </Button>
-                                        </div>
+                                                </ScrollArea>
+
+                                                {/* Apply Filter Button */}
+                                                <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                Applying...
+                                                            </div>
+                                                        ) : (
+                                                            'Apply Filter'
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        )}
                                     </AccordionContent>
                                 </AccordionItem>
                             );
