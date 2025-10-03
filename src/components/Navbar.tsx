@@ -37,8 +37,8 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
         <Button
             variant="ghost"
             className={clsx(
-                "hover:bg-[#F0F0F0] hover:text-black hover:rounded-full px-4 py-2",
-                isActive ? "bg-[#F0F0F0] text-black rounded-full" : "text-white"
+                "hover:text-black px-4 py-2 text-sm",
+                isActive ? "text-black" : "text-[#9e9e9e]"
             )}
             asChild
         >
@@ -48,10 +48,10 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
 };
 
 const CurrencyBox = ({ img, label, value }: { img: string; label: string; value: string }) => (
-    <div className="flex items-center border border-gray-400 rounded-md px-2 py-1 space-x-2">
-        <img src={img} alt={`${label} Flag`} width={24} height={16} className="rounded-sm" />
+    <div className="flex items-center border border-gray-400 rounded-md px-2 py-1 space-x-1.5 text-sm">
+        <img src={img} alt={`${label} Flag`} width={20} height={14} className="rounded-sm" />
         <span>{label}</span>
-        <span className="text-black rounded-sm px-1 bg-[#F0F0F0]">{value}</span>
+        <span className="text-black rounded-sm px-1 bg-[#F0F0F0] text-xs">{value}</span>
     </div>
 );
 
@@ -85,10 +85,10 @@ const Navbar = () => {
 
     return (
         <nav className="w-full">
-            <div className="text-white flex items-center justify-between h-16 px-4 md:px-8 bg-[#2A408C]">
-                <div className="text-xl font-bold">Chemys</div>
+            <div className="text-black flex items-center justify-between h-16 px-4 md:px-8 bg-white border-b border-gray-200">
+                <div className="text-xl font-semibold">Chemys</div>
 
-                <div className="hidden xl:flex items-center space-x-6">
+                <div className="hidden xl:flex items-center space-x-3">
                     {navLinks.slice(0, 2).map(link => (
                         <NavLink key={link.label} {...link} />
                     ))}
@@ -98,12 +98,12 @@ const Navbar = () => {
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        <button className="flex items-center hover:text-gray-300 focus:outline-none">
-                            Resources <ChevronDown className="ml-1 h-4 w-4" />
+                        <button className="flex items-center text-[#9e9e9e] hover:text-black focus:outline-none text-sm px-4 py-2">
+                            Resources <ChevronDown className="ml-1 h-3 w-3" />
                         </button>
                         {showResources && (
                             <div
-                                className="absolute z-50 top-full mt-1 min-w-[160px] bg-[#2A408C] text-white shadow-md rounded-md"
+                                className="absolute z-50 top-full mt-1 min-w-[140px] bg-white text-black shadow-md rounded-md border border-gray-200"
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                             >
@@ -111,7 +111,7 @@ const Navbar = () => {
                                     <Link
                                         key={link.label}
                                         to={link.to}
-                                        className="block px-4 py-2 hover:bg-blue-700"
+                                        className="block px-3 py-1.5 text-xs text-[#9e9e9e] hover:text-black"
                                     >
                                         {link.label}
                                     </Link>
@@ -130,18 +130,18 @@ const Navbar = () => {
                         <CurrencyBox key={data.label} {...data} />
                     ))}
 
-                    <Button className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]" asChild>
+                    <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
                         <Link to="/admin-dashboard">Admin</Link>
                     </Button>
                     {user ? (
                         <Button
-                            className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]"
+                            className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5"
                             onClick={handleLogout}
                         >
                             Logout
                         </Button>
                     ) : (
-                        <Button className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]" asChild>
+                        <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
                             <Link to="/signin">Login</Link>
                         </Button>
                     )}
@@ -150,51 +150,51 @@ const Navbar = () => {
                 <div className="xl:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-white">
+                            <Button variant="ghost" size="icon" className="text-black">
                                 <Menu className="h-6 w-6" />
                                 <span className="sr-only">Toggle navigation</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="p-4 bg-[#2A408C] text-white">
-                            <div className="flex flex-col items-start space-y-4 pt-8">
+                        <SheetContent side="right" className="p-4 bg-white text-black">
+                            <div className="flex flex-col items-start space-y-2 pt-6">
                                 {navLinks.map((link) => (
-                                    <Link key={link.label} to={link.to} className="hover:text-gray-300 text-lg">
+                                    <Link key={link.label} to={link.to} className="text-[#9e9e9e] hover:text-black text-sm py-1">
                                         {link.label}
                                     </Link>
                                 ))}
 
                                 <Collapsible className="w-full">
-                                    <CollapsibleTrigger className="flex items-center justify-between w-full text-lg font-semibold py-2">
-                                        Resources <ChevronDown className="ml-auto h-4 w-4" />
+                                    <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium py-1">
+                                        Resources <ChevronDown className="ml-auto h-3 w-3" />
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pt-2 pl-4">
                                         {resourceLinks.map((link) => (
-                                            <Link key={link.label} to={link.to} className="block px-2 py-1 hover:text-gray-300">
+                                            <Link key={link.label} to={link.to} className="block px-2 py-1 text-sm text-[#9e9e9e] hover:text-black">
                                                 {link.label}
                                             </Link>
                                         ))}
                                     </CollapsibleContent>
                                 </Collapsible>
 
-                                <div className="flex flex-col items-center space-y-4 w-full pt-4 border-t border-gray-600 mt-4">
+                                <div className="flex flex-col items-center space-y-3 w-full pt-3 border-t border-gray-300 mt-3">
                                     <div className="flex space-x-4">
                                         {currencyData.map((data) => (
                                             <CurrencyBox key={data.label} {...data} />
                                         ))}
                                     </div>
                                     <div className="flex space-x-4 w-full justify-center">
-                                        <Button className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]" asChild>
+                                        <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
                                             <Link to="#">Admin</Link>
                                         </Button>
                                         {user ? (
                                             <Button
-                                                className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]"
+                                                className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5"
                                                 onClick={handleLogout}
                                             >
                                                 Logout
                                             </Button>
                                         ) : (
-                                            <Button className="bg-[#F0F0F0] text-black hover:bg-[#e0e0e0]" asChild>
+                                            <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
                                                 <Link to="/signin">Login</Link>
                                             </Button>
                                         )}
