@@ -76,7 +76,9 @@ export default function BarChart({
     const trendAxisTicks = trendData ? getTrendAxisTicks(maxTrendValue) : []
 
     const formatValue = (value: number) => {
-        if (value >= 1000000) {
+        if (value >= 1000000000) {
+            return `${(value / 1000000000).toFixed(1)}B`
+        } else if (value >= 1000000) {
             return `${(value / 1000000).toFixed(1)}M`
         } else if (value >= 1000) {
             return `${(value / 1000).toFixed(0)}K`
@@ -156,6 +158,7 @@ export default function BarChart({
                                 yAxisId="right"
                                 orientation="right"
                                 tick={{ fill: "#64748b", fontSize: 12 }}
+                                tickFormatter={formatValue}
                                 axisLine={{ stroke: "#cbd5e1" }}
                                 tickLine={{ stroke: "#cbd5e1" }}
                                 ticks={trendAxisTicks}
@@ -191,9 +194,7 @@ export default function BarChart({
                                                         {entry.name}:
                                                     </span>
                                                     <span className="font-semibold text-slate-900 text-sm">
-                                                        {entry.name === barLabel
-                                                            ? formatValue(entry.value as number)
-                                                            : entry.value}
+                                                        {formatValue(entry.value as number)}
                                                     </span>
                                                 </div>
                                             ))}
