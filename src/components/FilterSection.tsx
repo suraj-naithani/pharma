@@ -256,8 +256,8 @@ export default function FilterSection() {
     }, [currentInput, filterState.selectedToggle, filterState.selectedChapters, filterState.selectedSearchType]);
 
     return (
-        <div className="p-4 w-full">
-            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-6">
+        <div className="p-3 w-full">
+            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4">
                 <ToggleGroup
                     type="single"
                     value={filterState.selectedToggle}
@@ -269,14 +269,14 @@ export default function FilterSection() {
                     <ToggleGroupItem
                         value="import"
                         aria-label="Toggle import"
-                        className="px-4 py-2 data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
                     >
                         Import
                     </ToggleGroupItem>
                     <ToggleGroupItem
                         value="export"
                         aria-label="Toggle export"
-                        className="px-4 py-2 data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
                     >
                         Export
                     </ToggleGroupItem>
@@ -288,7 +288,7 @@ export default function FilterSection() {
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
-                                className={`max-w-max justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.from ? "text-gray-500" : ""
+                                className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.from ? "text-gray-500" : ""
                                     }`}
                             >
                                 <CalendarDays className="mr-2 h-4 w-3" />
@@ -316,7 +316,7 @@ export default function FilterSection() {
                         <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
-                                className={`max-w-max justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] ${!filterState.dateRange.to ? "text-gray-500" : ""
+                                className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.to ? "text-gray-500" : ""
                                     }`}
                             >
                                 <CalendarDays className="mr-2 h-4 w-4" />
@@ -342,11 +342,11 @@ export default function FilterSection() {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-[140px] justify-between border outline-none border-gray-200 bg-white rounded-lg">
+                        <Button variant="outline" className="w-[130px] justify-between border outline-none border-gray-200 bg-white rounded-lg text-sm">
                             {filterState.selectedDataType || "Data Type"} <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[140px] border border-gray-200 bg-white">
+                    <DropdownMenuContent className="w-[130px] border border-gray-200 bg-white">
                         <DropdownMenuItem onClick={() => dispatch(setSelectedDataType("Raw"))} className="hover:bg-[#f4f4f5]">
                             Raw
                         </DropdownMenuItem>
@@ -360,7 +360,7 @@ export default function FilterSection() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="outline"
-                            className="w-[180px] relative rounded-lg h-10 px-3 bg-white border border-gray-200 rounded-lg"
+                            className="w-[140px] relative rounded-lg h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm"
                         >
                             <div className="flex flex-nowrap gap-1 items-center overflow-hidden flex-grow pr-6">
                                 {filterState.selectedChapters.length > 0 ? (
@@ -390,7 +390,7 @@ export default function FilterSection() {
                             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[180px] bg-white border border-gray-200">
+                    <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
                         {chapterOptions.map((chapter) => {
                             const isSelected = filterState.selectedChapters.includes(chapter);
 
@@ -423,7 +423,7 @@ export default function FilterSection() {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white">
+                        <Button variant="outline" className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm">
                             {filterState.selectedSearchType || "Search Type"} <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DropdownMenuTrigger>
@@ -441,7 +441,7 @@ export default function FilterSection() {
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <div className="relative flex-grow min-w-[550px] max-w-sm">
+                <div className="relative flex-grow min-w-[500px] max-w-sm">
                     <div
                         className="w-full relative rounded-lg h-10 bg-white border border-gray-200 flex items-center pr-12"
                         onClick={handleContainerClick}

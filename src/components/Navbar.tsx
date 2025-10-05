@@ -50,8 +50,8 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
 const CurrencyBox = ({ img, label, value }: { img: string; label: string; value: string }) => (
     <div className="flex items-center border border-gray-400 rounded-md px-2 py-1 space-x-1.5 text-sm">
         <img src={img} alt={`${label} Flag`} width={20} height={14} className="rounded-sm" />
-        <span>{label}</span>
-        <span className="text-black rounded-sm px-1 bg-[#F0F0F0] text-xs">{value}</span>
+        <span className="text-[#7e7c7b]">{label}</span>
+        <span className="text-[#7e7c7b] rounded-sm px-1 bg-[#F0F0F0] text-xs">{value}</span>
     </div>
 );
 
