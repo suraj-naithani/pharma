@@ -7,17 +7,22 @@ const AdminUsersPage = () => {
     return (
         <AdminLayout>
             <div className="h-full">
-                {/* Content */}
+                {/* Header */}
                 <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
-                        <Button className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                            <p className="text-gray-600 mt-1 text-sm">Manage user accounts and permissions</p>
+                        </div>
+                        <Button className="flex items-center bg-black text-white hover:bg-gray-800">
                             <Plus className="w-4 h-4" />
                             <span>ADD USER</span>
                         </Button>
                     </div>
+                </div>
 
-                    {/* User Table */}
+                {/* Content */}
+                <div className="p-6">
                     <UsersTable />
                 </div>
             </div>

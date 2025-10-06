@@ -390,7 +390,6 @@ export default function FilterSidebar() {
                         >
                             {isLoading ? (
                                 <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin" />
                                     Clearing...
                                 </div>
                             ) : (
@@ -447,7 +446,6 @@ export default function FilterSidebar() {
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                                                 Applying...
                                                             </div>
                                                         ) : (
@@ -541,7 +539,6 @@ export default function FilterSidebar() {
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                                                 Applying...
                                                             </div>
                                                         ) : (

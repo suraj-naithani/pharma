@@ -269,14 +269,14 @@ export default function FilterSection() {
                     <ToggleGroupItem
                         value="import"
                         aria-label="Toggle import"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-black data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
                     >
                         Import
                     </ToggleGroupItem>
                     <ToggleGroupItem
                         value="export"
                         aria-label="Toggle export"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-blue-800 data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-black data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
                     >
                         Export
                     </ToggleGroupItem>
@@ -512,7 +512,10 @@ export default function FilterSection() {
                     {filterState.showSuggestions && currentInput.trim() !== "" && (
                         <div className="absolute top-full left-0 z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
                             {isFetching ? (
-                                <div className="p-2 text-sm text-gray-500">Loading...</div>
+                                <div className="p-2 flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-black"></div>
+                                    <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                                </div>
                             ) : suggestions?.data?.length > 0 ? (
                                 <>
                                     {!suggestions?.data?.some(({ title }: { title: string }) => title.toLowerCase() === currentInput.toLowerCase()) && (
@@ -542,7 +545,7 @@ export default function FilterSection() {
                     )}
 
                     <Button
-                        className="absolute right-0 top-0 h-full bg-blue-700 hover:bg-blue-800 text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed"
+                        className="absolute right-0 top-0 h-full bg-black hover:bg-gray-800 text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed"
                         onClick={handleSubmit}
                         disabled={isLoading}
                     >

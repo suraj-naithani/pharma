@@ -8,6 +8,7 @@ import type { RootState } from "@/redux/store"
 import type { Subscription } from "@/types/subscription"
 import { useEffect, useState } from "react"
 import { EditSubscriptionDialog, ConfirmDialog } from "./dialog"
+import Loading from "./ui/loading"
 
 // Using the Subscription type from types/subscription.ts
 
@@ -178,7 +179,7 @@ export default function SubscriptionsTable() {
     ]
 
     if (isLoading) {
-        return <div className="flex justify-center items-center h-64">Loading subscriptions...</div>;
+        return <Loading className="h-64" />;
     }
 
     if (error) {

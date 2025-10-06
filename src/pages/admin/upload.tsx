@@ -21,7 +21,7 @@ const AdminUploadPage = () => {
                         </div>
 
                         <div className="mt-6 text-center">
-                            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2">
+                            <Button className="bg-black hover:bg-gray-800 text-white px-8 py-2">
                                 Upload Export File
                             </Button>
                         </div>
@@ -41,7 +41,7 @@ const AdminUploadPage = () => {
                         </div>
 
                         <div className="mt-6 text-center">
-                            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2">
+                            <Button className="bg-black hover:bg-gray-800 text-white px-8 py-2">
                                 Upload Import File
                             </Button>
                         </div>

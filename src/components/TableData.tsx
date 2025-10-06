@@ -248,11 +248,11 @@ export default function TableData<TData extends Record<string, any>>({
 
     return (
         <div
-            className={`w-full space-y-6 p-6 bg-white rounded-xl shadow-md border border-slate-100 ${isFullscreen ? "fixed inset-0 z-50 bg-white p-6 overflow-auto" : ""}`}
+            className={`w-full space-y-6 p-6 bg-white rounded-xl border-2 border-gray-100 ${isFullscreen ? "fixed inset-0 z-50 bg-white p-6 overflow-auto" : ""}`}
         >
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-xl font-bold">
+                    <h1 className="text-lg font-semibold text-gray-600">
                         {title} <span>({data.length})</span>
                     </h1>
                 </div>
@@ -367,7 +367,7 @@ export default function TableData<TData extends Record<string, any>>({
                 </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 shadow-sm">
+            <div className="rounded-lg border border-slate-200">
                 <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <Table className="min-w-full">
                         <TableHeader>
