@@ -3,10 +3,20 @@ import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import UsersTable from "@/components/UsersTable";
 import SubscriptionsTable from "@/components/SubscriptionsTable";
+import { CreateSubscriptionDialog } from "@/components/dialog";
 import { Plus } from "lucide-react";
 
 const AdminHomePage = () => {
     const [activeTab, setActiveTab] = useState("users");
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+    const handleCreateDialogClose = () => {
+        setIsCreateDialogOpen(false);
+    };
+
+    const handleCreateSuccess = () => {
+        console.log("Subscription created successfully");
+    };
 
     return (
         <AdminLayout>
@@ -65,7 +75,10 @@ const AdminHomePage = () => {
                         <div>
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-semibold text-gray-900">Subscription Management</h2>
-                                <Button className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700">
+                                <Button
+                                    className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700"
+                                    onClick={() => setIsCreateDialogOpen(true)}
+                                >
                                     <Plus className="w-4 h-4" />
                                     <span>ADD SUBSCRIPTION</span>
                                 </Button>
@@ -75,6 +88,12 @@ const AdminHomePage = () => {
                     )}
                 </div>
             </div>
+
+            <CreateSubscriptionDialog
+                isOpen={isCreateDialogOpen}
+                onClose={handleCreateDialogClose}
+                onSuccess={handleCreateSuccess}
+            />
         </AdminLayout>
     );
 };
