@@ -377,10 +377,10 @@ export default function FilterSidebar() {
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
-                <CardHeader className="px-4 py-4 border-b border-gray-200 flex-shrink-0">
+            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+                <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                        <CardTitle className="text-xl font-semibold text-gray-900">Filters</CardTitle>
                         <Button
                             onClick={handleClearAllFilters}
                             disabled={isLoading}
@@ -390,7 +390,6 @@ export default function FilterSidebar() {
                         >
                             {isLoading ? (
                                 <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin" />
                                     Clearing...
                                 </div>
                             ) : (
@@ -447,7 +446,6 @@ export default function FilterSidebar() {
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                                                 Applying...
                                                             </div>
                                                         ) : (
@@ -510,7 +508,7 @@ export default function FilterSidebar() {
                                                                 <Label
                                                                     key={option}
                                                                     htmlFor={`${category}-${option}`}
-                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150"
+                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
                                                                 >
                                                                     <Checkbox
                                                                         id={`${category}-${option}`}
@@ -541,7 +539,6 @@ export default function FilterSidebar() {
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">
-                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                                                 Applying...
                                                             </div>
                                                         ) : (

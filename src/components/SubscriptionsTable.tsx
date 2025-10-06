@@ -1,84 +1,91 @@
 import TableData, { type ColumnDef } from "./TableData"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useGetSubscriptionsQuery, useDeleteSubscriptionMutation } from "@/redux/api/adminApi"
+import { useDispatch, useSelector } from "react-redux"
+import { setSubscriptions, setLoading, setError } from "@/redux/reducers/subscriptionReducer"
+import type { RootState } from "@/redux/store"
+import type { Subscription } from "@/types/subscription"
+import { useEffect, useState } from "react"
+import { EditSubscriptionDialog, ConfirmDialog } from "./dialog"
+import Loading from "./ui/loading"
 
-type SubscriptionData = {
-    id: string
-    clientName: string
-    contactPerson: string
-    email: string
-    subscriptionType: string
-    productLimit: string
-    duration: string
-    cost: string
-    status: string
-}
-
-// Sample subscription data - replace with actual API data
-const sampleSubscriptions: SubscriptionData[] = [
-    {
-        id: "1",
-        clientName: "ABC Corporation",
-        contactPerson: "John Doe",
-        email: "john.doe@abccorp.com",
-        subscriptionType: "Premium",
-        productLimit: "10,000",
-        duration: "12 months",
-        cost: "$2,999",
-        status: "Active"
-    },
-    {
-        id: "2",
-        clientName: "XYZ Industries",
-        contactPerson: "Jane Smith",
-        email: "jane.smith@xyzind.com",
-        subscriptionType: "Basic",
-        productLimit: "5,000",
-        duration: "6 months",
-        cost: "$1,499",
-        status: "Active"
-    },
-    {
-        id: "3",
-        clientName: "DEF Enterprises",
-        contactPerson: "Bob Johnson",
-        email: "bob.johnson@defent.com",
-        subscriptionType: "Enterprise",
-        productLimit: "Unlimited",
-        duration: "24 months",
-        cost: "$9,999",
-        status: "Expired"
-    },
-    {
-        id: "4",
-        clientName: "GHI Solutions",
-        contactPerson: "Alice Brown",
-        email: "alice.brown@ghisol.com",
-        subscriptionType: "Premium",
-        productLimit: "15,000",
-        duration: "12 months",
-        cost: "$3,499",
-        status: "Active"
-    },
-    {
-        id: "5",
-        clientName: "JKL Enterprises",
-        contactPerson: "Charlie Wilson",
-        email: "charlie.wilson@jklent.com",
-        subscriptionType: "Basic",
-        productLimit: "3,000",
-        duration: "3 months",
-        cost: "$799",
-        status: "Pending"
-    }
-]
+// Using the Subscription type from types/subscription.ts
 
 export default function SubscriptionsTable() {
-    const handleDownload = () => {
-        // Implement download functionality
-        console.log("Downloading subscriptions data...")
-    }
+    const dispatch = useDispatch();
+    const { subscriptions, isLoading, error } = useSelector((state: RootState) => state.subscription);
 
-    const columns: ColumnDef<SubscriptionData>[] = [
+    // State for edit dialog
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+
+    // State for delete confirmation dialog
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [subscriptionToDelete, setSubscriptionToDelete] = useState<number | null>(null);
+
+    // RTK Query call to fetch subscriptions
+    const { data, error: apiError, isLoading: apiLoading, isError } = useGetSubscriptionsQuery();
+    const [deleteSubscription, { isLoading: isDeleting }] = useDeleteSubscriptionMutation();
+
+    // Sync RTK Query data with Redux state
+    useEffect(() => {
+        dispatch(setLoading(apiLoading));
+
+        if (isError && apiError) {
+            dispatch(setError(apiError.toString()));
+        } else if (data?.data) {
+            dispatch(setSubscriptions(data.data));
+        }
+    }, [data, apiError, apiLoading, isError, dispatch]);
+
+    const handleEdit = (subscriptionId: number) => {
+        const subscription = subscriptions.find(sub => sub.id === subscriptionId);
+        if (subscription) {
+            setSelectedSubscription(subscription);
+            setIsEditDialogOpen(true);
+        }
+    };
+
+    const handleDelete = (subscriptionId: number) => {
+        setSubscriptionToDelete(subscriptionId);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (subscriptionToDelete) {
+            try {
+                await deleteSubscription(subscriptionToDelete).unwrap();
+                console.log("Subscription deleted successfully");
+                setIsDeleteDialogOpen(false);
+                setSubscriptionToDelete(null);
+            } catch (error) {
+                console.error("Failed to delete subscription:", error);
+                // You might want to show a toast notification here
+            }
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteDialogOpen(false);
+        setSubscriptionToDelete(null);
+    };
+
+    const handleDownload = () => {
+        console.log("Downloading subscriptions data...");
+    };
+
+    const handleEditDialogClose = () => {
+        setIsEditDialogOpen(false);
+        setSelectedSubscription(null);
+    };
+
+    const handleEditSuccess = () => {
+        // The RTK Query will automatically refetch data due to invalidatesTags
+        console.log("Subscription updated successfully");
+    };
+
+    const columns: ColumnDef<Subscription>[] = [
         {
             id: "clientName",
             header: "Client Name",
@@ -101,38 +108,23 @@ export default function SubscriptionsTable() {
             enableHiding: true,
         },
         {
-            id: "subscriptionType",
-            header: "Subscription Type",
-            cell: ({ value }) => (
-                <Badge variant={
-                    value === 'Enterprise' ? 'default' :
-                        value === 'Premium' ? 'secondary' :
-                            'outline'
-                }>
-                    {value}
-                </Badge>
-            ),
-            enableSorting: true,
-            enableHiding: true,
-        },
-        {
-            id: "productLimit",
+            id: "productlimit",
             header: "Product Limit",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "duration",
-            header: "Duration",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            id: "subscribedDurationDownload",
+            header: "Duration (months)",
+            cell: ({ value }) => <div className="text-slate-600">{value || 'N/A'}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "cost",
+            id: "subscriptionCost",
             header: "Cost",
-            cell: ({ value }) => <div className="font-semibold text-green-600">{value}</div>,
+            cell: ({ value }) => <div className="font-semibold text-green-600">${value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -141,29 +133,91 @@ export default function SubscriptionsTable() {
             header: "Status",
             cell: ({ value }) => (
                 <Badge variant={
-                    value === 'Active' ? 'default' :
-                        value === 'Expired' ? 'destructive' :
+                    value === 'active' ? 'default' :
+                        value === 'expired' ? 'destructive' :
                             'secondary'
                 }>
-                    {value}
+                    {value.charAt(0).toUpperCase() + value.slice(1)}
                 </Badge>
             ),
             enableSorting: true,
             enableHiding: true,
         },
+        {
+            id: "paymentMethod",
+            header: "Payment Method",
+            cell: ({ value }) => <div className="text-slate-600">{value || 'N/A'}</div>,
+            enableSorting: true,
+            enableHiding: true,
+        },
+        {
+            id: "actions" as keyof Subscription,
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex space-x-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => handleEdit((row as Subscription).id)}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleDelete((row as Subscription).id)}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
     ]
 
+    if (isLoading) {
+        return <Loading className="h-64" />;
+    }
+
+    if (error) {
+        return <div className="flex justify-center items-center h-64 text-red-600">Error: {error}</div>;
+    }
+
     return (
-        <TableData
-            data={sampleSubscriptions}
-            columns={columns}
-            title="Subscriptions"
-            onDownload={handleDownload}
-            isDownloading={false}
-            currentPage={1}
-            totalPages={1}
-            totalRecords={sampleSubscriptions.length}
-            pageSize={10}
-        />
+        <>
+            <TableData
+                data={subscriptions}
+                columns={columns}
+                title="Subscriptions"
+                onDownload={handleDownload}
+                isDownloading={false}
+                currentPage={1}
+                totalPages={1}
+                totalRecords={subscriptions.length}
+                pageSize={10}
+            />
+
+            <EditSubscriptionDialog
+                subscription={selectedSubscription}
+                isOpen={isEditDialogOpen}
+                onClose={handleEditDialogClose}
+                onSuccess={handleEditSuccess}
+            />
+
+            <ConfirmDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={handleCancelDelete}
+                onConfirm={handleConfirmDelete}
+                title="Delete Subscription"
+                description="Are you sure you want to delete this subscription? This action cannot be undone and all associated data will be permanently removed."
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                isLoading={isDeleting}
+            />
+        </>
     )
 }

@@ -146,7 +146,7 @@ const Home = () => {
                 {/* Dashboard Content */}
                 <div className="relative">
                   <img
-                    src="/euro.png"
+                    src="/dashboard.png"
                     alt="Pharma Dashboard Preview"
                     className="w-full h-auto rounded-2xl shadow-lg"
                   />

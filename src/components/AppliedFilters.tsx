@@ -185,7 +185,7 @@ export default function AppliedFilters() {
     }
 
     return (
-        <div className="w-full px-6 py-2 bg-gray-50 border-b border-gray-200">
+        <div className="w-full px-6 py-2">
             <div className="flex items-center justify-between">
                 <Button
                     variant="ghost"
@@ -203,25 +203,29 @@ export default function AppliedFilters() {
             </div>
 
             {isExpanded && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                    {appliedFilters.map((filter, index) => (
-                        <Badge
-                            key={`${filter.type}-${index}`}
-                            variant="secondary"
-                            className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200 px-2 py-1 text-xs"
-                        >
-                            <span className="font-medium">{filter.label}:</span>
-                            <span className="truncate max-w-[120px]">{filter.value}</span>
-                            <button
-                                type="button"
-                                onClick={filter.onRemove}
-                                disabled={isLoading}
-                                className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-blue-200 p-0.5 disabled:opacity-50"
-                            >
-                                <X className="h-3 w-3" />
-                            </button>
-                        </Badge>
-                    ))}
+                <div className="mt-3 bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="max-h-28 overflow-y-auto">
+                        <div className="flex flex-wrap gap-2">
+                            {appliedFilters.map((filter, index) => (
+                                <Badge
+                                    key={`${filter.type}-${index}`}
+                                    variant="secondary"
+                                    className="flex items-center gap-1.5 bg-gray-50 text-gray-700 border border-gray-200 px-2.5 py-1.5 text-xs shadow-sm hover:bg-gray-100 transition-all duration-200"
+                                >
+                                    <span className="font-medium text-gray-600">{filter.label}:</span>
+                                    <span className="truncate max-w-[100px] text-gray-800">{filter.value}</span>
+                                    <button
+                                        type="button"
+                                        onClick={filter.onRemove}
+                                        disabled={isLoading}
+                                        className="ml-1 rounded-full outline-none hover:bg-red-100 p-1 disabled:opacity-50 transition-colors group"
+                                    >
+                                        <X className="h-2.5 w-2.5 text-gray-400 group-hover:text-red-500" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
