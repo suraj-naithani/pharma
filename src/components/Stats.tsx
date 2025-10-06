@@ -57,7 +57,7 @@ const Stats = () => {
             {statsData.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                    <Card key={index} className="bg-white p-0 shadow-sm border border-gray-200">
+                    <Card key={index} className="bg-white p-0 border border-gray-200" style={{ boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)' }}>
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <div className={`p-2 rounded-md ${stat.bgColor}`}>

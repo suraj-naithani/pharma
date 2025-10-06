@@ -188,7 +188,7 @@ export default function HierarchicalHSCode({
 
                                 {/* Headings Level */}
                                 {isChapterExpanded && (
-                                    <div className="ml-6 space-y-1">
+                                    <div className="ml-3 space-y-1">
                                         {Object.entries(chapterData).map(([heading, headingData]) => {
                                             const headingKey = `heading-${heading}`;
                                             const isHeadingExpanded = expanded[headingKey];
@@ -222,7 +222,7 @@ export default function HierarchicalHSCode({
 
                                                     {/* Subheadings Level */}
                                                     {isHeadingExpanded && (
-                                                        <div className="ml-6 space-y-1">
+                                                        <div className="ml-3 space-y-1">
                                                             {Object.entries(headingData).map(([subheading, codes]) => {
                                                                 const subheadingKey = `subheading-${subheading}`;
                                                                 const isSubheadingExpanded = expanded[subheadingKey];
@@ -256,7 +256,7 @@ export default function HierarchicalHSCode({
 
                                                                         {/* Individual Codes Level */}
                                                                         {isSubheadingExpanded && (
-                                                                            <div className="ml-6 space-y-1">
+                                                                            <div className="ml-3 space-y-1">
                                                                                 {codes.map((code) => (
                                                                                     <div key={code} className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded">
                                                                                         <div className="w-6" /> {/* Spacer for alignment */}
