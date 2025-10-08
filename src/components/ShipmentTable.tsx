@@ -123,7 +123,7 @@ export default function ShipmentDTable() {
         {
             id: "shippingBillDate",
             header: "S.Bill_Date",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -131,7 +131,7 @@ export default function ShipmentDTable() {
             id: "H_S_Code",
             header: "HS Code",
             cell: ({ value }) => (
-                <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
+                <Badge variant="outline" className="font-mono text-xs bg-[#EEF2FF] text-[#1E293B] border-[#C7D2FE]">
                     {value}
                 </Badge>
             ),
@@ -141,7 +141,7 @@ export default function ShipmentDTable() {
         {
             id: "productName",
             header: "Product",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -166,7 +166,7 @@ export default function ShipmentDTable() {
         {
             id: "quantityUnit",
             header: "Quantity Unit",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ value }) => <div className="text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -185,7 +185,7 @@ export default function ShipmentDTable() {
         {
             id: "currency",
             header: "Currency",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -216,7 +216,7 @@ export default function ShipmentDTable() {
         {
             id: "buyerCountry",
             header: "Foreign Country",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },

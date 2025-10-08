@@ -105,7 +105,7 @@ export default function PortsTable() {
             id: "portName",
             header: "Port Name",
             cell: ({ value, density }) => (
-                <div className={cn("font-medium text-slate-800", density === "comfortable" ? "whitespace-normal" : "")}>
+                <div className={cn("font-medium text-[#1E293B]", density === "comfortable" ? "whitespace-normal" : "")}>
                     {value}
                 </div>
             ),
@@ -116,7 +116,7 @@ export default function PortsTable() {
             id: "portCode",
             header: "Port Code",
             cell: ({ value }) => (
-                <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
+                <Badge variant="outline" className="font-mono text-xs bg-[#EEF2FF] text-[#1E293B] border-[#C7D2FE]">
                     {value}
                 </Badge>
             ),
@@ -137,7 +137,7 @@ export default function PortsTable() {
         {
             id: "indianState",
             header: "Indian State",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },

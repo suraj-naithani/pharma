@@ -184,7 +184,7 @@ const Navbar = () => {
                                     </div>
                                     <div className="flex space-x-4 w-full justify-center">
                                         <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
-                                            <Link to="#">Admin</Link>
+                                            <Link to="/admin-dashboard">Admin</Link>
                                         </Button>
                                         {user ? (
                                             <Button
