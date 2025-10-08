@@ -11,10 +11,10 @@ const AdminUsersPage = () => {
                 <div className="p-6">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-                            <p className="text-gray-600 mt-1 text-sm">Manage user accounts and permissions</p>
+                            <h1 className="text-2xl font-bold text-[#1E293B]">User Management</h1>
+                            <p className="text-[#1E293B] mt-1 text-sm">Manage user accounts and permissions</p>
                         </div>
-                        <Button className="flex items-center bg-black text-white hover:bg-gray-800">
+                        <Button className="flex items-center bg-[#3B82F6] text-white hover:bg-[#60A5FA] transition-colors duration-200">
                             <Plus className="w-4 h-4" />
                             <span>ADD USER</span>
                         </Button>

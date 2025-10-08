@@ -37,8 +37,8 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
         <Button
             variant="ghost"
             className={clsx(
-                "hover:text-black px-4 py-2 text-sm",
-                isActive ? "text-black" : "text-[#9e9e9e]"
+                "hover:text-[#60A5FA] hover:bg-[#C7D2FE]/20 px-4 py-2 text-sm transition-colors duration-200",
+                isActive ? "text-white font-medium" : "text-white"
             )}
             asChild
         >
@@ -48,10 +48,10 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
 };
 
 const CurrencyBox = ({ img, label, value }: { img: string; label: string; value: string }) => (
-    <div className="flex items-center border border-gray-400 rounded-md px-2 py-1 space-x-1.5 text-sm">
+    <div className="flex items-center border border-[#C7D2FE] rounded-md px-2 py-1 space-x-1.5 text-sm bg-[#EEF2FF]">
         <img src={img} alt={`${label} Flag`} width={20} height={14} className="rounded-sm" />
-        <span className="text-[#7e7c7b]">{label}</span>
-        <span className="text-[#7e7c7b] rounded-sm px-1 bg-[#F0F0F0] text-xs">{value}</span>
+        <span className="text-[#1E293B]">{label}</span>
+        <span className="text-[#1E293B] rounded-sm px-1 bg-[#C7D2FE] text-xs">{value}</span>
     </div>
 );
 
@@ -85,8 +85,8 @@ const Navbar = () => {
 
     return (
         <nav className="w-full">
-            <div className="text-black flex items-center justify-between h-16 px-4 md:px-8 bg-white border-b border-gray-200">
-                <div className="text-xl font-semibold">Chemys</div>
+            <div className="text-white flex items-center justify-between h-16 px-4 md:px-8 bg-[#14245C] border-b border-[#1E3A8A]">
+                <div className="text-xl font-semibold text-white">Chemys</div>
 
                 <div className="hidden xl:flex items-center space-x-3">
                     {navLinks.slice(0, 2).map(link => (
@@ -98,12 +98,12 @@ const Navbar = () => {
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
-                        <button className="flex items-center text-[#9e9e9e] hover:text-black focus:outline-none text-sm px-4 py-2">
+                        <button className="flex items-center text-white hover:text-[#60A5FA] focus:outline-none text-sm px-4 py-2 transition-colors duration-200">
                             Resources <ChevronDown className="ml-1 h-3 w-3" />
                         </button>
                         {showResources && (
                             <div
-                                className="absolute z-50 top-full mt-1 min-w-[140px] bg-white text-black shadow-md rounded-md border border-gray-200"
+                                className="absolute z-50 top-full mt-1 min-w-[140px] bg-[#EEF2FF] text-[#1E293B] shadow-lg rounded-md border border-[#C7D2FE]"
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                             >
@@ -111,7 +111,7 @@ const Navbar = () => {
                                     <Link
                                         key={link.label}
                                         to={link.to}
-                                        className="block px-3 py-1.5 text-xs text-[#9e9e9e] hover:text-black"
+                                        className="block px-3 py-1.5 text-xs text-[#1E293B] hover:text-[#1E3A8A] hover:bg-[#C7D2FE]/30 transition-colors duration-200"
                                     >
                                         {link.label}
                                     </Link>
@@ -130,18 +130,18 @@ const Navbar = () => {
                         <CurrencyBox key={data.label} {...data} />
                     ))}
 
-                    <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
+                    <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                         <Link to="/admin-dashboard">Admin</Link>
                     </Button>
                     {user ? (
                         <Button
-                            className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5"
+                            className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200"
                             onClick={handleLogout}
                         >
                             Logout
                         </Button>
                     ) : (
-                        <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
+                        <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                             <Link to="/signin">Login</Link>
                         </Button>
                     )}
@@ -150,51 +150,51 @@ const Navbar = () => {
                 <div className="xl:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-black">
+                            <Button variant="ghost" size="icon" className="text-white hover:text-[#60A5FA]">
                                 <Menu className="h-6 w-6" />
                                 <span className="sr-only">Toggle navigation</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="p-4 bg-white text-black">
+                        <SheetContent side="right" className="p-4 bg-[#EEF2FF] text-[#1E293B]">
                             <div className="flex flex-col items-start space-y-2 pt-6">
                                 {navLinks.map((link) => (
-                                    <Link key={link.label} to={link.to} className="text-[#9e9e9e] hover:text-black text-sm py-1">
+                                    <Link key={link.label} to={link.to} className="text-[#1E293B] hover:text-[#1E3A8A] text-sm py-1 transition-colors duration-200">
                                         {link.label}
                                     </Link>
                                 ))}
 
                                 <Collapsible className="w-full">
-                                    <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium py-1">
+                                    <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium py-1 text-[#1E293B] hover:text-[#1E3A8A] transition-colors duration-200">
                                         Resources <ChevronDown className="ml-auto h-3 w-3" />
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pt-2 pl-4">
                                         {resourceLinks.map((link) => (
-                                            <Link key={link.label} to={link.to} className="block px-2 py-1 text-sm text-[#9e9e9e] hover:text-black">
+                                            <Link key={link.label} to={link.to} className="block px-2 py-1 text-sm text-[#1E293B] hover:text-[#1E3A8A] transition-colors duration-200">
                                                 {link.label}
                                             </Link>
                                         ))}
                                     </CollapsibleContent>
                                 </Collapsible>
 
-                                <div className="flex flex-col items-center space-y-3 w-full pt-3 border-t border-gray-300 mt-3">
+                                <div className="flex flex-col items-center space-y-3 w-full pt-3 border-t border-[#C7D2FE] mt-3">
                                     <div className="flex space-x-4">
                                         {currencyData.map((data) => (
                                             <CurrencyBox key={data.label} {...data} />
                                         ))}
                                     </div>
                                     <div className="flex space-x-4 w-full justify-center">
-                                        <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
+                                        <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                                             <Link to="#">Admin</Link>
                                         </Button>
                                         {user ? (
                                             <Button
-                                                className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5"
+                                                className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200"
                                                 onClick={handleLogout}
                                             >
                                                 Logout
                                             </Button>
                                         ) : (
-                                            <Button className="bg-black text-white hover:bg-gray-800 text-sm px-3 py-1.5" asChild>
+                                            <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                                                 <Link to="/signin">Login</Link>
                                             </Button>
                                         )}

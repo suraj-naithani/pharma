@@ -23,11 +23,11 @@ const AdminSubscriptionsPage = () => {
                 <div className="p-6">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Subscription Management</h1>
-                            <p className="text-gray-600 mt-1 text-sm">Manage all subscription plans and user subscriptions</p>
+                            <h1 className="text-2xl font-bold text-[#1E293B]">Subscription Management</h1>
+                            <p className="text-[#1E293B] mt-1 text-sm">Manage all subscription plans and user subscriptions</p>
                         </div>
                         <Button
-                            className="flex items-center bg-black text-white hover:bg-gray-800"
+                            className="flex items-center bg-[#3B82F6] text-white hover:bg-[#60A5FA] transition-colors duration-200"
                             onClick={() => setIsCreateDialogOpen(true)}
                         >
                             <Plus className="w-4 h-4" />

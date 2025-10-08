@@ -8,40 +8,40 @@ const AdminUploadPage = () => {
             <div className="p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Upload Export File Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 text-center mb-8">Upload Export File</h2>
+                    <div className="bg-white rounded-lg border border-[#C7D2FE] p-6 hover:shadow-lg transition-shadow duration-200">
+                        <h2 className="text-xl font-bold text-[#1E293B] text-center mb-8">Upload Export File</h2>
 
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50">
-                            <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
+                        <div className="border-2 border-dashed border-[#C7D2FE] rounded-lg p-12 text-center bg-[#EEF2FF] hover:bg-[#C7D2FE]/10 transition-colors duration-200">
+                            <div className="w-16 h-16 mx-auto mb-4 text-[#1E3A8A]">
                                 <Upload className="w-full h-full" />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">Click to upload</h3>
-                            <p className="text-gray-500 mb-1">or drag and drop</p>
-                            <p className="text-sm text-gray-400">Excel files only (.xls, .xlsx, .csv)</p>
+                            <h3 className="text-lg font-medium text-[#1E293B] mb-2">Click to upload</h3>
+                            <p className="text-[#1E293B] mb-1">or drag and drop</p>
+                            <p className="text-sm text-[#1E293B]">Excel files only (.xls, .xlsx, .csv)</p>
                         </div>
 
                         <div className="mt-6 text-center">
-                            <Button className="bg-black hover:bg-gray-800 text-white px-8 py-2">
+                            <Button className="bg-[#3B82F6] hover:bg-[#60A5FA] text-white px-8 py-2 transition-colors duration-200">
                                 Upload Export File
                             </Button>
                         </div>
                     </div>
 
                     {/* Upload Import File Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 text-center mb-8">Upload Import File</h2>
+                    <div className="bg-white rounded-lg border border-[#C7D2FE] p-6 hover:shadow-lg transition-shadow duration-200">
+                        <h2 className="text-xl font-bold text-[#1E293B] text-center mb-8">Upload Import File</h2>
 
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50">
-                            <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
+                        <div className="border-2 border-dashed border-[#C7D2FE] rounded-lg p-12 text-center bg-[#EEF2FF] hover:bg-[#C7D2FE]/10 transition-colors duration-200">
+                            <div className="w-16 h-16 mx-auto mb-4 text-[#1E3A8A]">
                                 <Upload className="w-full h-full" />
                             </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">Click to upload</h3>
-                            <p className="text-gray-500 mb-1">or drag and drop</p>
-                            <p className="text-sm text-gray-400">Excel files only (.xls, .xlsx, .csv)</p>
+                            <h3 className="text-lg font-medium text-[#1E293B] mb-2">Click to upload</h3>
+                            <p className="text-[#1E293B] mb-1">or drag and drop</p>
+                            <p className="text-sm text-[#1E293B]">Excel files only (.xls, .xlsx, .csv)</p>
                         </div>
 
                         <div className="mt-6 text-center">
-                            <Button className="bg-black hover:bg-gray-800 text-white px-8 py-2">
+                            <Button className="bg-[#3B82F6] hover:bg-[#60A5FA] text-white px-8 py-2 transition-colors duration-200">
                                 Upload Import File
                             </Button>
                         </div>

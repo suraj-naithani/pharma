@@ -109,7 +109,7 @@ export default function FilterSidebar() {
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
     const dashboardData = useSelector((state: RootState) => state.dashboard);
-    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
+    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: unknown[] };
     const filterValues = filterState.filters || {};
     const filterMetadata = dashboardData?.filterMetadata || {};
 
@@ -366,7 +366,7 @@ export default function FilterSidebar() {
     );
 
     const getFilteredOptions = useCallback(
-        (category: string, options: any[] = []) => {
+        (category: string, options: unknown[] = []) => {
             const searchTerm = categorySearchTerms[category] || "";
             return options
                 .map(String)
@@ -442,7 +442,7 @@ export default function FilterSidebar() {
                                                     <Button
                                                         onClick={handleApplyFilters}
                                                         disabled={isLoading}
-                                                        className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">
@@ -535,7 +535,7 @@ export default function FilterSidebar() {
                                                     <Button
                                                         onClick={handleApplyFilters}
                                                         disabled={isLoading}
-                                                        className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
                                                         {isLoading ? (
                                                             <div className="flex items-center gap-2">

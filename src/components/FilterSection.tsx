@@ -173,7 +173,7 @@ export default function FilterSection() {
             );
 
             toast.success("Data fetched successfully!", { id: toastId });
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             toast.error("Failed to fetch data.", { id: toastId });
         } finally {
@@ -231,7 +231,7 @@ export default function FilterSection() {
             // Show success message
             toast.success("All data has been reset successfully!");
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             toast.error("Failed to reset data.");
         } finally {
@@ -264,19 +264,19 @@ export default function FilterSection() {
                     onValueChange={(value) => {
                         if (value) dispatch(setSelectedToggle(value as "import" | "export"));
                     }}
-                    className="rounded-lg border border-gray-200 overflow-hidden"
+                    className="rounded-lg border border-[#C7D2FE] overflow-hidden"
                 >
                     <ToggleGroupItem
                         value="import"
                         aria-label="Toggle import"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-black data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
                     >
                         Import
                     </ToggleGroupItem>
                     <ToggleGroupItem
                         value="export"
                         aria-label="Toggle export"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-black data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-gray-700 h-auto"
+                        className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
                     >
                         Export
                     </ToggleGroupItem>
@@ -526,7 +526,7 @@ export default function FilterSection() {
                                             {currentInput}
                                         </div>
                                     )}
-                                    {suggestions.data.map(({ title }: { title: string }, i: any) => (
+                                    {suggestions.data.map(({ title }: { title: string }, i: number) => (
                                         <div
                                             key={i}
                                             className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
@@ -545,7 +545,7 @@ export default function FilterSection() {
                     )}
 
                     <Button
-                        className="absolute right-0 top-0 h-full bg-black hover:bg-gray-800 text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed"
+                        className="absolute right-0 top-0 h-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
                         onClick={handleSubmit}
                         disabled={isLoading}
                     >
@@ -556,7 +556,7 @@ export default function FilterSection() {
                 <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-lg border border-gray-200 bg-white hover:bg-gray-100"
+                    className="rounded-lg border border-[#C7D2FE] bg-white hover:bg-[#EEF2FF] text-[#1E293B] transition-colors duration-200"
                     onClick={handleResetAllData}
                     disabled={isLoading}
                     title="Reset all data (graphs, tables, filters)"

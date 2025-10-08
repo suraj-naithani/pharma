@@ -124,7 +124,7 @@ const Dashboard = () => {
     }, [topHSCodeByValue]);
 
     return (
-        <div className='bg-white w-full min-h-[100vh] '>
+        <div className='bg-[#EEF2FF] w-full min-h-[100vh] '>
             <FilterSection />
 
             <div className="w-full px-6 py-3">
