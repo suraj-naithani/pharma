@@ -19,6 +19,7 @@ type TradeData = {
     quantity: number
     quantityUnit: string
     portOfOrigin: string
+    portOfDeparture: string
     currency: string
     supplier: string
     buyer: string
@@ -85,7 +86,7 @@ export default function ShipmentDTable() {
         }
     }
 
-    const handleDownload = async (downloadParams?: any) => {
+    const handleDownload = async (downloadParams?: unknown) => {
         try {
             // Use current filter state for download parameters
             const params = downloadParams || {
@@ -172,7 +173,12 @@ export default function ShipmentDTable() {
         {
             id: "portOfOrigin",
             header: "Indian Ports",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ row }) => {
+                const portValue = filterState.selectedToggle === "export"
+                    ? row.portOfOrigin
+                    : row.portOfDeparture;
+                return <div className="font-medium text-slate-800">{portValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
@@ -186,14 +192,24 @@ export default function ShipmentDTable() {
         {
             id: "supplier",
             header: "Indian Company",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ row }) => {
+                const companyValue = filterState.selectedToggle === "export"
+                    ? row.supplier
+                    : row.buyer;
+                return <div className="text-slate-600">{companyValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "buyer",
             header: "Foreign Company",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ row }) => {
+                const companyValue = filterState.selectedToggle === "export"
+                    ? row.buyer
+                    : row.supplier;
+                return <div className="text-slate-600">{companyValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
