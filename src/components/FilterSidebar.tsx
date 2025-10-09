@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import HierarchicalHSCode from "@/components/HierarchicalHSCode";
+import RangeSlider from "@/components/RangeSlider";
 import { defaultFilterKeys } from "@/constants/config";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams } from "@/utils/helper";
@@ -105,13 +106,34 @@ export default function FilterSidebar() {
     const [openAccordionItem, setOpenAccordionItem] = useState("");
     const [categorySearchTerms, setCategorySearchTerms] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [unitPriceRange, setUnitPriceRange] = useState<[number, number]>([0, 1000000]);
+    const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000000]);
 
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
     const dashboardData = useSelector((state: RootState) => state.dashboard);
-    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: unknown[] };
-    const filterValues = filterState.filters || {};
-    const filterMetadata = dashboardData?.filterMetadata || {};
+    const filterOptions = useMemo(() => (dashboardData?.filter ?? {}) as { [key: string]: unknown[] | { min: number; max: number } }, [dashboardData?.filter]);
+    const filterValues = useMemo(() => filterState.filters || {}, [filterState.filters]);
+    const filterMetadata = useMemo(() => dashboardData?.filterMetadata || {}, [dashboardData?.filterMetadata]);
+
+    // Update range sliders when filter data changes
+    useEffect(() => {
+        if (filterOptions["Unit Price"] && typeof filterOptions["Unit Price"] === 'object' && 'min' in filterOptions["Unit Price"] && 'max' in filterOptions["Unit Price"]) {
+            const unitPriceData = filterOptions["Unit Price"] as { min: number; max: number };
+            // Only update if the current range is still at default values
+            if (unitPriceRange[0] === 0 && unitPriceRange[1] === 1000000) {
+                setUnitPriceRange([unitPriceData.min, unitPriceData.max]);
+            }
+        }
+
+        if (filterOptions["Quantity"] && typeof filterOptions["Quantity"] === 'object' && 'min' in filterOptions["Quantity"] && 'max' in filterOptions["Quantity"]) {
+            const quantityData = filterOptions["Quantity"] as { min: number; max: number };
+            // Only update if the current range is still at default values
+            if (quantityRange[0] === 0 && quantityRange[1] === 1000000) {
+                setQuantityRange([quantityData.min, quantityData.max]);
+            }
+        }
+    }, [filterOptions, unitPriceRange, quantityRange]);
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
@@ -120,7 +142,18 @@ export default function FilterSidebar() {
     const [triggerSearchFilters] = useLazySearchFiltersQuery();
     const [triggerFilterMetadata] = useLazyGetFilterMetadataQuery();
 
-    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
+    const getRangeValues = useCallback(
+        (category: string) => {
+            const option = filterOptions[category];
+            if (option && typeof option === 'object' && 'min' in option && 'max' in option) {
+                return { min: option.min, max: option.max };
+            }
+            return { min: 0, max: 1000000 }; // Default values
+        },
+        [filterOptions]
+    );
+
+    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[] | { min: number; max: number }>) => {
         setIsLoading(true);
         const filters = filtersOverride ?? filterValues;
 
@@ -222,10 +255,21 @@ export default function FilterSidebar() {
 
     const handleCheckboxChange = useCallback(
         (category: string, value: string, checked: boolean) => {
-            const currentValues = filterValues[category] || [];
+            // Skip checkbox changes for range-based filters
+            if (category === "Unit Price" || category === "Quantity") {
+                return;
+            }
+
+            const currentValues = filterValues[category];
+
+            // Ensure currentValues is an array
+            if (!Array.isArray(currentValues)) {
+                return;
+            }
+
             const updatedValues = checked
                 ? [...new Set([...currentValues, value])]
-                : currentValues.filter((val) => val !== value);
+                : currentValues.filter((val: string) => val !== value);
 
             dispatch(setFilterValues({ category, values: updatedValues }));
         },
@@ -235,9 +279,20 @@ export default function FilterSidebar() {
     const handleSelectAll = useCallback(
         async (category: string, checked: boolean) => {
             const options = filterOptions[category] || [];
+
+            // Skip select all for range-based filters (Unit Price, Quantity)
+            if (category === "Unit Price" || category === "Quantity") {
+                return;
+            }
+
+            // Ensure options is an array before calling map
+            if (!Array.isArray(options)) {
+                return;
+            }
+
             const filteredOptions = options
                 .map(String)
-                .filter((option) =>
+                .filter((option: string) =>
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
 
@@ -274,6 +329,15 @@ export default function FilterSidebar() {
                 [category]: []
             };
 
+            // For range filters, reset to default range
+            if (category === "Unit Price") {
+                const rangeValues = getRangeValues(category);
+                updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+            } else if (category === "Quantity") {
+                const rangeValues = getRangeValues(category);
+                updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+            }
+
             // Call API immediately with updated filters
             try {
                 await getRecordData(updatedFilters);
@@ -281,7 +345,7 @@ export default function FilterSidebar() {
                 console.error("Clear selection API error:", error);
             }
         },
-        [dispatch, filterValues, getRecordData]
+        [dispatch, filterValues, getRecordData, getRangeValues]
     );
 
     const handleClearAllFilters = useCallback(
@@ -295,6 +359,10 @@ export default function FilterSidebar() {
 
                 // Clear search terms
                 setCategorySearchTerms({});
+
+                // Reset range sliders to default values
+                setUnitPriceRange([0, 1000000]);
+                setQuantityRange([0, 1000000]);
 
                 // Call API with empty filters (initial payload)
                 await getRecordData({});
@@ -350,14 +418,21 @@ export default function FilterSidebar() {
         async () => {
             setIsLoading(true);
             try {
-                await getRecordData();
+                // Create updated filters with range slider values in correct format
+                const updatedFilters = {
+                    ...filterValues,
+                    "Unit Price": { min: unitPriceRange[0], max: unitPriceRange[1] },
+                    "Quantity": { min: quantityRange[0], max: quantityRange[1] }
+                };
+
+                await getRecordData(updatedFilters);
             } catch (error) {
                 console.error("Apply filters error:", error);
             } finally {
                 setIsLoading(false);
             }
         },
-        [getRecordData]
+        [getRecordData, filterValues, unitPriceRange, quantityRange]
     );
 
     const handleAccordionChange = useCallback(
@@ -366,7 +441,17 @@ export default function FilterSidebar() {
     );
 
     const getFilteredOptions = useCallback(
-        (category: string, options: unknown[] = []) => {
+        (category: string, options: unknown[] | { min: number; max: number } = []) => {
+            // Skip filtering for range-based filters
+            if (category === "Unit Price" || category === "Quantity") {
+                return [];
+            }
+
+            // Ensure options is an array before filtering
+            if (!Array.isArray(options)) {
+                return [];
+            }
+
             const searchTerm = categorySearchTerms[category] || "";
             return options
                 .map(String)
@@ -426,12 +511,56 @@ export default function FilterSidebar() {
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
-                                        {category === "H S Code" ? (
+                                        {category === "Unit Price" ? (
+                                            // Unit Price slider
+                                            <div className="space-y-3">
+                                                <RangeSlider
+                                                    value={unitPriceRange}
+                                                    onChange={setUnitPriceRange}
+                                                    min={getRangeValues(category).min}
+                                                    max={getRangeValues(category).max}
+                                                    step={100}
+                                                    disabled={isLoading}
+                                                    formatValue={(val) => `$${val.toLocaleString()}`}
+                                                />
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? 'Applying...' : 'Apply Filter'}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : category === "Quantity" ? (
+                                            // Quantity slider
+                                            <div className="space-y-3">
+                                                <RangeSlider
+                                                    value={quantityRange}
+                                                    onChange={setQuantityRange}
+                                                    min={getRangeValues(category).min}
+                                                    max={getRangeValues(category).max}
+                                                    step={1}
+                                                    disabled={isLoading}
+                                                    formatValue={(val) => val.toLocaleString()}
+                                                />
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? 'Applying...' : 'Apply Filter'}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : category === "H S Code" ? (
                                             // Special hierarchical component for HS Code
                                             <div className="space-y-3">
                                                 <HierarchicalHSCode
-                                                    hsCodes={options.map(String)}
-                                                    selectedCodes={filterValues[category] || []}
+                                                    hsCodes={Array.isArray(options) ? options.map(String) : []}
+                                                    selectedCodes={Array.isArray(filterValues[category]) ? filterValues[category] as string[] : []}
                                                     onSelectionChange={(selectedCodes) => {
                                                         dispatch(setFilterValues({ category, values: selectedCodes }));
                                                     }}
@@ -473,8 +602,9 @@ export default function FilterSidebar() {
                                                             id={`select-all-${category}`}
                                                             checked={
                                                                 filteredOptions.length > 0 &&
+                                                                Array.isArray(filterValues[category]) &&
                                                                 filteredOptions.every((option) =>
-                                                                    filterValues[category]?.includes(option)
+                                                                    (filterValues[category] as string[])?.includes(option)
                                                                 )
                                                             }
                                                             onCheckedChange={(checked: boolean) =>
@@ -512,7 +642,7 @@ export default function FilterSidebar() {
                                                                 >
                                                                     <Checkbox
                                                                         id={`${category}-${option}`}
-                                                                        checked={filterValues[category]?.includes(option) || false}
+                                                                        checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
                                                                         onCheckedChange={(checked: boolean) =>
                                                                             handleCheckboxChange(category, option, checked)
                                                                         }
@@ -560,6 +690,8 @@ export default function FilterSidebar() {
             openAccordionItem,
             categorySearchTerms,
             filterValues,
+            unitPriceRange,
+            quantityRange,
             handleAccordionChange,
             handleSearchChange,
             handleSelectAll,
@@ -569,6 +701,11 @@ export default function FilterSidebar() {
             getFilteredOptions,
             filterOptions,
             isLoading,
+            dispatch,
+            filterMetadata,
+            handleApplyFilters,
+            handleDebouncedSearch,
+            getRangeValues,
         ]
     );
 

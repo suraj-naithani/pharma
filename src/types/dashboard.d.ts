@@ -8,7 +8,7 @@ export interface FilterState {
     showSuggestions: boolean;
     selectedToggle: string;
     filters?: {
-        [key: string]: string[];
+        [key: string]: string[] | { min: number; max: number };
     };
     session: string;
 }
@@ -43,9 +43,9 @@ export interface Filters {
     IndianPort: string[];
     ProductDescription: number;
     ProductName: string[];
-    Quantity: string[];
+    Quantity: { min: number; max: number };
     QuantityUnits: string[];
-    UnitPrice: string[];
+    UnitPrice: { min: number; max: number };
 }
 
 export interface Summary {
