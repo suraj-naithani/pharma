@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown } from "lucide-react";
-
 // Currency data with country flags
 const countryCurrencies = [
     { country: "United States", currency: "US Dollar", code: "USD", img: "https://flagcdn.com/w40/us.png" },

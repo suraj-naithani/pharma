@@ -39,6 +39,7 @@ export default function ShipmentDTable() {
     const [totalRecords, setTotalRecords] = useState(0)
     const [pageSize, setPageSize] = useState(10)
     const [isInitialLoad, setIsInitialLoad] = useState(true)
+    const [isPageChanging, setIsPageChanging] = useState(false)
 
     // Use redux data on initial load, pagination data afterwards
     const data = isInitialLoad ? shipmentState.data : paginationData
@@ -53,7 +54,13 @@ export default function ShipmentDTable() {
     }, [shipmentState, isInitialLoad])
 
     const handlePageChange = async (page: number, newPageSize?: number) => {
+        // Prevent multiple calls if already changing page
+        if (isPageChanging) {
+            return
+        }
+
         try {
+            setIsPageChanging(true)
             setIsInitialLoad(false)
 
             // Update page size if provided
@@ -83,6 +90,8 @@ export default function ShipmentDTable() {
             setTotalRecords(result.totalRecords || 0)
         } catch (error) {
             console.error('Pagination failed:', error)
+        } finally {
+            setIsPageChanging(false)
         }
     }
 
@@ -234,7 +243,7 @@ export default function ShipmentDTable() {
             totalPages={totalPages}
             totalRecords={totalRecords}
             onPageChange={handlePageChange}
-            isLoading={isPaginationLoading}
+            isLoading={isPageChanging}
             pageSize={pageSize}
         />
     )
