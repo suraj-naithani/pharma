@@ -44,6 +44,7 @@ import { Eraser, Filter, Search } from "lucide-react";
 import moment from "moment";
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 // Custom hook for debouncing
 const useDebounce = (value: string, delay: number) => {
@@ -317,28 +318,32 @@ export default function FilterSidebar() {
 
     const handleClearSelection = useCallback(
         async (category: string) => {
-            dispatch(clearFilterCategory(category));
+            const toastId = toast.loading(`Clearing ${category} filter...`);
 
-            // Create updated filters object for API call
-            const updatedFilters = {
-                ...filterValues,
-                [category]: []
-            };
-
-            // For range filters, reset to default range
-            if (category === "Unit Price") {
-                const rangeValues = getRangeValues(category);
-                updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
-            } else if (category === "Quantity") {
-                const rangeValues = getRangeValues(category);
-                updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
-            }
-
-            // Call API immediately with updated filters
             try {
+                dispatch(clearFilterCategory(category));
+
+                // Create updated filters object for API call
+                const updatedFilters = {
+                    ...filterValues,
+                    [category]: []
+                };
+
+                // For range filters, reset to default range
+                if (category === "Unit Price") {
+                    const rangeValues = getRangeValues(category);
+                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                } else if (category === "Quantity") {
+                    const rangeValues = getRangeValues(category);
+                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                }
+
+                // Call API immediately with updated filters
                 await getRecordData(updatedFilters);
+                toast.success(`${category} filter cleared successfully!`, { id: toastId });
             } catch (error) {
                 console.error("Clear selection API error:", error);
+                toast.error(`Failed to clear ${category} filter.`, { id: toastId });
             }
         },
         [dispatch, filterValues, getRecordData, getRangeValues]
@@ -347,6 +352,8 @@ export default function FilterSidebar() {
     const handleClearAllFilters = useCallback(
         async () => {
             setIsLoading(true);
+            const toastId = toast.loading("Clearing all filters...");
+
             try {
                 // Clear all filter values
                 Object.keys(filterValues).forEach(category => {
@@ -362,8 +369,10 @@ export default function FilterSidebar() {
 
                 // Call API with empty filters (initial payload)
                 await getRecordData({});
+                toast.success("All filters cleared successfully!", { id: toastId });
             } catch (error) {
                 console.error("Clear all filters error:", error);
+                toast.error("Failed to clear all filters.", { id: toastId });
             } finally {
                 setIsLoading(false);
             }
@@ -413,6 +422,8 @@ export default function FilterSidebar() {
     const handleApplyFilters = useCallback(
         async () => {
             setIsLoading(true);
+            const toastId = toast.loading("Applying filters...");
+
             try {
                 // Create updated filters with range slider values in correct format
                 const updatedFilters = {
@@ -422,8 +433,10 @@ export default function FilterSidebar() {
                 };
 
                 await getRecordData(updatedFilters);
+                toast.success("Filters applied successfully!", { id: toastId });
             } catch (error) {
                 console.error("Apply filters error:", error);
+                toast.error("Failed to apply filters.", { id: toastId });
             } finally {
                 setIsLoading(false);
             }
