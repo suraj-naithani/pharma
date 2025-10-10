@@ -15,6 +15,7 @@ const About = lazy(() => import("./pages/about"));
 const Contact = lazy(() => import("./pages/contact"));
 const Countries = lazy(() => import("./pages/countries"));
 const IndianPorts = lazy(() => import("./pages/indianPorts"));
+const CurrencyConverter = lazy(() => import("./pages/currencyConverter"));
 const SignIn = lazy(() => import("./pages/signIn"));
 // const SignUp = lazy(() => import("./pages/signUp"));
 const Dashboard = lazy(() => import("./pages/dashboard"));
@@ -99,6 +100,7 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/countries" element={<Countries />} />
                 <Route path="/indian-ports" element={<IndianPorts />} />
+                <Route path="/currency-converter" element={<CurrencyConverter />} />
                 <Route
                   path="/signin"
                   element={

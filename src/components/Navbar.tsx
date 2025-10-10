@@ -15,14 +15,14 @@ const navLinks = [
     { label: "Home", to: "/" },
     { label: "Dashboard", to: "/dashboard" },
     { label: "About Us", to: "/about" },
-    { label: "Contact Us", to: "contact" }
+    { label: "Contact Us", to: "/contact" }
 ];
 
 const resourceLinks = [
     { label: "Countries", to: "/countries" },
     { label: "Indian Ports", to: "/indian-ports" },
     { label: "HS Codes", to: "#" },
-    { label: "Converter", to: "#" }
+    { label: "Converter", to: "/currency-converter" }
 ];
 
 
