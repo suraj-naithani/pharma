@@ -155,7 +155,7 @@ export default function TableData<TData extends Record<string, any>>({
                                 setRowSelection(newSelection)
                             }}
                             aria-label="Select all rows"
-                            className="h-5 w-5 rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=indeterminate]:bg-green-500 data-[state=indeterminate]:border-green-500"
+                            className="h-5 w-5 rounded-md border-[#C7D2FE] data-[state=checked]:bg-[#3B82F6] data-[state=checked]:border-[#3B82F6] data-[state=indeterminate]:bg-[#3B82F6] data-[state=indeterminate]:border-[#3B82F6]"
                         />
                     )
                 },
@@ -169,7 +169,7 @@ export default function TableData<TData extends Record<string, any>>({
                             }))
                         }}
                         aria-label="Select row"
-                        className="h-5 w-5 rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+                        className="h-5 w-5 rounded-md border-[#C7D2FE] data-[state=checked]:bg-[#3B82F6] data-[state=checked]:border-[#3B82F6]"
                     />
                 ),
                 enableSorting: false,
@@ -252,14 +252,14 @@ export default function TableData<TData extends Record<string, any>>({
         >
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-lg font-semibold text-gray-600">
-                        {title} <span>({data.length})</span>
+                    <h1 className="text-lg font-semibold text-[#1E293B]">
+                        {title} <span className="text-[#64748B]">({data.length})</span>
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-2 w-full justify-start lg:w-auto">
                     <div className="relative flex-1 md:max-w-md">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1E3A8A]" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3B82F6]" />
                         <Input
                             placeholder="Search across all columns..."
                             value={globalFilter ?? ""}
@@ -351,7 +351,7 @@ export default function TableData<TData extends Record<string, any>>({
                         variant="outline"
                         size="default"
                         onClick={handleDensityToggle}
-                        className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50"
+                        className="h-9 px-3 border-[#C7D2FE] hover:bg-[#EEF2FF] rounded-lg bg-white text-[#1E293B] transition-colors duration-200"
                     >
                         <DensityIcon className="h-4 w-4" />
                         <span className="sr-only">Toggle density</span>
@@ -360,7 +360,7 @@ export default function TableData<TData extends Record<string, any>>({
                         variant="outline"
                         size="default"
                         onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50"
+                        className="h-9 px-3 border-[#C7D2FE] hover:bg-[#EEF2FF] rounded-lg bg-white text-[#1E293B] transition-colors duration-200"
                     >
                         {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                     </Button>
@@ -378,12 +378,12 @@ export default function TableData<TData extends Record<string, any>>({
                                         <TableHead
                                             key={column.id as string}
                                             className={cn(
-                                                "whitespace-nowrap font-semibold text-slate-500 py-3",
+                                                "whitespace-nowrap font-semibold text-[#1E293B] py-3",
                                                 column.id === "productDescription" && density === "comfortable" && "w-1/4",
                                             )}
                                         >
                                             <div
-                                                className={`flex items-center space-x-2 ${column.enableSorting ? "cursor-pointer select-none hover:text-slate-700" : ""
+                                                className={`flex items-center space-x-2 ${column.enableSorting ? "cursor-pointer select-none hover:text-[#3B82F6]" : ""
                                                     }`}
                                                 onClick={() => column.enableSorting && handleSort(column.id as string)}
                                             >
@@ -393,11 +393,11 @@ export default function TableData<TData extends Record<string, any>>({
                                                 {column.enableSorting && (
                                                     <div className="flex flex-col">
                                                         {isSorted === "desc" ? (
-                                                            <ChevronDown className="h-4 w-4 text-blue-600" />
+                                                            <ChevronDown className="h-4 w-4 text-[#3B82F6]" />
                                                         ) : isSorted === "asc" ? (
-                                                            <ChevronUp className="h-4 w-4 text-blue-600" />
+                                                            <ChevronUp className="h-4 w-4 text-[#3B82F6]" />
                                                         ) : (
-                                                            <ChevronsUpDown className="h-4 w-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <ChevronsUpDown className="h-4 w-4 text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
                                                         )}
                                                     </div>
                                                 )}
@@ -415,7 +415,7 @@ export default function TableData<TData extends Record<string, any>>({
                                         data-state={rowSelection[row.id] && "selected"}
                                         className={cn(
                                             "border-b border-slate-100 last:border-b-0 transition-all duration-300 ease-in-out",
-                                            rowSelection[row.id] ? "bg-amber-100 hover:bg-amber-100" : "bg-white hover:bg-slate-50",
+                                            rowSelection[row.id] ? "bg-[#EEF2FF] hover:bg-[#EEF2FF]" : "bg-white hover:bg-[#F8FAFC]",
                                             density === "compact" && "h-8",
                                             density === "default" && "h-12",
                                             density === "comfortable" && "h-16",
@@ -435,7 +435,7 @@ export default function TableData<TData extends Record<string, any>>({
                                                     column.id === "productDescription" &&
                                                     density === "comfortable" &&
                                                     "w-1/4 break-words overflow-hidden",
-                                                    column.id === "select" && rowSelection[row.id] ? "border-l-4 border-green-500 pl-3" : "",
+                                                    column.id === "select" && rowSelection[row.id] ? "border-l-4 border-[#3B82F6] pl-3" : "",
                                                 )}
                                             >
                                                 {column.cell({ row, value: row[column.id as keyof TData], density })}
@@ -479,10 +479,10 @@ export default function TableData<TData extends Record<string, any>>({
                             }
                         }}
                     >
-                        <SelectTrigger className="h-9 w-[70px] rounded-lg bg-white border border-slate-200">
+                        <SelectTrigger className="h-9 w-[70px] rounded-lg bg-white border border-[#C7D2FE]">
                             <SelectValue placeholder={actualPageSize} />
                         </SelectTrigger>
-                        <SelectContent side="top" className="bg-white border border-slate-200">
+                        <SelectContent side="top" className="bg-white border border-[#C7D2FE]">
                             {[10, 20, 30, 40, 50].map((size) => (
                                 <SelectItem key={size} value={`${size}`}>
                                     {size}
@@ -507,7 +507,7 @@ export default function TableData<TData extends Record<string, any>>({
                     <div className="flex items-center space-x-1">
                         <Button
                             variant="outline"
-                            className="h-9 w-9 p-0 rounded-lg border-slate-300 bg-slate-50"
+                            className="h-9 w-9 p-0 rounded-lg border-[#C7D2FE] bg-white hover:bg-[#F8FAFC] text-[#1E293B]"
                             onClick={() => {
                                 if (onPageChange) {
                                     onPageChange(Math.max(1, actualCurrentPage - 1))
@@ -522,7 +522,7 @@ export default function TableData<TData extends Record<string, any>>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-9 w-9 p-0 rounded-lg border-slate-300 bg-slate-50"
+                            className="h-9 w-9 p-0 rounded-lg border-[#C7D2FE] bg-white hover:bg-[#F8FAFC] text-[#1E293B]"
                             onClick={() => {
                                 if (onPageChange) {
                                     onPageChange(Math.min(actualTotalPages, actualCurrentPage + 1))

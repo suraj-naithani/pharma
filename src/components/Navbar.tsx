@@ -21,7 +21,7 @@ const navLinks = [
 const resourceLinks = [
     { label: "Countries", to: "/countries" },
     { label: "Indian Ports", to: "/indian-ports" },
-    { label: "HS Codes", to: "#" },
+    { label: "HS Codes", to: "/hscode" },
     { label: "Converter", to: "/currency-converter" }
 ];
 
