@@ -9,6 +9,7 @@ import { ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import CurrencyConverter from "./CurrencyConverter";
 
 const navLinks = [
     { label: "Home", to: "/" },
@@ -24,10 +25,6 @@ const resourceLinks = [
     { label: "Converter", to: "#" }
 ];
 
-const currencyData = [
-    { img: "/usd.svg", label: "USD", value: "1" },
-    { img: "/euro.png", label: "EUR", value: "0.87" }
-];
 
 const NavLink = ({ to, label }: { to: string; label: string }) => {
     const location = useLocation();
@@ -47,13 +44,6 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
     );
 };
 
-const CurrencyBox = ({ img, label, value }: { img: string; label: string; value: string }) => (
-    <div className="flex items-center border border-[#C7D2FE] rounded-md px-2 py-1 space-x-1.5 text-sm bg-[#EEF2FF]">
-        <img src={img} alt={`${label} Flag`} width={20} height={14} className="rounded-sm" />
-        <span className="text-[#1E293B]">{label}</span>
-        <span className="text-[#1E293B] rounded-sm px-1 bg-[#C7D2FE] text-xs">{value}</span>
-    </div>
-);
 
 const Navbar = () => {
     const [showResources, setShowResources] = useState(false);
@@ -126,9 +116,7 @@ const Navbar = () => {
                 </div>
 
                 <div className="hidden xl:flex items-center space-x-4">
-                    {currencyData.map(data => (
-                        <CurrencyBox key={data.label} {...data} />
-                    ))}
+                    <CurrencyConverter />
 
                     <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                         <Link to="/admin-dashboard">Admin</Link>
@@ -177,11 +165,7 @@ const Navbar = () => {
                                 </Collapsible>
 
                                 <div className="flex flex-col items-center space-y-3 w-full pt-3 border-t border-[#C7D2FE] mt-3">
-                                    <div className="flex space-x-4">
-                                        {currencyData.map((data) => (
-                                            <CurrencyBox key={data.label} {...data} />
-                                        ))}
-                                    </div>
+                                    <CurrencyConverter />
                                     <div className="flex space-x-4 w-full justify-center">
                                         <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
                                             <Link to="/admin-dashboard">Admin</Link>
