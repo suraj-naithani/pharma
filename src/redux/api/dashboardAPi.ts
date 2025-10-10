@@ -106,14 +106,10 @@ export const dashboardApi = createApi({
             providesTags: ["dashboard"],
         }),
         getFilterMetadata: builder.query({
-            query: ({ informationOf, startDate, endDate }) => ({
+            query: (params) => ({
                 url: "filters/metadata",
                 method: "GET",
-                params: {
-                    informationOf,
-                    startDate,
-                    endDate,
-                },
+                params,
             }),
             providesTags: ["dashboard"],
         }),

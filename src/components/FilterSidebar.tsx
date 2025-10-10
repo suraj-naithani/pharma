@@ -189,11 +189,7 @@ export default function FilterSidebar() {
                 triggerAllTopMetrics(data).unwrap(),
                 triggerShipmentTable(shipmentParams).unwrap(),
                 triggerFilterValues(data).unwrap(),
-                triggerFilterMetadata({
-                    informationOf: filterState.selectedToggle,
-                    startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
-                    endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
-                }).unwrap()
+                triggerFilterMetadata(data).unwrap()
             ]);
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
