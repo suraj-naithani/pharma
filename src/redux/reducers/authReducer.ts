@@ -4,7 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: AuthState = {
     user: null,
-    isLoading: true,
+    isLoading: !!localStorage.getItem("token"), // Only show loading if there's a token to validate
 };
 
 const authSlice = createSlice({
@@ -19,8 +19,11 @@ const authSlice = createSlice({
             state.user = null;
             state.isLoading = false;
         },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.isLoading = action.payload;
+        },
     },
 });
 
-export const { userExists, userNotExist } = authSlice.actions;
+export const { userExists, userNotExist, setLoading } = authSlice.actions;
 export const authReducer = authSlice;

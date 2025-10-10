@@ -1,4 +1,4 @@
-import { Home, Upload, Users, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Home, Upload, Users, ChevronsLeft, ChevronsRight, FileText } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -24,27 +24,28 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     const menuItems = [
         { id: "home", label: "Home", icon: Home, path: "/admin-dashboard" },
         { id: "users", label: "Users", icon: Users, path: "/admin-dashboard/users" },
+        { id: "subscriptions", label: "Subscriptions", icon: FileText, path: "/admin-dashboard/subscriptions" },
         { id: "upload", label: "Upload", icon: Upload, path: "/admin-dashboard/upload" },
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50">
+        <div className="flex flex-col min-h-screen bg-[#EEF2FF]">
             {/* Navbar */}
             <Navbar />
 
             {/* Admin Dashboard Content */}
             <div className="flex flex-1">
                 {/* Sidebar */}
-                <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-gray-200 p-4 transition-all duration-300`}>
-                    <div className="mb-8 flex items-center justify-between">
-                        {!isCollapsed && <h1 className="text-xl font-bold text-gray-800">Admin Panel</h1>}
+                <aside className={`${isCollapsed ? 'w-16' : 'w-48'} bg-white border-r border-[#C7D2FE] p-3 transition-all duration-300`}>
+                    <div className="mb-6 flex items-center justify-between">
+                        {!isCollapsed && <h1 className="text-md font-semibold text-[#1E293B]">Admin</h1>}
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="text-gray-600 hover:text-gray-900"
+                            className="text-[#1E293B] hover:text-[#1E3A8A] hover:bg-[#C7D2FE]/20 transition-colors duration-200"
                         >
-                            {isCollapsed ? <ChevronsRight className="h-5 w-5" /> : <ChevronsLeft className="h-5 w-5" />}
+                            {isCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
                         </Button>
                     </div>
 
@@ -56,14 +57,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                                 <Link
                                     key={item.id}
                                     to={item.path}
-                                    className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'space-x-3 px-4'} w-full h-12 rounded-lg text-left transition-colors ${isActive
-                                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                    className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'space-x-2 px-3'} w-full h-10 rounded-lg text-left text-sm transition-colors duration-200 ${isActive
+                                        ? "bg-[#3B82F6] text-white hover:bg-[#60A5FA]"
+                                        : "text-[#1E293B] hover:text-[#1E3A8A] hover:bg-[#C7D2FE]/20"
                                         }`}
                                     title={isCollapsed ? item.label : undefined}
                                 >
-                                    <Icon className={`h-5 w-5 ${isCollapsed ? 'flex-shrink-0' : ''}`} />
-                                    {!isCollapsed && <span className="ml-3">{item.label}</span>}
+                                    <Icon className={`h-4 w-4 ${isCollapsed ? 'flex-shrink-0' : ''}`} />
+                                    {!isCollapsed && <span className="ml-2 text-sm">{item.label}</span>}
                                 </Link>
                             );
                         })}

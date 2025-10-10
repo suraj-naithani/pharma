@@ -76,7 +76,9 @@ export default function BarChart({
     const trendAxisTicks = trendData ? getTrendAxisTicks(maxTrendValue) : []
 
     const formatValue = (value: number) => {
-        if (value >= 1000000) {
+        if (value >= 1000000000) {
+            return `${(value / 1000000000).toFixed(1)}B`
+        } else if (value >= 1000000) {
             return `${(value / 1000000).toFixed(1)}M`
         } else if (value >= 1000) {
             return `${(value / 1000).toFixed(0)}K`
@@ -88,7 +90,7 @@ export default function BarChart({
         const { x, y, width, height, value } = props
         const formattedValue = formatValue(value)
 
-        if (height < 30) return <g />
+        if (height < 25) return <g />
 
         return (
             <text
@@ -97,8 +99,8 @@ export default function BarChart({
                 fill="white"
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize={13}
-                fontWeight="600"
+                fontSize={9}
+                fontWeight="500"
             >
                 {formattedValue}
             </text>
@@ -112,9 +114,9 @@ export default function BarChart({
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden flex-1">
-            <div className="px-6 pt-6 pb-2">
-                <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex-1">
+            <div className="px-4 pt-4 pb-2 mb-2 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             </div>
 
             <div className="" onWheel={handleWheel}>
@@ -123,52 +125,33 @@ export default function BarChart({
                         data={slicedData}
                         margin={{ top: 15, right: 15, left: 15, bottom: 15 }}
                     >
-                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
 
                         <XAxis
                             dataKey="name"
-                            tick={{ fill: "#64748b", fontSize: 12 }}
+                            tick={{ fill: "#64748b", fontSize: 11 }}
                             axisLine={{ stroke: "#cbd5e1" }}
                             tickLine={{ stroke: "#cbd5e1" }}
                         />
 
                         <YAxis
                             yAxisId="left"
-                            tick={{ fill: "#64748b", fontSize: 12 }}
+                            tick={{ fill: "#64748b", fontSize: 11 }}
                             tickFormatter={formatValue}
                             axisLine={{ stroke: "#cbd5e1" }}
                             tickLine={{ stroke: "#cbd5e1" }}
                             ticks={yAxisTicks}
-                            label={{
-                                value: "Bar Values",
-                                angle: -90,
-                                position: "insideLeft",
-                                style: {
-                                    textAnchor: "middle",
-                                    fill: "#6b7280",
-                                    fontSize: "12px",
-                                },
-                            }}
                         />
 
                         {showTrendline && trendData && (
                             <YAxis
                                 yAxisId="right"
                                 orientation="right"
-                                tick={{ fill: "#64748b", fontSize: 12 }}
+                                tick={{ fill: "#64748b", fontSize: 11 }}
+                                tickFormatter={formatValue}
                                 axisLine={{ stroke: "#cbd5e1" }}
                                 tickLine={{ stroke: "#cbd5e1" }}
                                 ticks={trendAxisTicks}
-                                label={{
-                                    value: "Trendline Values",
-                                    angle: 90,
-                                    position: "insideRight",
-                                    style: {
-                                        textAnchor: "middle",
-                                        fill: "#6b7280",
-                                        fontSize: "12px",
-                                    },
-                                }}
                             />
                         )}
 
@@ -176,24 +159,22 @@ export default function BarChart({
                             content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
                                     return (
-                                        <div className="bg-white p-3 border border-slate-200 rounded-lg shadow-lg">
-                                            <p className="font-medium text-slate-900 mb-2">{label}</p>
+                                        <div className="bg-white p-2 border border-gray-200 rounded-md shadow-sm">
+                                            <p className="font-medium text-gray-900 mb-1 text-xs">{label}</p>
                                             {payload.map((entry, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-center gap-2 mb-1"
+                                                    className="flex items-center gap-1.5 mb-0.5"
                                                 >
                                                     <div
-                                                        className="w-3 h-3 rounded-full"
+                                                        className="w-2 h-2 rounded-full"
                                                         style={{ backgroundColor: entry.color }}
                                                     />
-                                                    <span className="text-slate-600 text-sm">
+                                                    <span className="text-gray-600 text-xs">
                                                         {entry.name}:
                                                     </span>
-                                                    <span className="font-semibold text-slate-900 text-sm">
-                                                        {entry.name === barLabel
-                                                            ? formatValue(entry.value as number)
-                                                            : entry.value}
+                                                    <span className="font-semibold text-gray-900 text-xs">
+                                                        {formatValue(entry.value as number)}
                                                     </span>
                                                 </div>
                                             ))}
@@ -213,10 +194,10 @@ export default function BarChart({
                                     {payload?.map((entry, index) => (
                                         <div
                                             key={index}
-                                            className="flex items-center gap-2 text-slate-700 text-sm font-medium"
+                                            className="flex items-center gap-2 text-gray-600 text-sm font-medium"
                                         >
                                             <div
-                                                className="w-4 h-4 rounded-sm"
+                                                className="w-3 h-3 rounded-sm"
                                                 style={{ backgroundColor: entry.color }}
                                             />
                                             <span>{entry.value}</span>
@@ -233,7 +214,7 @@ export default function BarChart({
                             fill={barColor}
                             radius={[5, 5, 0, 0]}
                             label={renderCustomizedLabel}
-                            maxBarSize={50}
+                            maxBarSize={35}
                         />
 
                         {showTrendline && trendData && (

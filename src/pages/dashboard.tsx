@@ -124,10 +124,10 @@ const Dashboard = () => {
     }, [topHSCodeByValue]);
 
     return (
-        <div className='bg-[#f9fafb] w-full min-h-[100vh] '>
+        <div className='bg-[#EEF2FF] w-full min-h-[100vh] '>
             <FilterSection />
 
-            <div className="w-full px-6 py-3 bg-gray-50">
+            <div className="w-full px-6 py-3">
                 <Stats />
             </div>
 
@@ -150,8 +150,8 @@ const Dashboard = () => {
                                         barLabel="Top Year By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#6366f1"
-                                        trendColor="#10b981"
+                                        barColor="#3b82f6"
+                                        trendColor="#06b6d4"
                                     />
                                 )}
                                 {yearsByValue && yearsByValue.labels && yearsByValue.labels.length > 0 && (
@@ -163,8 +163,8 @@ const Dashboard = () => {
                                         barLabel="Top Year By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#0ea5e9"
-                                        trendColor="#facc15"
+                                        barColor="#10b981"
+                                        trendColor="#f59e0b"
                                     />
                                 )}
                             </div>
@@ -178,8 +178,8 @@ const Dashboard = () => {
                                         barLabel="Top Buyer By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#0891b2"
-                                        trendColor="#c084fc"
+                                        barColor="#6366f1"
+                                        trendColor="#10b981"
                                     />
                                 )}
                                 {buyersByValue && buyersByValue.labels && buyersByValue.labels.length > 0 && (
@@ -191,8 +191,8 @@ const Dashboard = () => {
                                         barLabel="Top Buyer By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#64748b"
-                                        trendColor="#f97316"
+                                        barColor="#8b5cf6"
+                                        trendColor="#f59e0b"
                                     />
                                 )}
                             </div>
@@ -206,8 +206,8 @@ const Dashboard = () => {
                                         barLabel="Top Supplier By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#7c3aed"
-                                        trendColor="#f472b6"
+                                        barColor="#06b6d4"
+                                        trendColor="#ef4444"
                                     />
                                 )}
                                 {supplierByValue && supplierByValue.labels && supplierByValue.labels.length > 0 && (
@@ -219,8 +219,8 @@ const Dashboard = () => {
                                         barLabel="Top Supplier By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#1e40af"
-                                        trendColor="#10b981"
+                                        barColor="#14b8a6"
+                                        trendColor="#f97316"
                                     />
                                 )}
                             </div>
@@ -234,8 +234,8 @@ const Dashboard = () => {
                                         barLabel="Top Indian Port By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#2563eb"
-                                        trendColor="#f87171"
+                                        barColor="#dc2626"
+                                        trendColor="#06b6d4"
                                     />
                                 )}
                                 {indianPortByValue && indianPortByValue.labels && indianPortByValue.labels.length > 0 && (
@@ -247,8 +247,8 @@ const Dashboard = () => {
                                         barLabel="Top Indian Port By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#a855f7"
-                                        trendColor="#22d3ee"
+                                        barColor="#7c3aed"
+                                        trendColor="#10b981"
                                     />
                                 )}
                             </div>
@@ -262,8 +262,8 @@ const Dashboard = () => {
                                         barLabel="Top Country By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#14b8a6"
-                                        trendColor="#eab308"
+                                        barColor="#0891b2"
+                                        trendColor="#f59e0b"
                                     />
                                 )}
                                 {countryByValue && countryByValue.labels && countryByValue.labels.length > 0 && (
@@ -275,8 +275,8 @@ const Dashboard = () => {
                                         barLabel="Top Country By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#8b5cf6"
-                                        trendColor="#34d399"
+                                        barColor="#a855f7"
+                                        trendColor="#06b6d4"
                                     />
                                 )}
                             </div>
@@ -290,8 +290,8 @@ const Dashboard = () => {
                                         barLabel="Top HS Code By Quantity"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#334155"
-                                        trendColor="#2dd4bf"
+                                        barColor="#64748b"
+                                        trendColor="#10b981"
                                     />
                                 )}
                                 {hsCodeByValue && hsCodeByValue.labels && hsCodeByValue.labels.length > 0 && (
@@ -303,8 +303,8 @@ const Dashboard = () => {
                                         barLabel="Top HS Code By Value"
                                         trendLabel="Trendline"
                                         showTrendline={true}
-                                        barColor="#fda4af"
-                                        trendColor="#1e293b"
+                                        barColor="#f87171"
+                                        trendColor="#3b82f6"
                                     />
                                 )}
                             </div>

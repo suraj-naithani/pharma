@@ -248,18 +248,18 @@ export default function TableData<TData extends Record<string, any>>({
 
     return (
         <div
-            className={`w-full space-y-6 p-6 bg-white rounded-xl shadow-md border border-slate-100 ${isFullscreen ? "fixed inset-0 z-50 bg-white p-6 overflow-auto" : ""}`}
+            className={`w-full space-y-6 p-6 bg-white rounded-xl border-2 border-gray-100 ${isFullscreen ? "fixed inset-0 z-50 bg-white p-6 overflow-auto" : ""}`}
         >
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h1 className="text-xl font-bold">
+                    <h1 className="text-lg font-semibold text-gray-600">
                         {title} <span>({data.length})</span>
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-2 w-full justify-start lg:w-auto">
                     <div className="relative flex-1 md:max-w-md">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1E3A8A]" />
                         <Input
                             placeholder="Search across all columns..."
                             value={globalFilter ?? ""}
@@ -271,12 +271,12 @@ export default function TableData<TData extends Record<string, any>>({
                                     setCurrentPage(1)
                                 }
                             }}
-                            className="pl-10 h-9 border-slate-300 focus:border-blue-500 focus:ring-blue-500/20 rounded-lg bg-slate-50 w-full"
+                            className="pl-10 h-9 border-[#C7D2FE] focus:border-[#3B82F6] focus:ring-[#3B82F6]/20 rounded-lg bg-[#EEF2FF] w-full transition-colors duration-200"
                         />
                     </div>
                     <Button
                         variant="outline"
-                        className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50"
+                        className="h-9 px-3 border-[#C7D2FE] hover:bg-[#EEF2FF] rounded-lg bg-white text-[#1E293B] transition-colors duration-200"
                         disabled={isDownloading || !onDownload}
                         onClick={() => onDownload && onDownload()}
                     >
@@ -284,7 +284,7 @@ export default function TableData<TData extends Record<string, any>>({
                     </Button>
                     <DropdownMenu open={columnDropdownOpen} onOpenChange={setColumnDropdownOpen}>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-9 px-3 border-slate-300 hover:bg-slate-50 rounded-lg bg-slate-50">
+                            <Button variant="outline" className="h-9 px-3 border-[#C7D2FE] hover:bg-[#EEF2FF] rounded-lg bg-white text-[#1E293B] transition-colors duration-200">
                                 <Settings2 className="h-4 w-4" />
                                 <span className="sr-only">Columns</span>
                             </Button>
@@ -367,7 +367,7 @@ export default function TableData<TData extends Record<string, any>>({
                 </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 shadow-sm">
+            <div className="rounded-lg border border-slate-200">
                 <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <Table className="min-w-full">
                         <TableHeader>

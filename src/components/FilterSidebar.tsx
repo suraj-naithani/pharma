@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import HierarchicalHSCode from "@/components/HierarchicalHSCode";
+import RangeSlider from "@/components/RangeSlider";
 import { defaultFilterKeys } from "@/constants/config";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams } from "@/utils/helper";
@@ -42,6 +44,7 @@ import { Eraser, Filter, Search } from "lucide-react";
 import moment from "moment";
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 // Custom hook for debouncing
 const useDebounce = (value: string, delay: number) => {
@@ -104,13 +107,34 @@ export default function FilterSidebar() {
     const [openAccordionItem, setOpenAccordionItem] = useState("");
     const [categorySearchTerms, setCategorySearchTerms] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [unitPriceRange, setUnitPriceRange] = useState<[number, number]>([0, 1000000]);
+    const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000000]);
 
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
     const dashboardData = useSelector((state: RootState) => state.dashboard);
-    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
-    const filterValues = filterState.filters || {};
-    const filterMetadata = dashboardData?.filterMetadata || {};
+    const filterOptions = useMemo(() => (dashboardData?.filter ?? {}) as { [key: string]: unknown[] | { min: number; max: number } }, [dashboardData?.filter]);
+    const filterValues = useMemo(() => filterState.filters || {}, [filterState.filters]);
+    const filterMetadata = useMemo(() => dashboardData?.filterMetadata || {}, [dashboardData?.filterMetadata]);
+
+    // Update range sliders when filter data changes
+    useEffect(() => {
+        if (filterOptions["Unit Price"] && typeof filterOptions["Unit Price"] === 'object' && 'min' in filterOptions["Unit Price"] && 'max' in filterOptions["Unit Price"]) {
+            const unitPriceData = filterOptions["Unit Price"] as { min: number; max: number };
+            // Only update if the current range is still at default values
+            if (unitPriceRange[0] === 0 && unitPriceRange[1] === 1000000) {
+                setUnitPriceRange([unitPriceData.min, unitPriceData.max]);
+            }
+        }
+
+        if (filterOptions["Quantity"] && typeof filterOptions["Quantity"] === 'object' && 'min' in filterOptions["Quantity"] && 'max' in filterOptions["Quantity"]) {
+            const quantityData = filterOptions["Quantity"] as { min: number; max: number };
+            // Only update if the current range is still at default values
+            if (quantityRange[0] === 0 && quantityRange[1] === 1000000) {
+                setQuantityRange([quantityData.min, quantityData.max]);
+            }
+        }
+    }, [filterOptions, unitPriceRange, quantityRange]);
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
@@ -119,7 +143,18 @@ export default function FilterSidebar() {
     const [triggerSearchFilters] = useLazySearchFiltersQuery();
     const [triggerFilterMetadata] = useLazyGetFilterMetadataQuery();
 
-    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[]>) => {
+    const getRangeValues = useCallback(
+        (category: string) => {
+            const option = filterOptions[category];
+            if (option && typeof option === 'object' && 'min' in option && 'max' in option) {
+                return { min: option.min, max: option.max };
+            }
+            return { min: 0, max: 1000000 }; // Default values
+        },
+        [filterOptions]
+    );
+
+    const getRecordData = useCallback(async (filtersOverride?: Record<string, string[] | { min: number; max: number }>) => {
         setIsLoading(true);
         const filters = filtersOverride ?? filterValues;
 
@@ -155,11 +190,7 @@ export default function FilterSidebar() {
                 triggerAllTopMetrics(data).unwrap(),
                 triggerShipmentTable(shipmentParams).unwrap(),
                 triggerFilterValues(data).unwrap(),
-                triggerFilterMetadata({
-                    informationOf: filterState.selectedToggle,
-                    startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
-                    endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
-                }).unwrap()
+                triggerFilterMetadata(data).unwrap()
             ]);
             // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
@@ -221,10 +252,21 @@ export default function FilterSidebar() {
 
     const handleCheckboxChange = useCallback(
         (category: string, value: string, checked: boolean) => {
-            const currentValues = filterValues[category] || [];
+            // Skip checkbox changes for range-based filters
+            if (category === "Unit Price" || category === "Quantity") {
+                return;
+            }
+
+            const currentValues = filterValues[category];
+
+            // Ensure currentValues is an array
+            if (!Array.isArray(currentValues)) {
+                return;
+            }
+
             const updatedValues = checked
                 ? [...new Set([...currentValues, value])]
-                : currentValues.filter((val) => val !== value);
+                : currentValues.filter((val: string) => val !== value);
 
             dispatch(setFilterValues({ category, values: updatedValues }));
         },
@@ -234,9 +276,20 @@ export default function FilterSidebar() {
     const handleSelectAll = useCallback(
         async (category: string, checked: boolean) => {
             const options = filterOptions[category] || [];
+
+            // Skip select all for range-based filters (Unit Price, Quantity)
+            if (category === "Unit Price" || category === "Quantity") {
+                return;
+            }
+
+            // Ensure options is an array before calling map
+            if (!Array.isArray(options)) {
+                return;
+            }
+
             const filteredOptions = options
                 .map(String)
-                .filter((option) =>
+                .filter((option: string) =>
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
 
@@ -265,27 +318,42 @@ export default function FilterSidebar() {
 
     const handleClearSelection = useCallback(
         async (category: string) => {
-            dispatch(clearFilterCategory(category));
+            const toastId = toast.loading(`Clearing ${category} filter...`);
 
-            // Create updated filters object for API call
-            const updatedFilters = {
-                ...filterValues,
-                [category]: []
-            };
-
-            // Call API immediately with updated filters
             try {
+                dispatch(clearFilterCategory(category));
+
+                // Create updated filters object for API call
+                const updatedFilters = {
+                    ...filterValues,
+                    [category]: []
+                };
+
+                // For range filters, reset to default range
+                if (category === "Unit Price") {
+                    const rangeValues = getRangeValues(category);
+                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                } else if (category === "Quantity") {
+                    const rangeValues = getRangeValues(category);
+                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                }
+
+                // Call API immediately with updated filters
                 await getRecordData(updatedFilters);
+                toast.success(`${category} filter cleared successfully!`, { id: toastId });
             } catch (error) {
                 console.error("Clear selection API error:", error);
+                toast.error(`Failed to clear ${category} filter.`, { id: toastId });
             }
         },
-        [dispatch, filterValues, getRecordData]
+        [dispatch, filterValues, getRecordData, getRangeValues]
     );
 
     const handleClearAllFilters = useCallback(
         async () => {
             setIsLoading(true);
+            const toastId = toast.loading("Clearing all filters...");
+
             try {
                 // Clear all filter values
                 Object.keys(filterValues).forEach(category => {
@@ -295,10 +363,16 @@ export default function FilterSidebar() {
                 // Clear search terms
                 setCategorySearchTerms({});
 
+                // Reset range sliders to default values
+                setUnitPriceRange([0, 1000000]);
+                setQuantityRange([0, 1000000]);
+
                 // Call API with empty filters (initial payload)
                 await getRecordData({});
+                toast.success("All filters cleared successfully!", { id: toastId });
             } catch (error) {
                 console.error("Clear all filters error:", error);
+                toast.error("Failed to clear all filters.", { id: toastId });
             } finally {
                 setIsLoading(false);
             }
@@ -348,15 +422,26 @@ export default function FilterSidebar() {
     const handleApplyFilters = useCallback(
         async () => {
             setIsLoading(true);
+            const toastId = toast.loading("Applying filters...");
+
             try {
-                await getRecordData();
+                // Create updated filters with range slider values in correct format
+                const updatedFilters = {
+                    ...filterValues,
+                    "Unit Price": { min: unitPriceRange[0], max: unitPriceRange[1] },
+                    "Quantity": { min: quantityRange[0], max: quantityRange[1] }
+                };
+
+                await getRecordData(updatedFilters);
+                toast.success("Filters applied successfully!", { id: toastId });
             } catch (error) {
                 console.error("Apply filters error:", error);
+                toast.error("Failed to apply filters.", { id: toastId });
             } finally {
                 setIsLoading(false);
             }
         },
-        [getRecordData]
+        [getRecordData, filterValues, unitPriceRange, quantityRange]
     );
 
     const handleAccordionChange = useCallback(
@@ -365,7 +450,17 @@ export default function FilterSidebar() {
     );
 
     const getFilteredOptions = useCallback(
-        (category: string, options: any[] = []) => {
+        (category: string, options: unknown[] | { min: number; max: number } = []) => {
+            // Skip filtering for range-based filters
+            if (category === "Unit Price" || category === "Quantity") {
+                return [];
+            }
+
+            // Ensure options is an array before filtering
+            if (!Array.isArray(options)) {
+                return [];
+            }
+
             const searchTerm = categorySearchTerms[category] || "";
             return options
                 .map(String)
@@ -376,10 +471,10 @@ export default function FilterSidebar() {
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-xl shadow-lg border-none bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
-                <CardHeader className="px-4 py-4 border-b border-gray-200 flex-shrink-0">
+            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+                <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl font-bold">Filters</CardTitle>
+                        <CardTitle className="text-xl font-semibold text-gray-900">Filters</CardTitle>
                         <Button
                             onClick={handleClearAllFilters}
                             disabled={isLoading}
@@ -389,7 +484,6 @@ export default function FilterSidebar() {
                         >
                             {isLoading ? (
                                 <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin" />
                                     Clearing...
                                 </div>
                             ) : (
@@ -426,96 +520,173 @@ export default function FilterSidebar() {
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
-                                        <SearchInput
-                                            category={category}
-                                            value={searchTerm}
-                                            onChange={(value) => handleSearchChange(category, value)}
-                                            onDebouncedSearch={handleDebouncedSearch}
-                                        />
-
-                                        <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
-                                            <Label
-                                                htmlFor={`select-all-${category}`}
-                                                className="flex items-center gap-2 font-normal cursor-pointer text-sm"
-                                            >
-                                                <Checkbox
-                                                    id={`select-all-${category}`}
-                                                    checked={
-                                                        filteredOptions.length > 0 &&
-                                                        filteredOptions.every((option) =>
-                                                            filterValues[category]?.includes(option)
-                                                        )
-                                                    }
-                                                    onCheckedChange={(checked: boolean) =>
-                                                        handleSelectAll(category, checked)
-                                                    }
+                                        {category === "Unit Price" ? (
+                                            // Unit Price slider
+                                            <div className="space-y-3">
+                                                <RangeSlider
+                                                    value={unitPriceRange}
+                                                    onChange={setUnitPriceRange}
+                                                    min={getRangeValues(category).min}
+                                                    max={getRangeValues(category).max}
+                                                    step={100}
                                                     disabled={isLoading}
-                                                    className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                    formatValue={(val) => `$${val.toLocaleString()}`}
                                                 />
-                                                Select All
-                                            </Label>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleClearSelection(category);
-                                                }}
-                                                disabled={isLoading}
-                                                aria-label="Clear selection"
-                                            >
-                                                <Eraser className="h-4 w-4" />
-                                                <span className="sr-only">Clear selection</span>
-                                            </Button>
-                                        </div>
-
-                                        <ScrollArea className="max-h-64 overflow-auto">
-                                            <div className="p-3 space-y-2">
-                                                {filteredOptions.length > 0 ? (
-                                                    filteredOptions.map((option) => (
-                                                        <Label
-                                                            key={option}
-                                                            htmlFor={`${category}-${option}`}
-                                                            className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150"
-                                                        >
-                                                            <Checkbox
-                                                                id={`${category}-${option}`}
-                                                                checked={filterValues[category]?.includes(option) || false}
-                                                                onCheckedChange={(checked: boolean) =>
-                                                                    handleCheckboxChange(category, option, checked)
-                                                                }
-                                                                disabled={isLoading}
-                                                                className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                            />
-                                                            {option}
-                                                        </Label>
-                                                    ))
-                                                ) : (
-                                                    <p className="text-center text-muted-foreground py-4 text-sm">
-                                                        No options found.
-                                                    </p>
-                                                )}
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? 'Applying...' : 'Apply Filter'}
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </ScrollArea>
+                                        ) : category === "Quantity" ? (
+                                            // Quantity slider
+                                            <div className="space-y-3">
+                                                <RangeSlider
+                                                    value={quantityRange}
+                                                    onChange={setQuantityRange}
+                                                    min={getRangeValues(category).min}
+                                                    max={getRangeValues(category).max}
+                                                    step={1}
+                                                    disabled={isLoading}
+                                                    formatValue={(val) => val.toLocaleString()}
+                                                />
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? 'Applying...' : 'Apply Filter'}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : category === "H S Code" ? (
+                                            // Special hierarchical component for HS Code
+                                            <div className="space-y-3">
+                                                <HierarchicalHSCode
+                                                    hsCodes={Array.isArray(options) ? options.map(String) : []}
+                                                    selectedCodes={Array.isArray(filterValues[category]) ? filterValues[category] as string[] : []}
+                                                    onSelectionChange={(selectedCodes) => {
+                                                        dispatch(setFilterValues({ category, values: selectedCodes }));
+                                                    }}
+                                                    disabled={isLoading}
+                                                />
+                                                {/* Apply Filter Button for HS Code */}
+                                                <div className="pt-3 border-t border-gray-200">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? (
+                                                            <div className="flex items-center gap-2">
+                                                                Applying...
+                                                            </div>
+                                                        ) : (
+                                                            'Apply Filter'
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // Default filter component for other categories
+                                            <>
+                                                <SearchInput
+                                                    category={category}
+                                                    value={searchTerm}
+                                                    onChange={(value) => handleSearchChange(category, value)}
+                                                    onDebouncedSearch={handleDebouncedSearch}
+                                                />
 
-                                        {/* Apply Filter Button */}
-                                        <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
-                                            <Button
-                                                onClick={handleApplyFilters}
-                                                disabled={isLoading}
-                                                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {isLoading ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                        Applying...
+                                                <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 mb-2 cursor-pointer">
+                                                    <Label
+                                                        htmlFor={`select-all-${category}`}
+                                                        className="flex items-center gap-2 font-normal cursor-pointer text-sm"
+                                                    >
+                                                        <Checkbox
+                                                            id={`select-all-${category}`}
+                                                            checked={
+                                                                filteredOptions.length > 0 &&
+                                                                Array.isArray(filterValues[category]) &&
+                                                                filteredOptions.every((option) =>
+                                                                    (filterValues[category] as string[])?.includes(option)
+                                                                )
+                                                            }
+                                                            onCheckedChange={(checked: boolean) =>
+                                                                handleSelectAll(category, checked)
+                                                            }
+                                                            disabled={isLoading}
+                                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                        />
+                                                        Select All
+                                                    </Label>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleClearSelection(category);
+                                                        }}
+                                                        disabled={isLoading}
+                                                        aria-label="Clear selection"
+                                                    >
+                                                        <Eraser className="h-4 w-4" />
+                                                        <span className="sr-only">Clear selection</span>
+                                                    </Button>
+                                                </div>
+
+                                                <ScrollArea className="max-h-64 overflow-auto">
+                                                    <div className="p-3 space-y-2">
+                                                        {filteredOptions.length > 0 ? (
+                                                            filteredOptions.map((option) => (
+                                                                <Label
+                                                                    key={option}
+                                                                    htmlFor={`${category}-${option}`}
+                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
+                                                                >
+                                                                    <Checkbox
+                                                                        id={`${category}-${option}`}
+                                                                        checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
+                                                                        onCheckedChange={(checked: boolean) =>
+                                                                            handleCheckboxChange(category, option, checked)
+                                                                        }
+                                                                        disabled={isLoading}
+                                                                        className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                                    />
+                                                                    {option}
+                                                                </Label>
+                                                            ))
+                                                        ) : (
+                                                            <p className="text-center text-muted-foreground py-4 text-sm">
+                                                                No options found.
+                                                            </p>
+                                                        )}
                                                     </div>
-                                                ) : (
-                                                    'Apply Filter'
-                                                )}
-                                            </Button>
-                                        </div>
+                                                </ScrollArea>
+
+                                                {/* Apply Filter Button */}
+                                                <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
+                                                    <Button
+                                                        onClick={handleApplyFilters}
+                                                        disabled={isLoading}
+                                                        className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {isLoading ? (
+                                                            <div className="flex items-center gap-2">
+                                                                Applying...
+                                                            </div>
+                                                        ) : (
+                                                            'Apply Filter'
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        )}
                                     </AccordionContent>
                                 </AccordionItem>
                             );
@@ -528,6 +699,8 @@ export default function FilterSidebar() {
             openAccordionItem,
             categorySearchTerms,
             filterValues,
+            unitPriceRange,
+            quantityRange,
             handleAccordionChange,
             handleSearchChange,
             handleSelectAll,
@@ -537,6 +710,11 @@ export default function FilterSidebar() {
             getFilteredOptions,
             filterOptions,
             isLoading,
+            dispatch,
+            filterMetadata,
+            handleApplyFilters,
+            handleDebouncedSearch,
+            getRangeValues,
         ]
     );
 

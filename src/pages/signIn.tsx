@@ -21,24 +21,24 @@ export default function SignIn() {
             localStorage.setItem("sessionId", res.sessionId);
             console.log(res.user)
             dispatch(userExists(res.user));
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Login failed:", err);
         }
     };
 
     return (
-        <section className="">
+        <section className="bg-[#EEF2FF] min-h-screen">
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-                <div className="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
-                    <div className="p-6 space-y-4 md:space-y-6 sm:p-8  bg-white rounded-lg">
-                        <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
+                <div className="w-full rounded-lg shadow-lg md:mt-0 sm:max-w-md xl:p-0">
+                    <div className="p-6 space-y-4 md:space-y-6 sm:p-8 bg-white rounded-lg border border-[#C7D2FE]">
+                        <h1 className="text-xl font-bold leading-tight tracking-tight text-[#1E293B] md:text-2xl">
                             Sign in to your account
                         </h1>
                         <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block mb-2 text-sm font-medium text-gray-900"
+                                    className="block mb-2 text-sm font-medium text-[#1E293B]"
                                 >
                                     Your email
                                 </label>
@@ -47,7 +47,7 @@ export default function SignIn() {
                                     name="email"
                                     id="email"
                                     placeholder="name@company.com"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                                    className="bg-[#EEF2FF] border border-[#C7D2FE] text-[#1E293B] rounded-lg focus:ring-[#3B82F6] focus:border-[#3B82F6] block w-full p-2.5 transition-colors duration-200"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -56,7 +56,7 @@ export default function SignIn() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block mb-2 text-sm font-medium text-gray-900"
+                                    className="block mb-2 text-sm font-medium text-[#1E293B]"
                                 >
                                     Password
                                 </label>
@@ -65,7 +65,7 @@ export default function SignIn() {
                                     name="password"
                                     id="password"
                                     placeholder="••••••••"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                                    className="bg-[#EEF2FF] border border-[#C7D2FE] text-[#1E293B] rounded-lg focus:ring-[#3B82F6] focus:border-[#3B82F6] block w-full p-2.5 transition-colors duration-200"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -78,13 +78,13 @@ export default function SignIn() {
                                             id="remember"
                                             aria-describedby="remember"
                                             type="checkbox"
-                                            className="w-4 h-4 border border-gray-300 rounded outline-none focus-visible:text-primary-600 focus:outline-none"
+                                            className="w-4 h-4 border border-[#C7D2FE] rounded outline-none focus-visible:text-[#3B82F6] focus:outline-none accent-[#3B82F6]"
                                         />
                                     </div>
                                     <div className="ml-3 text-sm">
                                         <label
                                             htmlFor="remember"
-                                            className="text-gray-500"
+                                            className="text-[#1E293B]"
                                         >
                                             Remember me
                                         </label>
@@ -92,23 +92,23 @@ export default function SignIn() {
                                 </div>
                                 <a
                                     href="#"
-                                    className="text-sm font-medium text-primary-600 hover:underline"
+                                    className="text-sm font-medium text-[#3B82F6] hover:text-[#60A5FA] hover:underline transition-colors duration-200"
                                 >
                                     Forgot password?
                                 </a>
                             </div>
                             <button
                                 type="submit"
-                                className="btn w-full bg-[#1e3a8a] hover:bg-[#1e3a8a] rounded-lg py-3 text-white"
+                                className="btn w-full bg-[#3B82F6] hover:bg-[#60A5FA] rounded-lg py-3 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isLoading}
                             >
                                 {isLoading ? "Signing in..." : "Sign in"}
                             </button>
-                            <p className="text-sm font-light text-gray-500">
-                                Don’t have an account yet?{" "}
+                            <p className="text-sm font-light text-[#1E293B]">
+                                Don't have an account yet?{" "}
                                 <a
                                     href="#"
-                                    className="font-medium text-primary-600 hover:underline"
+                                    className="font-medium text-[#3B82F6] hover:text-[#60A5FA] hover:underline transition-colors duration-200"
                                 >
                                     Sign up
                                 </a>

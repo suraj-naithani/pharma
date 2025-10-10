@@ -3,91 +3,31 @@
 import TableData, { type ColumnDef } from "./TableData"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import CountriesList from "@/constants/country"
 
 type CountryData = {
     id: string
-    countryCode2: string
-    countryCode3: string
-    countryName: string
-    countryNameFull: string
-    continentCode2: string
-    continentName: string
-    dialCode: string
-    currencyName: string
-    capital: string
-}
-
-const generateCountryData = (count: number): CountryData[] => {
-    const countries = [
-        {
-            countryCode2: "AF",
-            countryCode3: "AFG",
-            countryName: "Afghanistan",
-            countryNameFull: "Islamic Republic of Afghanistan",
-            continentCode2: "AS",
-            continentName: "Asia",
-            dialCode: "93",
-            currencyName: "Afghani",
-            capital: "Kabul",
-        },
-        {
-            countryCode2: "AL",
-            countryCode3: "ALB",
-            countryName: "Albania",
-            countryNameFull: "Republic of Albania",
-            continentCode2: "EU",
-            continentName: "Europe",
-            dialCode: "355",
-            currencyName: "Lek",
-            capital: "Tirana",
-        },
-        {
-            countryCode2: "DZ",
-            countryCode3: "DZA",
-            countryName: "Algeria",
-            countryNameFull: "People's Democratic Republic of Algeria",
-            continentCode2: "AF",
-            continentName: "Africa",
-            dialCode: "213",
-            currencyName: "Algerian Dinar",
-            capital: "Algiers",
-        },
-        {
-            countryCode2: "AD",
-            countryCode3: "AND",
-            countryName: "Andorra",
-            countryNameFull: "Principality of Andorra",
-            continentCode2: "EU",
-            continentName: "Europe",
-            dialCode: "376",
-            currencyName: "Euro",
-            capital: "Andorra la Vella",
-        },
-        {
-            countryCode2: "AO",
-            countryCode3: "AGO",
-            countryName: "Angola",
-            countryNameFull: "Republic of Angola",
-            continentCode2: "AF",
-            continentName: "Africa",
-            dialCode: "244",
-            currencyName: "Kwanza",
-            capital: "Luanda",
-        },
-    ]
-
-    return Array.from({ length: Math.min(count, countries.length) }, (_, i) => ({
-        id: `CT${String(i + 1).padStart(4, "0")}`,
-        ...countries[i],
-    }))
+    Country_Code_2: string
+    Country_Code_3: string
+    Country_Name: string
+    Country_Name_Full: string
+    Continent_Code_2: string
+    Continent_Name: string
+    Dial_Code: number
+    Currency_Name: string
+    Capital: string
 }
 
 export default function CountryTable() {
-    const data = generateCountryData(5)
+    const data: CountryData[] = CountriesList.map((country, index) => ({
+        id: `CT${String(index + 1).padStart(4, "0")}`,
+        ...country,
+        Dial_Code: typeof country.Dial_Code === 'string' ? parseInt(country.Dial_Code) : country.Dial_Code,
+    }))
 
     const columns: ColumnDef<CountryData>[] = [
         {
-            id: "countryCode2",
+            id: "Country_Code_2",
             header: "Country Code 2",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-blue-100 text-blue-700 border-blue-200">
@@ -98,7 +38,7 @@ export default function CountryTable() {
             enableHiding: true,
         },
         {
-            id: "countryCode3",
+            id: "Country_Code_3",
             header: "Country Code 3",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
@@ -109,14 +49,14 @@ export default function CountryTable() {
             enableHiding: true,
         },
         {
-            id: "countryName",
+            id: "Country_Name",
             header: "Country Name",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "countryNameFull",
+            id: "Country_Name_Full",
             header: "Country Name Full",
             cell: ({ value, density }) => (
                 <div className={cn("text-slate-600 leading-relaxed", density === "comfortable" ? "whitespace-normal" : "")}>
@@ -127,7 +67,7 @@ export default function CountryTable() {
             enableHiding: true,
         },
         {
-            id: "continentCode2",
+            id: "Continent_Code_2",
             header: "Continent Code 2",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-green-100 text-green-700 border-green-200">
@@ -138,14 +78,14 @@ export default function CountryTable() {
             enableHiding: true,
         },
         {
-            id: "continentName",
+            id: "Continent_Name",
             header: "Continent Name",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "dialCode",
+            id: "Dial_Code",
             header: "Dial Code",
             cell: ({ value }) => (
                 <div className="font-mono text-slate-700 bg-slate-50 px-2 py-1 rounded text-sm">+{value}</div>
@@ -154,14 +94,14 @@ export default function CountryTable() {
             enableHiding: true,
         },
         {
-            id: "currencyName",
+            id: "Currency_Name",
             header: "Currency Name",
             cell: ({ value }) => <div className="text-slate-600">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "capital",
+            id: "Capital",
             header: "Capital",
             cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
             enableSorting: true,

@@ -19,6 +19,7 @@ type TradeData = {
     quantity: number
     quantityUnit: string
     portOfOrigin: string
+    portOfDeparture: string
     currency: string
     supplier: string
     buyer: string
@@ -38,6 +39,7 @@ export default function ShipmentDTable() {
     const [totalRecords, setTotalRecords] = useState(0)
     const [pageSize, setPageSize] = useState(10)
     const [isInitialLoad, setIsInitialLoad] = useState(true)
+    const [isPageChanging, setIsPageChanging] = useState(false)
 
     // Use redux data on initial load, pagination data afterwards
     const data = isInitialLoad ? shipmentState.data : paginationData
@@ -52,7 +54,13 @@ export default function ShipmentDTable() {
     }, [shipmentState, isInitialLoad])
 
     const handlePageChange = async (page: number, newPageSize?: number) => {
+        // Prevent multiple calls if already changing page
+        if (isPageChanging) {
+            return
+        }
+
         try {
+            setIsPageChanging(true)
             setIsInitialLoad(false)
 
             // Update page size if provided
@@ -82,10 +90,12 @@ export default function ShipmentDTable() {
             setTotalRecords(result.totalRecords || 0)
         } catch (error) {
             console.error('Pagination failed:', error)
+        } finally {
+            setIsPageChanging(false)
         }
     }
 
-    const handleDownload = async (downloadParams?: any) => {
+    const handleDownload = async (downloadParams?: unknown) => {
         try {
             // Use current filter state for download parameters
             const params = downloadParams || {
@@ -122,7 +132,7 @@ export default function ShipmentDTable() {
         {
             id: "shippingBillDate",
             header: "S.Bill_Date",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -130,7 +140,7 @@ export default function ShipmentDTable() {
             id: "H_S_Code",
             header: "HS Code",
             cell: ({ value }) => (
-                <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
+                <Badge variant="outline" className="font-mono text-xs bg-[#EEF2FF] text-[#1E293B] border-[#C7D2FE]">
                     {value}
                 </Badge>
             ),
@@ -140,7 +150,7 @@ export default function ShipmentDTable() {
         {
             id: "productName",
             header: "Product",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -165,42 +175,57 @@ export default function ShipmentDTable() {
         {
             id: "quantityUnit",
             header: "Quantity Unit",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ value }) => <div className="text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "portOfOrigin",
             header: "Indian Ports",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ row }) => {
+                const portValue = filterState.selectedToggle === "export"
+                    ? row.portOfOrigin
+                    : row.portOfDeparture;
+                return <div className="font-medium text-slate-800">{portValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "currency",
             header: "Currency",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "supplier",
             header: "Indian Company",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ row }) => {
+                const companyValue = filterState.selectedToggle === "export"
+                    ? row.supplier
+                    : row.buyer;
+                return <div className="text-slate-600">{companyValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "buyer",
             header: "Foreign Company",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ row }) => {
+                const companyValue = filterState.selectedToggle === "export"
+                    ? row.buyer
+                    : row.supplier;
+                return <div className="text-slate-600">{companyValue}</div>;
+            },
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "buyerCountry",
             header: "Foreign Country",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -218,7 +243,7 @@ export default function ShipmentDTable() {
             totalPages={totalPages}
             totalRecords={totalRecords}
             onPageChange={handlePageChange}
-            isLoading={isPaginationLoading}
+            isLoading={isPageChanging}
             pageSize={pageSize}
         />
     )

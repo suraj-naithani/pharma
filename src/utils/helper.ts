@@ -42,19 +42,22 @@ export const formatNumber = (value: number | undefined | null): string => {
     return numeral(value).format("0.[0]a").toUpperCase();
 };
 
-/**
- * Converts filter object to URL parameters format
- * From: { "Foreign Country": ["Afghanistan", "China"], "Indian Port": ["Nhava Sheva Sea"] }
- * To: { "filters[Foreign Country]": "Afghanistan,China", "filters[Indian Port]": "Nhava Sheva Sea" }
- */
-export const convertFiltersToUrlParams = (filters?: Record<string, string[]>): Record<string, string> => {
+export const convertFiltersToUrlParams = (filters?: Record<string, string[] | { min: number; max: number }>): Record<string, string> => {
     const urlParams: Record<string, string> = {};
 
     if (!filters) return urlParams;
 
     Object.keys(filters).forEach((key) => {
         const filterValues = filters[key];
-        if (filterValues && filterValues.length > 0) {
+
+        // Handle range filters (objects with min/max)
+        if (filterValues && typeof filterValues === 'object' && 'min' in filterValues && 'max' in filterValues) {
+            const rangeFilter = filterValues as { min: number; max: number };
+            urlParams[`filters[${key}][min]`] = rangeFilter.min.toString();
+            urlParams[`filters[${key}][max]`] = rangeFilter.max.toString();
+        }
+        // Handle regular array filters
+        else if (Array.isArray(filterValues) && filterValues.length > 0) {
             urlParams[`filters[${key}]`] = filterValues.join(',');
         }
     });
