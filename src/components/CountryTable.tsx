@@ -3,7 +3,7 @@
 import TableData, { type ColumnDef } from "./TableData"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import CountriesList from "@/constants/country"
+import { CountriesList } from "@/constants/country"
 
 type CountryData = {
     id: string

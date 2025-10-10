@@ -1,4 +1,4 @@
-const CountriesList = [
+export const CountriesList = [
     {
         Country_Code_2: "AF",
         Country_Code_3: "AFG",
@@ -2585,5 +2585,3 @@ const CountriesList = [
         Continent_Name: "Africa",
     },
 ];
-
-export default CountriesList;

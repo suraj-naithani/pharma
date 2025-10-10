@@ -2,6 +2,7 @@
 
 import TableData, { type ColumnDef } from "./TableData"
 import { Badge } from "@/components/ui/badge"
+import { indianPorts } from "@/constants/indianPort"
 import { cn } from "@/lib/utils"
 
 type PortData = {
@@ -10,76 +11,6 @@ type PortData = {
     portCode: string
     mode: string
     indianState: string
-}
-
-const generatePortData = (count: number): PortData[] => {
-    const ports = [
-        {
-            portName: "AACHIVS SEZ/NOIDA",
-            portCode: "INDEA6",
-            mode: "ICD",
-            indianState: "UTTAR PRADESH",
-        },
-        {
-            portName: "AAL-SEZ/Visakhapatnam",
-            portCode: "INNRP6",
-            mode: "ICD",
-            indianState: "Andhra Pradesh",
-        },
-        {
-            portName: "AA-SEZ AHMEDABAD",
-            portCode: "INAPI6",
-            mode: "ICD",
-            indianState: "Gujarat",
-        },
-        {
-            portName: "Achra",
-            portCode: "INACH1",
-            mode: "SEA",
-            indianState: "Maharashtra",
-        },
-        {
-            portName: "Adalaj",
-            portCode: "INADA6",
-            mode: "ICD",
-            indianState: "Gujarat",
-        },
-        {
-            portName: "AEPL SEZ/GURGAON",
-            portCode: "INGGE6",
-            mode: "ICD",
-            indianState: "HARYANA",
-        },
-        {
-            portName: "Agartala",
-            portCode: "INAGT8",
-            mode: "ROAD",
-            indianState: "Tripura",
-        },
-        {
-            portName: "Agatti Island",
-            portCode: "INAGI1",
-            mode: "SEA",
-            indianState: "Lakshadweep",
-        },
-        {
-            portName: "Agra",
-            portCode: "INAGR4",
-            mode: "AIR",
-            indianState: "Uttar Pradesh",
-        },
-        {
-            portName: "Agra",
-            portCode: "INBLJ6",
-            mode: "ICD",
-            indianState: "Uttar Pradesh",
-        },
-    ]
-
-    return Array.from({ length: Math.min(count, ports.length) }, (_, i) => ({
-        id: `PT${String(i + 1).padStart(4, "0")}`,
-        ...ports[i],
-    }))
 }
 
 const getModeColor = (mode: string) => {
@@ -98,7 +29,10 @@ const getModeColor = (mode: string) => {
 }
 
 export default function PortsTable() {
-    const data = generatePortData(10)
+    const data = indianPorts.map((port, index) => ({
+        id: `PT${String(index + 1).padStart(4, "0")}`,
+        ...port,
+    }))
 
     const columns: ColumnDef<PortData>[] = [
         {
