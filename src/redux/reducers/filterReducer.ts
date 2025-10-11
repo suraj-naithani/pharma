@@ -99,10 +99,13 @@ const filterSlice = createSlice({
             const { category, value } = action.payload;
             if (!state.filters) return;
             const currentValues = state.filters[category] || [];
-            if (currentValues.includes(value)) {
-                state.filters[category] = currentValues.filter((val) => val !== value);
-            } else {
-                state.filters[category] = [...currentValues, value];
+            // Type guard to ensure we're working with string arrays
+            if (Array.isArray(currentValues)) {
+                if (currentValues.includes(value)) {
+                    state.filters[category] = currentValues.filter((val: string) => val !== value);
+                } else {
+                    state.filters[category] = [...currentValues, value];
+                }
             }
         },
         clearFilterCategory(state, action: PayloadAction<string>) {

@@ -7,22 +7,22 @@ import { CountriesList } from "@/constants/country"
 
 type CountryData = {
     id: string
-    Country_Code_2: string
-    Country_Code_3: string
-    Country_Name: string
-    Country_Name_Full: string
-    Continent_Code_2: string
-    Continent_Name: string
+    Country_Code_2?: string
+    Country_Code_3?: string
+    Country_Name?: string
+    Country_Name_Full?: string
+    Continent_Code_2?: string
+    Continent_Name?: string
     Dial_Code: number
-    Currency_Name: string
-    Capital: string
+    Currency_Name?: string
+    Capital?: string
 }
 
 export default function CountryTable() {
     const data: CountryData[] = CountriesList.map((country, index) => ({
         id: `CT${String(index + 1).padStart(4, "0")}`,
         ...country,
-        Dial_Code: typeof country.Dial_Code === 'string' ? parseInt(country.Dial_Code) : country.Dial_Code,
+        Dial_Code: typeof country.Dial_Code === 'string' ? parseInt(country.Dial_Code) : (country.Dial_Code || 0),
     }))
 
     const columns: ColumnDef<CountryData>[] = [
@@ -31,7 +31,7 @@ export default function CountryTable() {
             header: "Country Code 2",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-blue-100 text-blue-700 border-blue-200">
-                    {value}
+                    {value || '-'}
                 </Badge>
             ),
             enableSorting: true,
@@ -42,7 +42,7 @@ export default function CountryTable() {
             header: "Country Code 3",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-slate-100 text-slate-700 border-slate-200">
-                    {value}
+                    {value || '-'}
                 </Badge>
             ),
             enableSorting: true,
@@ -51,7 +51,7 @@ export default function CountryTable() {
         {
             id: "Country_Name",
             header: "Country Name",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-slate-800">{value || '-'}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -60,7 +60,7 @@ export default function CountryTable() {
             header: "Country Name Full",
             cell: ({ value, density }) => (
                 <div className={cn("text-slate-600 leading-relaxed", density === "comfortable" ? "whitespace-normal" : "")}>
-                    {value}
+                    {value || '-'}
                 </div>
             ),
             enableSorting: true,
@@ -71,7 +71,7 @@ export default function CountryTable() {
             header: "Continent Code 2",
             cell: ({ value }) => (
                 <Badge variant="outline" className="font-mono text-xs bg-green-100 text-green-700 border-green-200">
-                    {value}
+                    {value || '-'}
                 </Badge>
             ),
             enableSorting: true,
@@ -80,7 +80,7 @@ export default function CountryTable() {
         {
             id: "Continent_Name",
             header: "Continent Name",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-slate-800">{value || '-'}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -96,14 +96,14 @@ export default function CountryTable() {
         {
             id: "Currency_Name",
             header: "Currency Name",
-            cell: ({ value }) => <div className="text-slate-600">{value}</div>,
+            cell: ({ value }) => <div className="text-slate-600">{value || '-'}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
             id: "Capital",
             header: "Capital",
-            cell: ({ value }) => <div className="font-medium text-slate-800">{value}</div>,
+            cell: ({ value }) => <div className="font-medium text-slate-800">{value || '-'}</div>,
             enableSorting: true,
             enableHiding: true,
         },

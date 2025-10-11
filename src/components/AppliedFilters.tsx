@@ -35,7 +35,7 @@ export default function AppliedFilters() {
 
     const filterState = useSelector((state: RootState) => state.filter);
     const dashboardData = useSelector((state: RootState) => state.dashboard);
-    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: any[] };
+    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: (string | number)[] };
     const dispatch = useDispatch();
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
@@ -76,9 +76,12 @@ export default function AppliedFilters() {
                                 onRemove: () => {
                                     // Use the same logic as FilterSidebar to ensure consistency
                                     const currentValues = filterState.filters?.[category] || [];
-                                    const updatedValues = currentValues.filter((val) => val !== value);
-                                    dispatch(setFilterValues({ category, values: updatedValues }));
-                                    handleFilterChange();
+                                    // Type guard to ensure it's an array
+                                    if (Array.isArray(currentValues)) {
+                                        const updatedValues = currentValues.filter((val: string) => val !== value);
+                                        dispatch(setFilterValues({ category, values: updatedValues }));
+                                        handleFilterChange();
+                                    }
                                 }
                             }))
                         });
@@ -175,7 +178,7 @@ export default function AppliedFilters() {
             );
 
             toast.success("Data updated successfully!", { id: toastId });
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             toast.error("Failed to update data.", { id: toastId });
         } finally {

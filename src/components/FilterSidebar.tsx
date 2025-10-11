@@ -109,6 +109,7 @@ export default function FilterSidebar() {
     const [isLoading, setIsLoading] = useState(false);
     const [unitPriceRange, setUnitPriceRange] = useState<[number, number]>([0, 1000000]);
     const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000000]);
+    const [visibleItemsCount, setVisibleItemsCount] = useState<Record<string, number>>({});
 
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
@@ -449,24 +450,40 @@ export default function FilterSidebar() {
         []
     );
 
+    const INITIAL_ITEMS = 100; // Initial items to show
+    const LOAD_MORE_COUNT = 50; // Items to load when clicking "Load More"
+
+    const handleLoadMore = useCallback((category: string) => {
+        setVisibleItemsCount(prev => ({
+            ...prev,
+            [category]: (prev[category] || INITIAL_ITEMS) + LOAD_MORE_COUNT
+        }));
+    }, []);
+
     const getFilteredOptions = useCallback(
         (category: string, options: unknown[] | { min: number; max: number } = []) => {
             // Skip filtering for range-based filters
             if (category === "Unit Price" || category === "Quantity") {
-                return [];
+                return { displayed: [], total: 0, hasMore: false };
             }
 
             // Ensure options is an array before filtering
             if (!Array.isArray(options)) {
-                return [];
+                return { displayed: [], total: 0, hasMore: false };
             }
 
             const searchTerm = categorySearchTerms[category] || "";
-            return options
+            const filtered = options
                 .map(String)
                 .filter((option) => option.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            const limit = visibleItemsCount[category] || INITIAL_ITEMS;
+            const displayed = filtered.slice(0, limit);
+            const hasMore = filtered.length > displayed.length;
+
+            return { displayed, total: filtered.length, hasMore };
         },
-        [categorySearchTerms]
+        [categorySearchTerms, visibleItemsCount]
     );
 
     const FilterPanelContent = useMemo(
@@ -502,7 +519,7 @@ export default function FilterSidebar() {
                     >
                         {defaultFilterKeys.map((category) => {
                             const options = filterOptions[category] || [];
-                            const filteredOptions = getFilteredOptions(category, options);
+                            const { displayed: filteredOptions, total: totalOptions, hasMore } = getFilteredOptions(category, options);
                             const searchTerm = categorySearchTerms[category] || "";
 
                             return (
@@ -643,24 +660,38 @@ export default function FilterSidebar() {
                                                 <ScrollArea className="max-h-64 overflow-auto">
                                                     <div className="p-3 space-y-2">
                                                         {filteredOptions.length > 0 ? (
-                                                            filteredOptions.map((option) => (
-                                                                <Label
-                                                                    key={option}
-                                                                    htmlFor={`${category}-${option}`}
-                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
-                                                                >
-                                                                    <Checkbox
-                                                                        id={`${category}-${option}`}
-                                                                        checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
-                                                                        onCheckedChange={(checked: boolean) =>
-                                                                            handleCheckboxChange(category, option, checked)
-                                                                        }
-                                                                        disabled={isLoading}
-                                                                        className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                                    />
-                                                                    {option}
-                                                                </Label>
-                                                            ))
+                                                            <>
+                                                                {filteredOptions.map((option) => (
+                                                                    <Label
+                                                                        key={option}
+                                                                        htmlFor={`${category}-${option}`}
+                                                                        className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
+                                                                    >
+                                                                        <Checkbox
+                                                                            id={`${category}-${option}`}
+                                                                            checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
+                                                                            onCheckedChange={(checked: boolean) =>
+                                                                                handleCheckboxChange(category, option, checked)
+                                                                            }
+                                                                            disabled={isLoading}
+                                                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                                        />
+                                                                        {option}
+                                                                    </Label>
+                                                                ))}
+                                                                {hasMore && (
+                                                                    <div className="pt-2 text-center">
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => handleLoadMore(category)}
+                                                                            className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                        >
+                                                                            Load More ({filteredOptions.length} of {totalOptions})
+                                                                        </Button>
+                                                                    </div>
+                                                                )}
+                                                            </>
                                                         ) : (
                                                             <p className="text-center text-muted-foreground py-4 text-sm">
                                                                 No options found.
@@ -715,6 +746,7 @@ export default function FilterSidebar() {
             handleApplyFilters,
             handleDebouncedSearch,
             getRangeValues,
+            handleLoadMore,
         ]
     );
 
