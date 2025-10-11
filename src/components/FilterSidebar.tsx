@@ -488,7 +488,7 @@ export default function FilterSidebar() {
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col w-full sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
                 <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4">
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-semibold text-gray-900">Filters</CardTitle>
@@ -751,8 +751,8 @@ export default function FilterSidebar() {
     );
 
     return (
-        <div className="flex text-foreground flex-1">
-            <aside className="hidden md:block w-full max-w-[20rem]">{FilterPanelContent}</aside>
+        <div className="flex text-foreground w-full max-w-[16rem]">
+            <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
             <div className="fixed bottom-4 right-4 z-50 md:hidden">
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>

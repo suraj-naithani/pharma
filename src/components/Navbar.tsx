@@ -34,8 +34,10 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
         <Button
             variant="ghost"
             className={clsx(
-                "hover:text-[#60A5FA] hover:bg-[#C7D2FE]/20 px-4 py-2 text-sm transition-colors duration-200",
-                isActive ? "text-white font-medium" : "text-white"
+                "hover:text-[#60A5FA] hover:bg-[#C7D2FE]/20 px-4 py-2 text-sm transition-colors duration-200 relative",
+                isActive
+                    ? "text-white font-medium bg-[#1E3A8A]/40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#60A5FA]"
+                    : "text-white"
             )}
             asChild
         >
@@ -51,6 +53,7 @@ const Navbar = () => {
 
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
+    const location = useLocation();
 
     const navigate = useNavigate();
     const { refetch } = useFetchUserProfileQuery();
@@ -97,15 +100,23 @@ const Navbar = () => {
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                             >
-                                {resourceLinks.map(link => (
-                                    <Link
-                                        key={link.label}
-                                        to={link.to}
-                                        className="block px-3 py-1.5 text-xs text-[#1E293B] hover:text-[#1E3A8A] hover:bg-[#C7D2FE]/30 transition-colors duration-200"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
+                                {resourceLinks.map(link => {
+                                    const isActive = location.pathname === link.to;
+                                    return (
+                                        <Link
+                                            key={link.label}
+                                            to={link.to}
+                                            className={clsx(
+                                                "block px-3 py-1.5 text-xs hover:text-[#1E3A8A] hover:bg-[#C7D2FE]/30 transition-colors duration-200",
+                                                isActive
+                                                    ? "text-[#1E3A8A] font-medium bg-[#C7D2FE]/50"
+                                                    : "text-[#1E293B]"
+                                            )}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -145,22 +156,46 @@ const Navbar = () => {
                         </SheetTrigger>
                         <SheetContent side="right" className="p-4 bg-[#EEF2FF] text-[#1E293B]">
                             <div className="flex flex-col items-start space-y-2 pt-6">
-                                {navLinks.map((link) => (
-                                    <Link key={link.label} to={link.to} className="text-[#1E293B] hover:text-[#1E3A8A] text-sm py-1 transition-colors duration-200">
-                                        {link.label}
-                                    </Link>
-                                ))}
+                                {navLinks.map((link) => {
+                                    const isActive = location.pathname === link.to;
+                                    return (
+                                        <Link
+                                            key={link.label}
+                                            to={link.to}
+                                            className={clsx(
+                                                "text-sm py-1 transition-colors duration-200 relative pl-3 border-l-2",
+                                                isActive
+                                                    ? "text-[#1E3A8A] font-medium border-[#60A5FA]"
+                                                    : "text-[#1E293B] hover:text-[#1E3A8A] border-transparent"
+                                            )}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    );
+                                })}
 
                                 <Collapsible className="w-full">
                                     <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium py-1 text-[#1E293B] hover:text-[#1E3A8A] transition-colors duration-200">
                                         Resources <ChevronDown className="ml-auto h-3 w-3" />
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="pt-2 pl-4">
-                                        {resourceLinks.map((link) => (
-                                            <Link key={link.label} to={link.to} className="block px-2 py-1 text-sm text-[#1E293B] hover:text-[#1E3A8A] transition-colors duration-200">
-                                                {link.label}
-                                            </Link>
-                                        ))}
+                                        {resourceLinks.map((link) => {
+                                            const isActive = location.pathname === link.to;
+                                            return (
+                                                <Link
+                                                    key={link.label}
+                                                    to={link.to}
+                                                    className={clsx(
+                                                        "block px-2 py-1 text-sm hover:text-[#1E3A8A] transition-colors duration-200",
+                                                        isActive
+                                                            ? "text-[#1E3A8A] font-medium"
+                                                            : "text-[#1E293B]"
+                                                    )}
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            );
+                                        })}
                                     </CollapsibleContent>
                                 </Collapsible>
 
