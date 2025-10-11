@@ -26,7 +26,7 @@ import {
     setTopYearsByValue,
     clearDashboardStats
 } from "@/redux/reducers/dashboardReducer"
-import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData } from "@/redux/reducers/filterReducer"
+import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData, clearAllFilters } from "@/redux/reducers/filterReducer"
 import { setShipmentTable, clearShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
@@ -80,6 +80,9 @@ export default function FilterSection() {
         e.preventDefault();
         setIsLoading(true);
 
+        // Clear all applied filters before making API call to get fresh data
+        dispatch(clearAllFilters());
+
         // Ensure we have proper default values even if Redux state isn't fully initialized
         const safeFilterState = {
             selectedToggle: filterState.selectedToggle || "import",
@@ -91,7 +94,20 @@ export default function FilterSection() {
             selectedChapters: filterState.selectedChapters || [],
             selectedSearchType: filterState.selectedSearchType || null,
             selectedSearchItems: filterState.selectedSearchItems || [],
-            filters: filterState.filters || {}
+            filters: {
+                "Indian Port": [],
+                "H S Code": [],
+                "Product Description": [],
+                "Quantity Units": [],
+                "Quantity": [],
+                "Unit Price": [],
+                "Currency": [],
+                "Product Name": [],
+                "Indian Company": [],
+                "Foreign Company": [],
+                "Foreign Country": [],
+                "CAS Number": [],
+            }
         };
 
         const data = {

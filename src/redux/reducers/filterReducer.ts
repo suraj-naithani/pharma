@@ -116,7 +116,20 @@ const filterSlice = createSlice({
             }
         },
         clearAllFilters(state) {
-            state.filters = {};
+            state.filters = {
+                "Indian Port": [],
+                "H S Code": [],
+                "Product Description": [],
+                "Quantity Units": [],
+                "Quantity": [],
+                "Unit Price": [],
+                "Currency": [],
+                "Product Name": [],
+                "Indian Company": [],
+                "Foreign Company": [],
+                "Foreign Country": [],
+                "CAS Number": [],
+            };
         },
         resetAllData(state) {
             // Reset to initial state
