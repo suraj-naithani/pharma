@@ -24,13 +24,15 @@ type TradeData = {
     supplier: string
     buyer: string
     buyerCountry: string
+    standardUnitRateUSD?: number
+    unitPrice?: number
 }
 
 export default function ShipmentDTable() {
     const shipmentState = useSelector((state: RootState) => state.shipmentTable)
     const filterState = useSelector((state: RootState) => state.filter)
     const [downloadDataAsCSV, { isLoading: isDownloading }] = useDownloadDataAsCSVMutation()
-    const [getShipmentTable, { isLoading: isPaginationLoading }] = useLazyGetShipmentTableQuery()
+    const [getShipmentTable] = useLazyGetShipmentTableQuery()
 
     // Local state for pagination data
     const [paginationData, setPaginationData] = useState<any[]>([])
@@ -130,8 +132,20 @@ export default function ShipmentDTable() {
 
     const columns: ColumnDef<TradeData>[] = [
         {
+            id: "portOfOrigin",
+            header: "Indian Port",
+            cell: ({ row }) => {
+                const portValue = filterState.selectedToggle === "export"
+                    ? row.portOfOrigin
+                    : row.portOfDeparture;
+                return <div className="font-medium text-slate-800">{portValue}</div>;
+            },
+            enableSorting: true,
+            enableHiding: true,
+        },
+        {
             id: "shippingBillDate",
-            header: "S.Bill_Date",
+            header: "Date of Shipment",
             cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
@@ -144,13 +158,6 @@ export default function ShipmentDTable() {
                     {value}
                 </Badge>
             ),
-            enableSorting: true,
-            enableHiding: true,
-        },
-        {
-            id: "productName",
-            header: "Product",
-            cell: ({ value }) => <div className="font-medium text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
@@ -174,19 +181,17 @@ export default function ShipmentDTable() {
         },
         {
             id: "quantityUnit",
-            header: "Quantity Unit",
+            header: "Quantity Units",
             cell: ({ value }) => <div className="text-[#1E293B]">{value}</div>,
             enableSorting: true,
             enableHiding: true,
         },
         {
-            id: "portOfOrigin",
-            header: "Indian Ports",
+            id: "unitPrice",
+            header: "Unit Price",
             cell: ({ row }) => {
-                const portValue = filterState.selectedToggle === "export"
-                    ? row.portOfOrigin
-                    : row.portOfDeparture;
-                return <div className="font-medium text-slate-800">{portValue}</div>;
+                const unitPrice = row.standardUnitRateUSD || row.unitPrice;
+                return <div className="font-medium text-slate-800">{unitPrice ? unitPrice.toFixed(2) : '-'}</div>;
             },
             enableSorting: true,
             enableHiding: true,
