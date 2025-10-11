@@ -43,13 +43,14 @@ export default function AppliedFilters() {
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
 
-    // Get only FilterSidebar applied filters (exclude FilterSection filters)
-    const getAppliedFilters = () => {
-        const filters: Array<{
-            type: string;
-            label: string;
-            value: string;
-            onRemove: () => void;
+    // Get grouped filters by category
+    const getGroupedFilters = () => {
+        const groupedFilters: Array<{
+            category: string;
+            values: Array<{
+                value: string;
+                onRemove: () => void;
+            }>;
         }> = [];
 
         // Only show additional filters from filterState.filters (FilterSidebar filters)
@@ -67,28 +68,30 @@ export default function AppliedFilters() {
                         availableOptionsStrings.includes(value)
                     );
 
-                    validValues.forEach((value) => {
-                        filters.push({
-                            type: 'filter',
-                            label: category,
-                            value: value,
-                            onRemove: () => {
-                                // Use the same logic as FilterSidebar to ensure consistency
-                                const currentValues = filterState.filters?.[category] || [];
-                                const updatedValues = currentValues.filter((val) => val !== value);
-                                dispatch(setFilterValues({ category, values: updatedValues }));
-                                handleFilterChange();
-                            }
+                    if (validValues.length > 0) {
+                        groupedFilters.push({
+                            category,
+                            values: validValues.map(value => ({
+                                value,
+                                onRemove: () => {
+                                    // Use the same logic as FilterSidebar to ensure consistency
+                                    const currentValues = filterState.filters?.[category] || [];
+                                    const updatedValues = currentValues.filter((val) => val !== value);
+                                    dispatch(setFilterValues({ category, values: updatedValues }));
+                                    handleFilterChange();
+                                }
+                            }))
                         });
-                    });
+                    }
                 }
             });
         }
 
-        return filters;
+        return groupedFilters;
     };
 
-    const appliedFilters = getAppliedFilters();
+    const groupedFilters = getGroupedFilters();
+    const totalFilters = groupedFilters.reduce((sum, group) => sum + group.values.length, 0);
 
     const handleFilterChange = async () => {
         setIsLoading(true);
@@ -180,7 +183,7 @@ export default function AppliedFilters() {
         }
     };
 
-    if (appliedFilters.length === 0) {
+    if (totalFilters === 0) {
         return null;
     }
 
@@ -193,7 +196,7 @@ export default function AppliedFilters() {
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 p-0 h-auto"
                 >
-                    Applied Filters ({appliedFilters.length})
+                    Applied Filters ({totalFilters})
                     {isExpanded ? (
                         <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -203,26 +206,32 @@ export default function AppliedFilters() {
             </div>
 
             {isExpanded && (
-                <div className="mt-3 bg-white rounded-lg p-3 border border-gray-200">
+                <div className="mt-2.5 bg-white rounded-lg p-2.5 border border-gray-200">
                     <div className="max-h-28 overflow-y-auto">
-                        <div className="flex flex-wrap gap-2">
-                            {appliedFilters.map((filter, index) => (
-                                <Badge
-                                    key={`${filter.type}-${index}`}
-                                    variant="secondary"
-                                    className="flex items-center gap-1.5 bg-gray-50 text-gray-700 border border-gray-200 px-2.5 py-1.5 text-xs shadow-sm hover:bg-gray-100 transition-all duration-200"
-                                >
-                                    <span className="font-medium text-gray-600">{filter.label}:</span>
-                                    <span className="truncate max-w-[100px] text-gray-800">{filter.value}</span>
-                                    <button
-                                        type="button"
-                                        onClick={filter.onRemove}
-                                        disabled={isLoading}
-                                        className="ml-1 rounded-full outline-none hover:bg-red-100 p-1 disabled:opacity-50 transition-colors group"
-                                    >
-                                        <X className="h-2.5 w-2.5 text-gray-400 group-hover:text-red-500" />
-                                    </button>
-                                </Badge>
+                        <div className="flex flex-wrap gap-3">
+                            {groupedFilters.map((group, groupIndex) => (
+                                <div key={groupIndex} className="inline-flex flex-wrap items-center gap-1.5">
+                                    <span className="text-[11px] font-medium text-gray-600">
+                                        {group.category}:
+                                    </span>
+                                    {group.values.map((item, valueIndex) => (
+                                        <Badge
+                                            key={valueIndex}
+                                            variant="secondary"
+                                            className="flex items-center gap-1 bg-gray-50 text-gray-700 border border-gray-200 px-2 py-1 text-[11px] shadow-sm hover:bg-gray-100 transition-all duration-200"
+                                        >
+                                            <span className="truncate max-w-[100px] text-gray-800">{item.value}</span>
+                                            <button
+                                                type="button"
+                                                onClick={item.onRemove}
+                                                disabled={isLoading}
+                                                className="ml-0.5 rounded-full outline-none hover:bg-red-100 p-0.5 disabled:opacity-50 transition-colors group"
+                                            >
+                                                <X className="h-2.5 w-2.5 text-gray-400 group-hover:text-red-500" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
                             ))}
                         </div>
                     </div>
