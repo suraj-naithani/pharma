@@ -34,8 +34,6 @@ export default function AppliedFilters() {
     const [isLoading, setIsLoading] = useState(false);
 
     const filterState = useSelector((state: RootState) => state.filter);
-    const dashboardData = useSelector((state: RootState) => state.dashboard);
-    const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: (string | number)[] };
     const dispatch = useDispatch();
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
@@ -57,15 +55,11 @@ export default function AppliedFilters() {
         if (filterState.filters) {
             Object.entries(filterState.filters).forEach(([category, values]) => {
                 if (Array.isArray(values) && values.length > 0) {
-                    // Get available options for this category from dashboard data
-                    const availableOptions = filterOptions[category] || [];
-                    const availableOptionsStrings = availableOptions.map(String);
-
-                    // Filter out empty or null values and only show values that are actually available
+                    // Filter out empty or null values
                     const validValues = values.filter(value =>
                         value &&
-                        value.trim() !== '' &&
-                        availableOptionsStrings.includes(value)
+                        typeof value === 'string' &&
+                        value.trim() !== ''
                     );
 
                     if (validValues.length > 0) {
