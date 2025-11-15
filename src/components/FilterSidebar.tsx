@@ -63,6 +63,16 @@ const useDebounce = (value: string, delay: number) => {
     return debouncedValue;
 };
 
+// Helper function to extract value from option (handles both objects and strings)
+const extractOptionValue = (option: unknown): string => {
+    // If option is an object with a 'value' property, extract it
+    if (typeof option === 'object' && option !== null && 'value' in option) {
+        return String((option as { value: unknown }).value);
+    }
+    // Otherwise, convert to string directly
+    return String(option);
+};
+
 type SearchInputProps = {
     category: string;
     value: string;
@@ -289,7 +299,7 @@ export default function FilterSidebar() {
             }
 
             const filteredOptions = options
-                .map(String)
+                .map(extractOptionValue)
                 .filter((option: string) =>
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
@@ -473,8 +483,9 @@ export default function FilterSidebar() {
             }
 
             const searchTerm = categorySearchTerms[category] || "";
+            // Extract value from objects or use string directly
             const filtered = options
-                .map(String)
+                .map(extractOptionValue)
                 .filter((option) => option.toLowerCase().includes(searchTerm.toLowerCase()));
 
             const limit = visibleItemsCount[category] || INITIAL_ITEMS;
@@ -585,7 +596,7 @@ export default function FilterSidebar() {
                                             // Special hierarchical component for HS Code
                                             <div className="space-y-3">
                                                 <HierarchicalHSCode
-                                                    hsCodes={Array.isArray(options) ? options.map(String) : []}
+                                                    hsCodes={Array.isArray(options) ? options.map(extractOptionValue) : []}
                                                     selectedCodes={Array.isArray(filterValues[category]) ? filterValues[category] as string[] : []}
                                                     onSelectionChange={(selectedCodes) => {
                                                         dispatch(setFilterValues({ category, values: selectedCodes }));
