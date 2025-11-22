@@ -63,14 +63,18 @@ const useDebounce = (value: string, delay: number) => {
     return debouncedValue;
 };
 
-// Helper function to extract value from option (handles both objects and strings)
 const extractOptionValue = (option: unknown): string => {
-    // If option is an object with a 'value' property, extract it
     if (typeof option === 'object' && option !== null && 'value' in option) {
         return String((option as { value: unknown }).value);
     }
-    // Otherwise, convert to string directly
     return String(option);
+};
+
+const extractOptionCount = (option: unknown): string | null => {
+    if (typeof option === 'object' && option !== null && 'count' in option) {
+        return String((option as { count: unknown }).count);
+    }
+    return null;
 };
 
 type SearchInputProps = {
@@ -120,6 +124,7 @@ export default function FilterSidebar() {
     const [unitPriceRange, setUnitPriceRange] = useState<[number, number]>([0, 1000000]);
     const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000000]);
     const [visibleItemsCount, setVisibleItemsCount] = useState<Record<string, number>>({});
+    const [hoveredOption, setHoveredOption] = useState<{ text: string; x: number; y: number } | null>(null);
 
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
@@ -474,25 +479,30 @@ export default function FilterSidebar() {
         (category: string, options: unknown[] | { min: number; max: number } = []) => {
             // Skip filtering for range-based filters
             if (category === "Unit Price" || category === "Quantity") {
-                return { displayed: [], total: 0, hasMore: false };
+                return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
             // Ensure options is an array before filtering
             if (!Array.isArray(options)) {
-                return { displayed: [], total: 0, hasMore: false };
+                return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
             const searchTerm = categorySearchTerms[category] || "";
-            // Extract value from objects or use string directly
-            const filtered = options
-                .map(extractOptionValue)
-                .filter((option) => option.toLowerCase().includes(searchTerm.toLowerCase()));
+            // Filter the original options first (preserving objects), then extract values
+            const filteredObjects = options.filter((option) => {
+                const value = extractOptionValue(option);
+                return value.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+
+            // Extract values from filtered objects for backward compatibility
+            const filtered = filteredObjects.map(extractOptionValue);
 
             const limit = visibleItemsCount[category] || INITIAL_ITEMS;
             const displayed = filtered.slice(0, limit);
+            const displayedObjects = filteredObjects.slice(0, limit);
             const hasMore = filtered.length > displayed.length;
 
-            return { displayed, total: filtered.length, hasMore };
+            return { displayed, total: filtered.length, hasMore, displayedObjects };
         },
         [categorySearchTerms, visibleItemsCount]
     );
@@ -530,7 +540,7 @@ export default function FilterSidebar() {
                     >
                         {defaultFilterKeys.map((category) => {
                             const options = filterOptions[category] || [];
-                            const { displayed: filteredOptions, total: totalOptions, hasMore } = getFilteredOptions(category, options);
+                            const { displayed: filteredOptions, total: totalOptions, hasMore, displayedObjects } = getFilteredOptions(category, options);
                             const searchTerm = categorySearchTerms[category] || "";
 
                             return (
@@ -672,24 +682,52 @@ export default function FilterSidebar() {
                                                     <div className="p-3 space-y-2">
                                                         {filteredOptions.length > 0 ? (
                                                             <>
-                                                                {filteredOptions.map((option) => (
-                                                                    <Label
-                                                                        key={option}
-                                                                        htmlFor={`${category}-${option}`}
-                                                                        className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
-                                                                    >
-                                                                        <Checkbox
-                                                                            id={`${category}-${option}`}
-                                                                            checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
-                                                                            onCheckedChange={(checked: boolean) =>
-                                                                                handleCheckboxChange(category, option, checked)
-                                                                            }
-                                                                            disabled={isLoading}
-                                                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                                        />
-                                                                        {option}
-                                                                    </Label>
-                                                                ))}
+                                                                {filteredOptions.map((option, index) => {
+                                                                    // Get the original option object from displayedObjects array
+                                                                    const originalOption = displayedObjects[index];
+                                                                    const count = originalOption ? extractOptionCount(originalOption) : null;
+
+                                                                    return (
+                                                                        <Label
+                                                                            key={option}
+                                                                            htmlFor={`${category}-${option}`}
+                                                                            className="flex items-center justify-between text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal gap-2"
+                                                                        >
+                                                                            <div className="flex items-center space-x-4 flex-1 min-w-0 overflow-hidden">
+                                                                                <Checkbox
+                                                                                    id={`${category}-${option}`}
+                                                                                    checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
+                                                                                    onCheckedChange={(checked: boolean) =>
+                                                                                        handleCheckboxChange(category, option, checked)
+                                                                                    }
+                                                                                    disabled={isLoading}
+                                                                                    className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300 flex-shrink-0"
+                                                                                />
+                                                                                <div className="relative">
+                                                                                    <span
+                                                                                        className="truncate block max-w-[120px] cursor-default"
+                                                                                        onMouseEnter={(e) => {
+                                                                                            const rect = e.currentTarget.getBoundingClientRect();
+                                                                                            setHoveredOption({
+                                                                                                text: option,
+                                                                                                x: rect.left + rect.width / 2,
+                                                                                                y: rect.top
+                                                                                            });
+                                                                                        }}
+                                                                                        onMouseLeave={() => setHoveredOption(null)}
+                                                                                    >
+                                                                                        {option}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            {count !== null && (
+                                                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
+                                                                                    {count}
+                                                                                </span>
+                                                                            )}
+                                                                        </Label>
+                                                                    );
+                                                                })}
                                                                 {hasMore && (
                                                                     <div className="pt-2 text-center">
                                                                         <Button
@@ -762,28 +800,49 @@ export default function FilterSidebar() {
     );
 
     return (
-        <div className="flex text-foreground w-full max-w-[16rem]">
-            <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
-            <div className="fixed bottom-4 right-4 z-50 md:hidden">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="default"
-                            size="icon"
-                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                            aria-label="Open filters"
+        <>
+            <div className="flex text-foreground w-full max-w-[16rem]">
+                <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
+                <div className="fixed bottom-4 right-4 z-50 md:hidden">
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                        <SheetTrigger asChild>
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                                aria-label="Open filters"
+                            >
+                                <Filter className="h-6 w-6" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent
+                            side="left"
+                            className="w-72 sm:w-80 border-none outline-none"
                         >
-                            <Filter className="h-6 w-6" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent
-                        side="left"
-                        className="w-72 sm:w-80 border-none outline-none"
-                    >
-                        {FilterPanelContent}
-                    </SheetContent>
-                </Sheet>
+                            {FilterPanelContent}
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
-        </div>
+            {/* Tooltip Portal */}
+            {hoveredOption && (
+                <div
+                    className="fixed z-[9999] pointer-events-none"
+                    style={{
+                        left: `${hoveredOption.x}px`,
+                        top: `${hoveredOption.y - 10}px`,
+                        transform: 'translate(-50%, -100%)'
+                    }}
+                >
+                    <div className="bg-white border border-gray-200 rounded-md shadow-sm px-3 py-2 whitespace-nowrap">
+                        <p className="text-xs font-medium text-gray-900">
+                            {hoveredOption.text}
+                        </p>
+                    </div>
+                    {/* Tooltip Arrow */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45"></div>
+                </div>
+            )}
+        </>
     );
 }
