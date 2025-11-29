@@ -73,11 +73,11 @@ export const transformSearchTypeForPayload = (searchType: string | null, informa
             return 'buyer';
         }
         if (searchType === 'Foreign Company (Exporter)') {
-            return 'seller';
+            return 'supplier';
         }
     } else if (informationOf === 'import') {
         if (searchType === 'Indian Company (Importer)') {
-            return 'seller';
+            return 'supplier';
         }
         if (searchType === 'Foreign Company (Exporter)') {
             return 'buyer';
