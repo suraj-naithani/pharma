@@ -459,9 +459,13 @@ export default function FilterSection() {
                                 variant="outline"
                                 className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm"
                             >
-                                {filterState.selectedSearchType
-                                    ? getSearchTypeLabel(filterState.selectedSearchType)
-                                    : "Search Type"}
+                                <span className="truncate max-w-[140px]">
+                                    {filterState.selectedSearchType
+                                        ? (getSearchTypeLabel(filterState.selectedSearchType).length > 60
+                                            ? getSearchTypeLabel(filterState.selectedSearchType).substring(0, 60) + "..."
+                                            : getSearchTypeLabel(filterState.selectedSearchType))
+                                        : "Search Type"}
+                                </span>
                                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>

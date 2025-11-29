@@ -123,8 +123,8 @@ const About = () => {
             </div>
 
             {/* Subtle background elements */}
-            <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#C7D2FE] rounded-full opacity-30 blur-xl"></div>
-            <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-[#60A5FA] rounded-full opacity-30 blur-xl"></div>
+            <div className="hidden sm:block absolute -top-8 -right-8 w-32 h-32 bg-[#C7D2FE] rounded-full opacity-30 blur-xl"></div>
+            <div className="hidden sm:block absolute -bottom-8 -left-8 w-40 h-40 bg-[#60A5FA] rounded-full opacity-30 blur-xl"></div>
           </div>
         </div>
       </div>
