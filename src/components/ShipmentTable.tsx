@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import type { RootState } from "@/redux/store"
 import { useSelector } from "react-redux"
 import { useDownloadDataAsCSVMutation, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi"
-import { convertFiltersToUrlParams } from "@/utils/helper"
+import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper"
 import moment from "moment"
 import { useState, useEffect } from "react"
 
@@ -75,7 +75,7 @@ export default function ShipmentDTable() {
             const params = {
                 startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
                 endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
-                searchType: filterState.selectedSearchType,
+                searchType: transformSearchTypeForPayload(filterState.selectedSearchType, filterState.selectedToggle),
                 searchValue: Array.isArray(filterState.selectedSearchItems)
                     ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
                     : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
@@ -103,7 +103,7 @@ export default function ShipmentDTable() {
             const params = downloadParams || {
                 startDate: moment(filterState.dateRange.from).format("YYYY-MM-DD"),
                 endDate: moment(filterState.dateRange.to).format("YYYY-MM-DD"),
-                searchType: filterState.selectedSearchType,
+                searchType: transformSearchTypeForPayload(filterState.selectedSearchType, filterState.selectedToggle),
                 searchValue: Array.isArray(filterState.selectedSearchItems)
                     ? filterState.selectedSearchItems.join(',')
                     : filterState.selectedSearchItems,

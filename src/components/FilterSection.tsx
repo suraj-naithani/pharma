@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
 import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi"
-import { convertFiltersToUrlParams } from "@/utils/helper"
+import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper"
 import {
     setFilterData,
     setFilterMetadata,
@@ -133,7 +133,7 @@ export default function FilterSection() {
                 safeFilterState.dateRange.to
             ).format("DD/MM/YYYY")}`,
             chapter: safeFilterState.selectedChapters,
-            searchType: safeFilterState.selectedSearchType,
+            searchType: transformSearchTypeForPayload(safeFilterState.selectedSearchType, safeFilterState.selectedToggle),
             searchValue: Array.isArray(safeFilterState.selectedSearchItems)
                 ? safeFilterState.selectedSearchItems.map(item => typeof item === 'string' ? item.replace(/'/g, "''") : String(item).replace(/'/g, "''")) // Escape single quotes
                 : (safeFilterState.selectedSearchItems as string).replace(/'/g, "''"),
@@ -274,7 +274,7 @@ export default function FilterSection() {
             triggerSuggestions({
                 informationOf: filterState.selectedToggle || "export",
                 chapter: filterState.selectedChapters?.[0] || "",
-                searchType: filterState.selectedSearchType,
+                searchType: transformSearchTypeForPayload(filterState.selectedSearchType, filterState.selectedToggle || "export"),
                 suggestion: currentInput,
                 session: localStorage.getItem("sessionId"),
             });

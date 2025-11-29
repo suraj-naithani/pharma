@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLazyGetFilterValuesQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery } from "@/redux/api/dashboardAPi";
-import { convertFiltersToUrlParams } from "@/utils/helper";
+import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper";
 import {
     setFilterData,
     setSummaryStats,
@@ -114,7 +114,7 @@ export default function AppliedFilters() {
                 safeFilterState.dateRange.to
             ).format("DD/MM/YYYY")}`,
             chapter: safeFilterState.selectedChapters,
-            searchType: safeFilterState.selectedSearchType,
+            searchType: transformSearchTypeForPayload(safeFilterState.selectedSearchType, safeFilterState.selectedToggle),
             searchValue: Array.isArray(safeFilterState.selectedSearchItems)
                 ? safeFilterState.selectedSearchItems.map(item => typeof item === 'string' ? item.replace(/'/g, "''") : String(item).replace(/'/g, "''"))
                 : (safeFilterState.selectedSearchItems as string).replace(/'/g, "''"),

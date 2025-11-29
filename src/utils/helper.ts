@@ -2,7 +2,7 @@ import numeral from 'numeral';
 
 type RawDataItem = {
     count: number;
-    [key: string]: any;
+    [key: string]: unknown;
     total: number;
     totalQuantity?: number;
     totalValue?: number;
@@ -31,7 +31,7 @@ export function transformDynamicData(
         }
     });
 
-    const labels = rawData.map((item) => item[dynamicKey] ?? 0);
+    const labels = rawData.map((item) => String(item[dynamicKey] ?? 0));
     const trendData = rawData.map((item) => item.count ?? 0);
 
     return { labels, data, trendData };
@@ -63,4 +63,26 @@ export const convertFiltersToUrlParams = (filters?: Record<string, string[] | { 
     });
 
     return urlParams;
+};
+
+export const transformSearchTypeForPayload = (searchType: string | null, informationOf: string): string | null => {
+    if (!searchType) return searchType;
+
+    if (informationOf === 'export') {
+        if (searchType === 'Indian Company (Importer)') {
+            return 'buyer';
+        }
+        if (searchType === 'Foreign Company (Exporter)') {
+            return 'seller';
+        }
+    } else if (informationOf === 'import') {
+        if (searchType === 'Indian Company (Importer)') {
+            return 'seller';
+        }
+        if (searchType === 'Foreign Company (Exporter)') {
+            return 'buyer';
+        }
+    }
+
+    return searchType;
 };
