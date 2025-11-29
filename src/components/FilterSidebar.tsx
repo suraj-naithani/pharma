@@ -205,6 +205,7 @@ export default function FilterSidebar() {
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
+            ...(filterState.selectedChapters && filterState.selectedChapters.length > 0 && { chapter: filterState.selectedChapters }),
             ...convertFiltersToUrlParams(filters),
         };
 

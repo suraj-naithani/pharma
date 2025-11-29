@@ -124,6 +124,7 @@ export default function AppliedFilters() {
 
         const shipmentParams = {
             startDate: moment(safeFilterState.dateRange.from).format("YYYY-MM-DD"),
+            ...(safeFilterState.selectedChapters && safeFilterState.selectedChapters.length > 0 && { chapter: safeFilterState.selectedChapters }),
             endDate: moment(safeFilterState.dateRange.to).format("YYYY-MM-DD"),
             searchType: data.searchType,
             searchValue: data.searchValue,

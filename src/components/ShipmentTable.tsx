@@ -82,6 +82,7 @@ export default function ShipmentDTable() {
                 informationOf: filterState.selectedToggle,
                 page: page,
                 limit: currentPageSize,
+                ...(filterState.selectedChapters && filterState.selectedChapters.length > 0 && { chapter: filterState.selectedChapters }),
                 ...convertFiltersToUrlParams(filterState.filters || {}),
             }
 
@@ -108,6 +109,7 @@ export default function ShipmentDTable() {
                     ? filterState.selectedSearchItems.join(',')
                     : filterState.selectedSearchItems,
                 informationOf: filterState.selectedToggle,
+                ...(filterState.selectedChapters && filterState.selectedChapters.length > 0 && { chapter: filterState.selectedChapters }),
                 // Add filters
                 ...convertFiltersToUrlParams(filterState.filters || {}),
             }

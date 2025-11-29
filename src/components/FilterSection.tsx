@@ -149,6 +149,7 @@ export default function FilterSection() {
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
+            ...(safeFilterState.selectedChapters && safeFilterState.selectedChapters.length > 0 && { chapter: safeFilterState.selectedChapters }),
             ...convertFiltersToUrlParams(safeFilterState.filters),
         };
 
