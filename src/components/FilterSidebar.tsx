@@ -811,28 +811,28 @@ export default function FilterSidebar() {
 
     return (
         <>
-            <div className="flex text-foreground w-full max-w-[16rem]">
-                <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
-                <div className="fixed bottom-4 right-4 z-50 md:hidden">
-                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                            <Button
-                                variant="default"
-                                size="icon"
-                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                                aria-label="Open filters"
-                            >
-                                <Filter className="h-6 w-6" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                            side="left"
-                            className="w-72 sm:w-80 border-none outline-none"
+            <div className="hidden lg:flex text-foreground w-full max-w-[16rem]">
+                <aside className="w-full">{FilterPanelContent}</aside>
+            </div>
+            <div className="fixed bottom-4 right-4 z-50 lg:hidden">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="default"
+                            size="icon"
+                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                            aria-label="Open filters"
                         >
-                            {FilterPanelContent}
-                        </SheetContent>
-                    </Sheet>
-                </div>
+                            <Filter className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent
+                        side="left"
+                        className="w-72 sm:w-80 border-none outline-none"
+                    >
+                        {FilterPanelContent}
+                    </SheetContent>
+                </Sheet>
             </div>
             {/* Tooltip Portal */}
             {hoveredOption && (
