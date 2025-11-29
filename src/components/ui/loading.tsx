@@ -14,7 +14,7 @@ const Loading: React.FC<LoadingProps> = ({ size = "md", className = "" }) => {
 
     return (
         <div className={`flex justify-center items-center min-h-screen ${className}`}>
-            <div className={`animate-spin rounded-full ${sizeClasses[size]} border-gray-300 border-t-black`}></div>
+            <div className={`animate-spin rounded-full ${sizeClasses[size]} border-[#C7D2FE] border-t-[#3B82F6]`}></div>
         </div>
     )
 }

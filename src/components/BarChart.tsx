@@ -86,8 +86,8 @@ export default function BarChart({
         return value.toString()
     }
 
-    const renderCustomizedLabel = (props: any) => {
-        const { x, y, width, height, value } = props
+    const renderCustomizedLabel = (props: { x?: number; y?: number; width?: number; height?: number; value?: number }) => {
+        const { x = 0, y = 0, width = 0, height = 0, value = 0 } = props
         const formattedValue = formatValue(value)
 
         if (height < 25) return <g />
@@ -113,6 +113,13 @@ export default function BarChart({
         setScrollIndex((prev) => Math.max(0, Math.min(prev + delta, maxScroll)))
     }
 
+    // Custom tick formatter to truncate very long labels
+    const formatTickLabel = (value: string | number) => {
+        const label = String(value)
+        const maxLength = 25 // Maximum characters before truncation
+        return label.length > maxLength ? label.substring(0, maxLength) + '...' : label
+    }
+
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex-1">
             <div className="px-4 pt-4 pb-2 mb-2 border-b border-gray-100">
@@ -129,9 +136,15 @@ export default function BarChart({
 
                         <XAxis
                             dataKey="name"
-                            tick={{ fill: "#64748b", fontSize: 11 }}
+                            angle={-30}
+                            textAnchor="end"
+                            interval={0}
+                            tick={{ fill: "#64748b", fontSize: 10 }}
+                            tickFormatter={formatTickLabel}
                             axisLine={{ stroke: "#cbd5e1" }}
                             tickLine={{ stroke: "#cbd5e1" }}
+                            height={60}
+                            dy={5}
                         />
 
                         <YAxis
@@ -190,7 +203,7 @@ export default function BarChart({
                             align="center"
                             height={50}
                             content={({ payload }) => (
-                                <div className="flex justify-center gap-6 mt-4">
+                                <div className="flex justify-center gap-6 mt-8">
                                     {payload?.map((entry, index) => (
                                         <div
                                             key={index}

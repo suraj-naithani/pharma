@@ -525,8 +525,8 @@ export default function FilterSection() {
                         <div className="absolute top-full left-0 z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
                             {isFetching ? (
                                 <div className="p-2 flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-black"></div>
-                                    <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#C7D2FE] border-t-[#3B82F6]"></div>
+                                    <span className="ml-2 text-sm text-[#1E293B]">Loading...</span>
                                 </div>
                             ) : suggestions?.data?.length > 0 ? (
                                 <>

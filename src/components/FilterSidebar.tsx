@@ -63,6 +63,20 @@ const useDebounce = (value: string, delay: number) => {
     return debouncedValue;
 };
 
+const extractOptionValue = (option: unknown): string => {
+    if (typeof option === 'object' && option !== null && 'value' in option) {
+        return String((option as { value: unknown }).value);
+    }
+    return String(option);
+};
+
+const extractOptionCount = (option: unknown): string | null => {
+    if (typeof option === 'object' && option !== null && 'count' in option) {
+        return String((option as { count: unknown }).count);
+    }
+    return null;
+};
+
 type SearchInputProps = {
     category: string;
     value: string;
@@ -109,6 +123,8 @@ export default function FilterSidebar() {
     const [isLoading, setIsLoading] = useState(false);
     const [unitPriceRange, setUnitPriceRange] = useState<[number, number]>([0, 1000000]);
     const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000000]);
+    const [visibleItemsCount, setVisibleItemsCount] = useState<Record<string, number>>({});
+    const [hoveredOption, setHoveredOption] = useState<{ text: string; x: number; y: number } | null>(null);
 
     const dispatch = useDispatch();
     const filterState = useSelector((state: RootState) => state.filter);
@@ -288,7 +304,7 @@ export default function FilterSidebar() {
             }
 
             const filteredOptions = options
-                .map(String)
+                .map(extractOptionValue)
                 .filter((option: string) =>
                     option.toLowerCase().includes((categorySearchTerms[category] || "").toLowerCase())
                 );
@@ -449,29 +465,51 @@ export default function FilterSidebar() {
         []
     );
 
+    const INITIAL_ITEMS = 100; // Initial items to show
+    const LOAD_MORE_COUNT = 50; // Items to load when clicking "Load More"
+
+    const handleLoadMore = useCallback((category: string) => {
+        setVisibleItemsCount(prev => ({
+            ...prev,
+            [category]: (prev[category] || INITIAL_ITEMS) + LOAD_MORE_COUNT
+        }));
+    }, []);
+
     const getFilteredOptions = useCallback(
         (category: string, options: unknown[] | { min: number; max: number } = []) => {
             // Skip filtering for range-based filters
             if (category === "Unit Price" || category === "Quantity") {
-                return [];
+                return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
             // Ensure options is an array before filtering
             if (!Array.isArray(options)) {
-                return [];
+                return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
             const searchTerm = categorySearchTerms[category] || "";
-            return options
-                .map(String)
-                .filter((option) => option.toLowerCase().includes(searchTerm.toLowerCase()));
+            // Filter the original options first (preserving objects), then extract values
+            const filteredObjects = options.filter((option) => {
+                const value = extractOptionValue(option);
+                return value.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+
+            // Extract values from filtered objects for backward compatibility
+            const filtered = filteredObjects.map(extractOptionValue);
+
+            const limit = visibleItemsCount[category] || INITIAL_ITEMS;
+            const displayed = filtered.slice(0, limit);
+            const displayedObjects = filteredObjects.slice(0, limit);
+            const hasMore = filtered.length > displayed.length;
+
+            return { displayed, total: filtered.length, hasMore, displayedObjects };
         },
-        [categorySearchTerms]
+        [categorySearchTerms, visibleItemsCount]
     );
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col min-w-[15rem] sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col w-full sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
                 <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4">
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl font-semibold text-gray-900">Filters</CardTitle>
@@ -502,7 +540,7 @@ export default function FilterSidebar() {
                     >
                         {defaultFilterKeys.map((category) => {
                             const options = filterOptions[category] || [];
-                            const filteredOptions = getFilteredOptions(category, options);
+                            const { displayed: filteredOptions, total: totalOptions, hasMore, displayedObjects } = getFilteredOptions(category, options);
                             const searchTerm = categorySearchTerms[category] || "";
 
                             return (
@@ -568,7 +606,7 @@ export default function FilterSidebar() {
                                             // Special hierarchical component for HS Code
                                             <div className="space-y-3">
                                                 <HierarchicalHSCode
-                                                    hsCodes={Array.isArray(options) ? options.map(String) : []}
+                                                    hsCodes={Array.isArray(options) ? options.map(extractOptionValue) : []}
                                                     selectedCodes={Array.isArray(filterValues[category]) ? filterValues[category] as string[] : []}
                                                     onSelectionChange={(selectedCodes) => {
                                                         dispatch(setFilterValues({ category, values: selectedCodes }));
@@ -643,24 +681,66 @@ export default function FilterSidebar() {
                                                 <ScrollArea className="max-h-64 overflow-auto">
                                                     <div className="p-3 space-y-2">
                                                         {filteredOptions.length > 0 ? (
-                                                            filteredOptions.map((option) => (
-                                                                <Label
-                                                                    key={option}
-                                                                    htmlFor={`${category}-${option}`}
-                                                                    className="flex items-center space-x-4 text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal"
-                                                                >
-                                                                    <Checkbox
-                                                                        id={`${category}-${option}`}
-                                                                        checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
-                                                                        onCheckedChange={(checked: boolean) =>
-                                                                            handleCheckboxChange(category, option, checked)
-                                                                        }
-                                                                        disabled={isLoading}
-                                                                        className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                                    />
-                                                                    {option}
-                                                                </Label>
-                                                            ))
+                                                            <>
+                                                                {filteredOptions.map((option, index) => {
+                                                                    // Get the original option object from displayedObjects array
+                                                                    const originalOption = displayedObjects[index];
+                                                                    const count = originalOption ? extractOptionCount(originalOption) : null;
+
+                                                                    return (
+                                                                        <Label
+                                                                            key={option}
+                                                                            htmlFor={`${category}-${option}`}
+                                                                            className="flex items-center justify-between text-sm text-gray-600 cursor-pointer py-1 px-2 rounded-md hover:bg-accent/50 transition-colors duration-150 font-normal gap-2"
+                                                                        >
+                                                                            <div className="flex items-center space-x-4 flex-1 min-w-0 overflow-hidden">
+                                                                                <Checkbox
+                                                                                    id={`${category}-${option}`}
+                                                                                    checked={Array.isArray(filterValues[category]) && (filterValues[category] as string[])?.includes(option) || false}
+                                                                                    onCheckedChange={(checked: boolean) =>
+                                                                                        handleCheckboxChange(category, option, checked)
+                                                                                    }
+                                                                                    disabled={isLoading}
+                                                                                    className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300 flex-shrink-0"
+                                                                                />
+                                                                                <div className="relative">
+                                                                                    <span
+                                                                                        className="truncate block max-w-[120px] cursor-default"
+                                                                                        onMouseEnter={(e) => {
+                                                                                            const rect = e.currentTarget.getBoundingClientRect();
+                                                                                            setHoveredOption({
+                                                                                                text: option,
+                                                                                                x: rect.left + rect.width / 2,
+                                                                                                y: rect.top
+                                                                                            });
+                                                                                        }}
+                                                                                        onMouseLeave={() => setHoveredOption(null)}
+                                                                                    >
+                                                                                        {option}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            {count !== null && (
+                                                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
+                                                                                    {count}
+                                                                                </span>
+                                                                            )}
+                                                                        </Label>
+                                                                    );
+                                                                })}
+                                                                {hasMore && (
+                                                                    <div className="pt-2 text-center">
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => handleLoadMore(category)}
+                                                                            className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                        >
+                                                                            Load More ({filteredOptions.length} of {totalOptions})
+                                                                        </Button>
+                                                                    </div>
+                                                                )}
+                                                            </>
                                                         ) : (
                                                             <p className="text-center text-muted-foreground py-4 text-sm">
                                                                 No options found.
@@ -715,32 +795,54 @@ export default function FilterSidebar() {
             handleApplyFilters,
             handleDebouncedSearch,
             getRangeValues,
+            handleLoadMore,
         ]
     );
 
     return (
-        <div className="flex text-foreground flex-1">
-            <aside className="hidden md:block w-full max-w-[20rem]">{FilterPanelContent}</aside>
-            <div className="fixed bottom-4 right-4 z-50 md:hidden">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="default"
-                            size="icon"
-                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                            aria-label="Open filters"
+        <>
+            <div className="flex text-foreground w-full max-w-[16rem]">
+                <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
+                <div className="fixed bottom-4 right-4 z-50 md:hidden">
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                        <SheetTrigger asChild>
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                                aria-label="Open filters"
+                            >
+                                <Filter className="h-6 w-6" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent
+                            side="left"
+                            className="w-72 sm:w-80 border-none outline-none"
                         >
-                            <Filter className="h-6 w-6" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent
-                        side="left"
-                        className="w-72 sm:w-80 border-none outline-none"
-                    >
-                        {FilterPanelContent}
-                    </SheetContent>
-                </Sheet>
+                            {FilterPanelContent}
+                        </SheetContent>
+                    </Sheet>
+                </div>
             </div>
-        </div>
+            {/* Tooltip Portal */}
+            {hoveredOption && (
+                <div
+                    className="fixed z-[9999] pointer-events-none"
+                    style={{
+                        left: `${hoveredOption.x}px`,
+                        top: `${hoveredOption.y - 10}px`,
+                        transform: 'translate(-50%, -100%)'
+                    }}
+                >
+                    <div className="bg-white border border-gray-200 rounded-md shadow-sm px-3 py-2 whitespace-nowrap">
+                        <p className="text-xs font-medium text-gray-900">
+                            {hoveredOption.text}
+                        </p>
+                    </div>
+                    {/* Tooltip Arrow */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45"></div>
+                </div>
+            )}
+        </>
     );
 }
