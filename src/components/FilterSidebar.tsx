@@ -15,7 +15,7 @@ import HierarchicalHSCode from "@/components/HierarchicalHSCode";
 import RangeSlider from "@/components/RangeSlider";
 import { defaultFilterKeys } from "@/constants/config";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
-import { convertFiltersToUrlParams } from "@/utils/helper";
+import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper";
 import {
     setFilterData,
     setFilterMetadata,
@@ -189,7 +189,7 @@ export default function FilterSidebar() {
                 filterState.dateRange.to
             ).format("DD/MM/YYYY")}`,
             chapter: filterState.selectedChapters,
-            searchType: filterState.selectedSearchType,
+            searchType: transformSearchTypeForPayload(filterState.selectedSearchType, filterState.selectedToggle),
             searchValue: Array.isArray(filterState.selectedSearchItems)
                 ? filterState.selectedSearchItems.map(item => item.replace(/'/g, "''")) // Escape single quotes
                 : (filterState.selectedSearchItems as string).replace(/'/g, "''"),
@@ -205,6 +205,7 @@ export default function FilterSidebar() {
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
+            ...(filterState.selectedChapters && filterState.selectedChapters.length > 0 && { chapter: filterState.selectedChapters }),
             ...convertFiltersToUrlParams(filters),
         };
 
