@@ -133,14 +133,14 @@ const Dashboard = () => {
 
             <AppliedFilters />
 
-            <section className="w-full flex flex-col gap-5 md:flex-row p-6">
+            <section className="w-full flex flex-col gap-3 md:flex-row p-6 pt-0">
                 <FilterSidebar />
 
                 <div className="flex-6 w-full flex flex-col gap-5 overflow-hidden">
                     {
                         (yearsByQuantity || buyersByQuantity || supplierByQuantity || indianPortByQuantity || countryByQuantity || hsCodeByQuantity || yearsByValue || buyersByValue || supplierByValue || indianPortByValue || countryByValue || hsCodeByValue) &&
-                        <div className="flex flex-col gap-5">
-                            <div className="flex gap-5 flex-col md:flex-row">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {yearsByQuantity && yearsByQuantity.labels && yearsByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top Years By Quantity"
@@ -168,7 +168,7 @@ const Dashboard = () => {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-5 flex-col md:flex-row">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {buyersByQuantity && buyersByQuantity.labels && buyersByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top Buyer By Quantity"
@@ -196,7 +196,7 @@ const Dashboard = () => {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-5 flex-col md:flex-row">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {supplierByQuantity && supplierByQuantity.labels && supplierByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top Supplier By Quantity"
@@ -224,7 +224,7 @@ const Dashboard = () => {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-5 flex-col md:flex-row">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {indianPortByQuantity && indianPortByQuantity.labels && indianPortByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top Indian Port By Quantity"
@@ -252,7 +252,7 @@ const Dashboard = () => {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-5 flex-col md:flex-row">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {countryByQuantity && countryByQuantity.labels && countryByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top Country By Quantity"
@@ -280,7 +280,7 @@ const Dashboard = () => {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-5 flex-col md:flex-row">
+                            <div className="flex gap-3 flex-col md:flex-row">
                                 {hsCodeByQuantity && hsCodeByQuantity.labels && hsCodeByQuantity.labels.length > 0 && (
                                     <BarChart
                                         title="Top HS Code By Quantity"
