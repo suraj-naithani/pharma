@@ -133,6 +133,14 @@ export default function FilterSidebar() {
     const filterValues = useMemo(() => filterState.filters || {}, [filterState.filters]);
     const filterMetadata = useMemo(() => dashboardData?.filterMetadata || {}, [dashboardData?.filterMetadata]);
 
+    // Filter categories based on selectedDataType: hide CAS Number when Raw is selected
+    const visibleFilterKeys = useMemo(() => {
+        if (filterState.selectedDataType === "Raw") {
+            return defaultFilterKeys.filter(key => key !== "CAS Number");
+        }
+        return defaultFilterKeys;
+    }, [filterState.selectedDataType]);
+
     // Update range sliders when filter data changes
     useEffect(() => {
         if (filterOptions["Unit Price"] && typeof filterOptions["Unit Price"] === 'object' && 'min' in filterOptions["Unit Price"] && 'max' in filterOptions["Unit Price"]) {
@@ -538,7 +546,7 @@ export default function FilterSidebar() {
                         value={openAccordionItem}
                         onValueChange={handleAccordionChange}
                     >
-                        {defaultFilterKeys.map((category) => {
+                        {visibleFilterKeys.map((category) => {
                             const options = filterOptions[category] || [];
                             const { displayed: filteredOptions, total: totalOptions, hasMore, displayedObjects } = getFilteredOptions(category, options);
                             const searchTerm = categorySearchTerms[category] || "";
@@ -796,6 +804,7 @@ export default function FilterSidebar() {
             handleDebouncedSearch,
             getRangeValues,
             handleLoadMore,
+            visibleFilterKeys,
         ]
     );
 
