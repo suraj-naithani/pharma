@@ -63,6 +63,22 @@ export default function FilterSection() {
         dispatch(setSelectedChapters(updatedChapters));
     };
 
+    const getSearchTypeLabel = (type: string) => {
+        if (type.includes("Indian Company")) {
+            return filterState.selectedToggle === "export"
+                ? "Indian Company (Exporter)"
+                : "Indian Company (Importer)";
+        }
+
+        if (type.includes("Foreign Company")) {
+            return filterState.selectedToggle === "export"
+                ? "Foreign Company (Importer)"
+                : "Foreign Company (Exporter)";
+        }
+
+        return type;
+    };
+
     const getSearchTypeDisabledState = (type: string) => {
         if (!filterState.selectedDataType) {
             return true;
@@ -435,8 +451,14 @@ export default function FilterSection() {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm">
-                            {filterState.selectedSearchType || "Search Type"} <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <Button
+                            variant="outline"
+                            className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm"
+                        >
+                            {filterState.selectedSearchType
+                                ? getSearchTypeLabel(filterState.selectedSearchType)
+                                : "Search Type"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[180px] bg-white border border-gray-200">
@@ -447,7 +469,7 @@ export default function FilterSection() {
                                 disabled={getSearchTypeDisabledState(type)}
                                 className={getSearchTypeDisabledState(type) ? "text-gray-400 cursor-not-allowed" : ""}
                             >
-                                {type}
+                                {getSearchTypeLabel(type)}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
