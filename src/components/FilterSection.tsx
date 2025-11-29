@@ -286,318 +286,324 @@ export default function FilterSection() {
 
     return (
         <div className="p-3 w-full">
-            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4">
-                <ToggleGroup
-                    type="single"
-                    value={filterState.selectedToggle}
-                    onValueChange={(value) => {
-                        if (value) dispatch(setSelectedToggle(value as "import" | "export"));
-                    }}
-                    className="rounded-lg border border-[#C7D2FE] overflow-hidden"
-                >
-                    <ToggleGroupItem
-                        value="import"
-                        aria-label="Toggle import"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap md:contents">
+                    <ToggleGroup
+                        type="single"
+                        value={filterState.selectedToggle}
+                        onValueChange={(value) => {
+                            if (value) dispatch(setSelectedToggle(value as "import" | "export"));
+                        }}
+                        className="rounded-lg border border-[#C7D2FE] overflow-hidden"
                     >
-                        Import
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="export"
-                        aria-label="Toggle export"
-                        className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
-                    >
-                        Export
-                    </ToggleGroupItem>
-                </ToggleGroup>
+                        <ToggleGroupItem
+                            value="import"
+                            aria-label="Toggle import"
+                            className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
+                        >
+                            Import
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                            value="export"
+                            aria-label="Toggle export"
+                            className="px-4 py-2 text-sm data-[state=on]:bg-[#3B82F6] data-[state=on]:text-white data-[state=off]:bg-white data-[state=off]:text-[#1E293B] h-auto transition-colors duration-200"
+                        >
+                            Export
+                        </ToggleGroupItem>
+                    </ToggleGroup>
 
-                <div className="flex flex-row gap-1">
-                    {/* Start Date Picker */}
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.from ? "text-gray-500" : ""
-                                    }`}
-                            >
-                                <CalendarDays className="mr-2 h-4 w-3" />
-                                {filterState.dateRange.from ? (
-                                    moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
-                                ) : (
-                                    <span>Start date</span>
-                                )}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
-                            <Calendar
-                                mode="single"
-                                selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
-                                onSelect={(date) =>
-                                    dispatch(setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD")))
-                                }
-                                initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    <div className="flex flex-row gap-1 flex-wrap sm:flex-nowrap">
+                        {/* Start Date Picker */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.from ? "text-gray-500" : ""
+                                        }`}
+                                >
+                                    <CalendarDays className="mr-2 h-4 w-3" />
+                                    {filterState.dateRange.from ? (
+                                        moment(new Date(filterState.dateRange.from)).format("D MMM YYYY")
+                                    ) : (
+                                        <span>Start date</span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
+                                    onSelect={(date) =>
+                                        dispatch(setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD")))
+                                    }
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
 
-                    {/* End Date Picker */}
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.to ? "text-gray-500" : ""
-                                    }`}
-                            >
-                                <CalendarDays className="mr-2 h-4 w-4" />
-                                {filterState.dateRange.to ? (
-                                    moment(new Date(filterState.dateRange.to)).format("D MMM YYYY")
-                                ) : (
-                                    <span>End date</span>
-                                )}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
-                            <Calendar
-                                mode="single"
-                                selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
-                                onSelect={(date) =>
-                                    dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
-                                }
-                                initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
+                        {/* End Date Picker */}
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={`max-w-max gap-0 justify-start text-left bg-white border-gray-200 font-normal hover:bg-[#f4f4f5] text-sm ${!filterState.dateRange.to ? "text-gray-500" : ""
+                                        }`}
+                                >
+                                    <CalendarDays className="mr-2 h-4 w-4" />
+                                    {filterState.dateRange.to ? (
+                                        moment(new Date(filterState.dateRange.to)).format("D MMM YYYY")
+                                    ) : (
+                                        <span>End date</span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 bg-white border border-gray-200" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
+                                    onSelect={(date) =>
+                                        dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
+                                    }
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-[130px] justify-between border outline-none border-gray-200 bg-white rounded-lg text-sm">
-                            {filterState.selectedDataType || "Data Type"} <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[130px] border border-gray-200 bg-white">
-                        <DropdownMenuItem onClick={() => dispatch(setSelectedDataType("Raw"))} className="hover:bg-[#f4f4f5]">
-                            Raw
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => dispatch(setSelectedDataType("Cleaned"))} className="hover:bg-[#f4f4f5]">
-                            Cleaned
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-[140px] relative rounded-lg h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm"
-                        >
-                            <div className="flex flex-nowrap gap-1 items-center overflow-hidden flex-grow pr-6">
-                                {filterState.selectedChapters.length > 0 ? (
-                                    filterState.selectedChapters.map((chapter) => (
-                                        <Badge
-                                            key={chapter}
-                                            variant="secondary"
-                                            className="flex items-center gap-1 bg-gray-200 text-gray-800 rounded-lg px-2 py-0.5 text-xs font-normal shrink-0"
-                                        >
-                                            {chapter}
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleRemoveChapter(chapter);
-                                                }}
-                                                className="ml-1 rounded-lg outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                            >
-                                                <X className="h-3 w-3 text-gray-600 hover:text-gray-900" />
-                                            </button>
-                                        </Badge>
-                                    ))
-                                ) : (
-                                    <span className="text-gray-700 whitespace-nowrap">Chapter</span>
-                                )}
-                            </div>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
-                        {chapterOptions.map((chapter) => {
-                            const isSelected = filterState.selectedChapters.includes(chapter);
-
-                            return (
-                                <DropdownMenuItem
-                                    key={chapter}
-                                    onSelect={(e) => e.preventDefault()}
-                                    className="hover:bg-[#f4f4f5] cursor-pointer"
-                                    onClick={() => dispatch(toggleChapter(chapter))}
-                                >
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`chapter-${chapter}`}
-                                            checked={isSelected}
-                                            onCheckedChange={() => { }}
-                                            className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white"
-                                        />
-                                        <label
-                                            htmlFor={`chapter-${chapter}`}
-                                            className="text-sm font-medium leading-none"
-                                        >
-                                            {chapter}
-                                        </label>
-                                    </div>
-                                </DropdownMenuItem>
-                            );
-                        })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm"
-                        >
-                            {filterState.selectedSearchType
-                                ? getSearchTypeLabel(filterState.selectedSearchType)
-                                : "Search Type"}
-                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[180px] bg-white border border-gray-200">
-                        {searchTypeOptions.map((type) => (
-                            <DropdownMenuItem
-                                key={type}
-                                onClick={() => dispatch(setSelectedSearchType(type))}
-                                disabled={getSearchTypeDisabledState(type)}
-                                className={getSearchTypeDisabledState(type) ? "text-gray-400 cursor-not-allowed" : ""}
-                            >
-                                {getSearchTypeLabel(type)}
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap md:contents">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-[130px] justify-between border outline-none border-gray-200 bg-white rounded-lg text-sm">
+                                {filterState.selectedDataType || "Data Type"} <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[130px] border border-gray-200 bg-white">
+                            <DropdownMenuItem onClick={() => dispatch(setSelectedDataType("Raw"))} className="hover:bg-[#f4f4f5]">
+                                Raw
                             </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            <DropdownMenuItem onClick={() => dispatch(setSelectedDataType("Cleaned"))} className="hover:bg-[#f4f4f5]">
+                                Cleaned
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                <div className="relative flex-grow min-w-[500px] max-w-sm">
-                    <div
-                        className="w-full relative rounded-lg h-10 bg-white border border-gray-200 flex items-center pr-12"
-                        onClick={handleContainerClick}
-                    >
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="w-[140px] relative rounded-lg h-10 px-3 bg-white border border-gray-200 rounded-lg text-sm"
+                            >
+                                <div className="flex flex-nowrap gap-1 items-center overflow-hidden flex-grow pr-6">
+                                    {filterState.selectedChapters.length > 0 ? (
+                                        filterState.selectedChapters.map((chapter) => (
+                                            <Badge
+                                                key={chapter}
+                                                variant="secondary"
+                                                className="flex items-center gap-1 bg-gray-200 text-gray-800 rounded-lg px-2 py-0.5 text-xs font-normal shrink-0"
+                                            >
+                                                {chapter}
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRemoveChapter(chapter);
+                                                    }}
+                                                    className="ml-1 rounded-lg outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                                >
+                                                    <X className="h-3 w-3 text-gray-600 hover:text-gray-900" />
+                                                </button>
+                                            </Badge>
+                                        ))
+                                    ) : (
+                                        <span className="text-gray-700 whitespace-nowrap">Chapter</span>
+                                    )}
+                                </div>
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
+                            {chapterOptions.map((chapter) => {
+                                const isSelected = filterState.selectedChapters.includes(chapter);
+
+                                return (
+                                    <DropdownMenuItem
+                                        key={chapter}
+                                        onSelect={(e) => e.preventDefault()}
+                                        className="hover:bg-[#f4f4f5] cursor-pointer"
+                                        onClick={() => dispatch(toggleChapter(chapter))}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`chapter-${chapter}`}
+                                                checked={isSelected}
+                                                onCheckedChange={() => { }}
+                                                className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 data-[state=checked]:text-white"
+                                            />
+                                            <label
+                                                htmlFor={`chapter-${chapter}`}
+                                                className="text-sm font-medium leading-none"
+                                            >
+                                                {chapter}
+                                            </label>
+                                        </div>
+                                    </DropdownMenuItem>
+                                );
+                            })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="w-[180px] justify-between rounded-lg border border-gray-200 bg-white text-sm"
+                            >
+                                {filterState.selectedSearchType
+                                    ? getSearchTypeLabel(filterState.selectedSearchType)
+                                    : "Search Type"}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[180px] bg-white border border-gray-200">
+                            {searchTypeOptions.map((type) => (
+                                <DropdownMenuItem
+                                    key={type}
+                                    onClick={() => dispatch(setSelectedSearchType(type))}
+                                    disabled={getSearchTypeDisabledState(type)}
+                                    className={getSearchTypeDisabledState(type) ? "text-gray-400 cursor-not-allowed" : ""}
+                                >
+                                    {getSearchTypeLabel(type)}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-grow sm:flex-grow-0 md:contents md:w-auto md:flex-grow-0">
+                    <div className="relative flex-grow w-full sm:min-w-0 sm:max-w-none min-w-0 md:min-w-[500px] md:max-w-sm">
                         <div
-                            ref={searchContainerRef}
-                            className="search-container flex items-center gap-1 overflow-x-auto h-full pl-3 pr-2"
-                            style={{
-                                msOverflowStyle: "none",
-                                scrollbarWidth: "none",
-                            }}
+                            className="w-full relative rounded-lg h-10 bg-white border border-gray-200 flex items-center pr-12"
+                            onClick={handleContainerClick}
                         >
-                            <style>{`
+                            <div
+                                ref={searchContainerRef}
+                                className="search-container flex items-center gap-1 overflow-x-auto h-full pl-3 pr-2"
+                                style={{
+                                    msOverflowStyle: "none",
+                                    scrollbarWidth: "none",
+                                }}
+                            >
+                                <style>{`
                                 .search-container::-webkit-scrollbar {
                                     display: none;
                                 }
                             `}</style>
 
-                            {filterState.selectedSearchItems.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-1 bg-gray-200 text-gray-700 rounded-lg px-2 py-0.5 text-xs font-normal shrink-0"
-                                >
-                                    <span className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
-                                        {item}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            dispatch(removeSearchItem(item));
-                                        }}
-                                        className="ml-1 rounded-lg outline-none border-none bg-transparent p-0.5 cursor-pointer"
+                                {filterState.selectedSearchItems.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-1 bg-gray-200 text-gray-700 rounded-lg px-2 py-0.5 text-xs font-normal shrink-0"
                                     >
-                                        <X className="h-3 w-3 text-gray-600 hover:text-gray-900" />
-                                    </button>
-                                </div>
-                            ))}
+                                        <span className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
+                                            {item}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                dispatch(removeSearchItem(item));
+                                            }}
+                                            className="ml-1 rounded-lg outline-none border-none bg-transparent p-0.5 cursor-pointer"
+                                        >
+                                            <X className="h-3 w-3 text-gray-600 hover:text-gray-900" />
+                                        </button>
+                                    </div>
+                                ))}
 
-                            <div className="flex-shrink-0 min-w-[80px] flex-grow">
-                                <input
-                                    ref={searchInputRef}
-                                    placeholder={filterState.selectedSearchItems.length > 0 ? "" : "Search"}
-                                    className="border-none outline-none p-0 h-8 bg-transparent w-full text-sm focus:ring-0"
-                                    value={currentInput}
-                                    onChange={(e) => setCurrentInput(e.target.value)}
-                                    onKeyDown={handleKeyPress}
-                                    onFocus={() => dispatch(setShowSuggestions(true))}
-                                    onBlur={() => setTimeout(() => dispatch(setShowSuggestions(false)), 200)}
-                                />
+                                <div className="flex-shrink-0 min-w-[80px] flex-grow">
+                                    <input
+                                        ref={searchInputRef}
+                                        placeholder={filterState.selectedSearchItems.length > 0 ? "" : "Search"}
+                                        className="border-none outline-none p-0 h-8 bg-transparent w-full text-sm focus:ring-0"
+                                        value={currentInput}
+                                        onChange={(e) => setCurrentInput(e.target.value)}
+                                        onKeyDown={handleKeyPress}
+                                        onFocus={() => dispatch(setShowSuggestions(true))}
+                                        onBlur={() => setTimeout(() => dispatch(setShowSuggestions(false)), 200)}
+                                    />
+                                </div>
                             </div>
+
+                            {filterState.selectedSearchItems.map((item, index) => (
+                                <button
+                                    key={index}
+                                    className="absolute right-12 top-1/2 -translate-y-1/2 p-1 bg-white z-10 border-none rounded cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        dispatch(removeSearchItem(item));
+                                    }}
+                                >
+                                    <X className="h-4 w-4 text-gray-500" />
+                                </button>
+                            ))}
                         </div>
 
-                        {filterState.selectedSearchItems.map((item, index) => (
-                            <button
-                                key={index}
-                                className="absolute right-12 top-1/2 -translate-y-1/2 p-1 bg-white z-10 border-none rounded cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    dispatch(removeSearchItem(item));
-                                }}
-                            >
-                                <X className="h-4 w-4 text-gray-500" />
-                            </button>
-                        ))}
+                        {filterState.showSuggestions && currentInput.trim() !== "" && (
+                            <div className="absolute top-full left-0 z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                                {isFetching ? (
+                                    <div className="p-2 flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#C7D2FE] border-t-[#3B82F6]"></div>
+                                        <span className="ml-2 text-sm text-[#1E293B]">Loading...</span>
+                                    </div>
+                                ) : suggestions?.data?.length > 0 ? (
+                                    <>
+                                        {!suggestions?.data?.some(({ title }: { title: string }) => title.toLowerCase() === currentInput.toLowerCase()) && (
+                                            <div
+                                                className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                                onMouseDown={() => addSearchItemHandler(currentInput)}
+                                            >
+                                                {currentInput}
+                                            </div>
+                                        )}
+                                        {suggestions.data.map(({ title }: { title: string }, i: number) => (
+                                            <div
+                                                key={i}
+                                                className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                                onMouseDown={() => addSearchItemHandler(title)}
+                                            >
+                                                {title}
+                                            </div>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <div className="p-2 text-sm text-gray-500">
+                                        No suggestions found. Press Enter to add "{currentInput}".
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <Button
+                            className="absolute right-0 top-0 h-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                        >
+                            <Search className="h-4 w-4" />
+                        </Button>
                     </div>
 
-                    {filterState.showSuggestions && currentInput.trim() !== "" && (
-                        <div className="absolute top-full left-0 z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
-                            {isFetching ? (
-                                <div className="p-2 flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#C7D2FE] border-t-[#3B82F6]"></div>
-                                    <span className="ml-2 text-sm text-[#1E293B]">Loading...</span>
-                                </div>
-                            ) : suggestions?.data?.length > 0 ? (
-                                <>
-                                    {!suggestions?.data?.some(({ title }: { title: string }) => title.toLowerCase() === currentInput.toLowerCase()) && (
-                                        <div
-                                            className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                            onMouseDown={() => addSearchItemHandler(currentInput)}
-                                        >
-                                            {currentInput}
-                                        </div>
-                                    )}
-                                    {suggestions.data.map(({ title }: { title: string }, i: number) => (
-                                        <div
-                                            key={i}
-                                            className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                            onMouseDown={() => addSearchItemHandler(title)}
-                                        >
-                                            {title}
-                                        </div>
-                                    ))}
-                                </>
-                            ) : (
-                                <div className="p-2 text-sm text-gray-500">
-                                    No suggestions found. Press Enter to add "{currentInput}".
-                                </div>
-                            )}
-                        </div>
-                    )}
-
                     <Button
-                        className="absolute right-0 top-0 h-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-tl-none rounded-bl-none px-4 border-none cursor-pointer disabled:cursor-not-allowed transition-colors duration-200"
-                        onClick={handleSubmit}
+                        variant="outline"
+                        size="icon"
+                        className="rounded-lg border border-[#C7D2FE] bg-white hover:bg-[#EEF2FF] text-[#1E293B] transition-colors duration-200 flex-shrink-0"
+                        onClick={handleResetAllData}
                         disabled={isLoading}
+                        title="Reset all data (graphs, tables, filters)"
                     >
-                        <Search className="h-4 w-4" />
+                        <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                     </Button>
                 </div>
-
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-lg border border-[#C7D2FE] bg-white hover:bg-[#EEF2FF] text-[#1E293B] transition-colors duration-200"
-                    onClick={handleResetAllData}
-                    disabled={isLoading}
-                    title="Reset all data (graphs, tables, filters)"
-                >
-                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
             </div>
         </div>
     );

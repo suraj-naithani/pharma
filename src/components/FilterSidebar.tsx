@@ -524,7 +524,7 @@ export default function FilterSidebar() {
                         onClick={() => setIsSheetOpen(false)}
                         variant="ghost"
                         size="icon"
-                        className="absolute top-1 right-1 sm:top-[-24px] sm:right-[-2px] md:top-[-24px] md:right-[-2px] h-8 w-8 text-gray-600 hover:text-gray-900 lg:hidden z-10"
+                        className="absolute top-[-24px] right-[-2px] h-8 w-8 text-gray-600 hover:text-gray-900 lg:hidden z-10"
                     >
                         <X className="h-5 w-5" />
                         <span className="sr-only">Close</span>
