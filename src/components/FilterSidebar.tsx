@@ -40,7 +40,7 @@ import {
     setFilterValues,
 } from "@/redux/reducers/filterReducer";
 import type { RootState } from "@/redux/store";
-import { Eraser, Filter, Search } from "lucide-react";
+import { Eraser, Filter, Search, X } from "lucide-react";
 import moment from "moment";
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -519,8 +519,17 @@ export default function FilterSidebar() {
     const FilterPanelContent = useMemo(
         () => (
             <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col w-full sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
-                <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4">
-                    <div className="flex items-center justify-between">
+                <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4 relative">
+                    <Button
+                        onClick={() => setIsSheetOpen(false)}
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-[-24px] right-[-2px] h-8 w-8 text-gray-600 hover:text-gray-900 lg:hidden z-10"
+                    >
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Close</span>
+                    </Button>
+                    <div className="flex items-center justify-between pt-[10px]">
                         <CardTitle className="text-xl font-semibold text-gray-900">Filters</CardTitle>
                         <Button
                             onClick={handleClearAllFilters}
@@ -811,28 +820,28 @@ export default function FilterSidebar() {
 
     return (
         <>
-            <div className="flex text-foreground w-full max-w-[16rem]">
-                <aside className="hidden md:block w-full">{FilterPanelContent}</aside>
-                <div className="fixed bottom-4 right-4 z-50 md:hidden">
-                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                            <Button
-                                variant="default"
-                                size="icon"
-                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                                aria-label="Open filters"
-                            >
-                                <Filter className="h-6 w-6" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                            side="left"
-                            className="w-72 sm:w-80 border-none outline-none"
+            <div className="hidden lg:flex text-foreground w-full max-w-[16rem]">
+                <aside className="w-full">{FilterPanelContent}</aside>
+            </div>
+            <div className="fixed bottom-4 right-4 z-50 lg:hidden">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="default"
+                            size="icon"
+                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                            aria-label="Open filters"
                         >
-                            {FilterPanelContent}
-                        </SheetContent>
-                    </Sheet>
-                </div>
+                            <Filter className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent
+                        side="right"
+                        className="max-h-[100vh] left-1/2 -translate-x-1/2 right-auto md:max-w-2xl border-none outline-none"
+                    >
+                        {FilterPanelContent}
+                    </SheetContent>
+                </Sheet>
             </div>
             {/* Tooltip Portal */}
             {hoveredOption && (

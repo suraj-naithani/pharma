@@ -50,6 +50,7 @@ const NavLink = ({ to, label }: { to: string; label: string }) => {
 const Navbar = () => {
     const [showResources, setShowResources] = useState(false);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     const user = useSelector((state: RootState) => state.auth.user);
     const dispatch = useDispatch();
@@ -147,7 +148,7 @@ const Navbar = () => {
                 </div>
 
                 <div className="xl:hidden">
-                    <Sheet>
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-white hover:text-[#60A5FA]">
                                 <Menu className="h-6 w-6" />
@@ -162,6 +163,7 @@ const Navbar = () => {
                                         <Link
                                             key={link.label}
                                             to={link.to}
+                                            onClick={() => setIsSheetOpen(false)}
                                             className={clsx(
                                                 "text-sm py-1 transition-colors duration-200 relative pl-3 border-l-2",
                                                 isActive
@@ -185,6 +187,7 @@ const Navbar = () => {
                                                 <Link
                                                     key={link.label}
                                                     to={link.to}
+                                                    onClick={() => setIsSheetOpen(false)}
                                                     className={clsx(
                                                         "block px-2 py-1 text-sm hover:text-[#1E3A8A] transition-colors duration-200",
                                                         isActive
@@ -203,18 +206,21 @@ const Navbar = () => {
                                     <CurrencyConverter />
                                     <div className="flex space-x-4 w-full justify-center">
                                         <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
-                                            <Link to="/admin-dashboard">Admin</Link>
+                                            <Link to="/admin-dashboard" onClick={() => setIsSheetOpen(false)}>Admin</Link>
                                         </Button>
                                         {user ? (
                                             <Button
                                                 className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200"
-                                                onClick={handleLogout}
+                                                onClick={() => {
+                                                    handleLogout();
+                                                    setIsSheetOpen(false);
+                                                }}
                                             >
                                                 Logout
                                             </Button>
                                         ) : (
                                             <Button className="bg-[#3B82F6] text-white hover:bg-[#60A5FA] text-sm px-3 py-1.5 transition-colors duration-200" asChild>
-                                                <Link to="/signin">Login</Link>
+                                                <Link to="/signin" onClick={() => setIsSheetOpen(false)}>Login</Link>
                                             </Button>
                                         )}
                                     </div>
