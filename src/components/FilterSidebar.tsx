@@ -824,24 +824,24 @@ export default function FilterSidebar() {
                 <aside className="w-full">{FilterPanelContent}</aside>
             </div>
             <div className="fixed bottom-4 right-4 z-50 lg:hidden">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="default"
-                            size="icon"
-                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                            aria-label="Open filters"
-                        >
-                            <Filter className="h-6 w-6" />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                        <SheetTrigger asChild>
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                                aria-label="Open filters"
+                            >
+                                <Filter className="h-6 w-6" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent
                         side="right"
                         className="max-h-[100vh] left-1/2 -translate-x-1/2 right-auto md:max-w-2xl border-none outline-none"
-                    >
-                        {FilterPanelContent}
-                    </SheetContent>
-                </Sheet>
+                        >
+                            {FilterPanelContent}
+                        </SheetContent>
+                    </Sheet>
             </div>
             {/* Tooltip Portal */}
             {hoveredOption && (

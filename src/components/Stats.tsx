@@ -6,6 +6,18 @@ import { useSelector } from "react-redux";
 
 const Stats = () => {
     const summaryStats = useSelector((state: RootState) => state.dashboard.summary);
+    const selectedToggle = useSelector((state: RootState) => state.filter.selectedToggle);
+
+    // Determine values based on toggle selection
+    // When export: Indian Companies = uniqueSuppliers, Foreign Companies = uniqueBuyers
+    // When import: Indian Companies = uniqueBuyers, Foreign Companies = uniqueSuppliers
+    const indianCompaniesValue = selectedToggle === "export"
+        ? (summaryStats?.uniqueSuppliers ? formatNumber(summaryStats.uniqueSuppliers) : "0")
+        : (summaryStats?.uniqueBuyers ? formatNumber(summaryStats.uniqueBuyers) : "0");
+
+    const foreignCompaniesValue = selectedToggle === "export"
+        ? (summaryStats?.uniqueBuyers ? formatNumber(summaryStats.uniqueBuyers) : "0")
+        : (summaryStats?.uniqueSuppliers ? formatNumber(summaryStats.uniqueSuppliers) : "0");
 
     const statsData = [
         {
@@ -38,14 +50,14 @@ const Stats = () => {
         },
         {
             title: "Indian Companies",
-            value: summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0",
+            value: indianCompaniesValue,
             icon: Building,
             color: "text-emerald-500",
             bgColor: "bg-emerald-50"
         },
         {
             title: "Foreign Companies",
-            value: summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0",
+            value: foreignCompaniesValue,
             icon: Building2,
             color: "text-slate-500",
             bgColor: "bg-slate-50"

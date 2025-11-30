@@ -26,7 +26,7 @@ import {
     setTopYearsByValue,
     clearDashboardStats
 } from "@/redux/reducers/dashboardReducer"
-import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData, clearAllFilters } from "@/redux/reducers/filterReducer"
+import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedSearchItems, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData, clearAllFilters } from "@/redux/reducers/filterReducer"
 import { setShipmentTable, clearShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
@@ -247,12 +247,20 @@ export default function FilterSection() {
         setIsLoading(true);
 
         try {
+            // Preserve the current toggle selection
+            const currentToggle = filterState.selectedToggle;
+
             // Clear all dashboard data (graphs, tables, stats)
             dispatch(clearDashboardStats());
             dispatch(clearShipmentTable());
 
             // Reset all filter state to initial values
             dispatch(resetAllData());
+
+            // Restore the toggle selection
+            if (currentToggle === "import" || currentToggle === "export") {
+                dispatch(setSelectedToggle(currentToggle));
+            }
 
             // Clear current input
             setCurrentInput("");
@@ -267,6 +275,12 @@ export default function FilterSection() {
             setIsLoading(false);
         }
     };
+
+    // Clear search bar when main filters change (except dates and chapters)
+    useEffect(() => {
+        setCurrentInput("");
+        dispatch(setSelectedSearchItems([]));
+    }, [filterState.selectedDataType, filterState.selectedSearchType, filterState.selectedToggle, dispatch]);
 
     useEffect(() => {
         if (!currentInput.trim()) return;
@@ -333,6 +347,7 @@ export default function FilterSection() {
                                 <Calendar
                                     mode="single"
                                     selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
+                                    defaultMonth={filterState.dateRange.from ? new Date(filterState.dateRange.from) : new Date()}
                                     onSelect={(date) =>
                                         dispatch(setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD")))
                                     }
@@ -361,6 +376,7 @@ export default function FilterSection() {
                                 <Calendar
                                     mode="single"
                                     selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
+                                    defaultMonth={filterState.dateRange.to ? new Date(filterState.dateRange.to) : new Date()}
                                     onSelect={(date) =>
                                         dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
                                     }
