@@ -6,7 +6,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { searchTypeOptions } from "@/constants/config"
-import { useLazyGetFilterValuesQuery, useLazyGetSuggestionsQuery, useLazyGetSummaryStatsQuery, useLazyGetAllTopMetricsQuery, useLazyGetShipmentTableQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi"
+import {
+    useLazyGetFilterValuesQuery,
+    useLazyGetSuggestionsQuery,
+    useLazyGetSummaryStatsQuery,
+    useLazyGetAllTopMetricsQuery,
+    useLazyGetShipmentTableQuery,
+    useLazyGetFilterMetadataQuery,
+    useLazyGetChaptersQuery
+} from "@/redux/api/dashboardAPi"
 import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper"
 import {
     setFilterData,
@@ -49,14 +57,22 @@ export default function FilterSection() {
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
     const [triggerFilterMetadata] = useLazyGetFilterMetadataQuery();
+    const [triggerChapters, { data: chaptersData }] = useLazyGetChaptersQuery();
 
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
-    const chapterOptions =
-        filterState.selectedDataType === "Cleaned"
-            ? [29, 30]
-            : Array.from({ length: 34 - 28 + 1 }, (_, i) => 28 + i);
+    useEffect(() => {
+        if (filterState.selectedToggle && filterState.dateRange.from && filterState.dateRange.to) {
+            triggerChapters({
+                informationOf: filterState.selectedToggle,
+                startDate: filterState.dateRange.from,
+                endDate: filterState.dateRange.to
+            });
+        }
+    }, [filterState.selectedToggle, filterState.dateRange.from, filterState.dateRange.to, triggerChapters]);
+
+    const chapterOptions: number[] = chaptersData?.chapters ? chaptersData.chapters.map((ch: string) => Number(ch)) : [];
 
     const handleRemoveChapter = (chapterToRemove: number) => {
         const updatedChapters = filterState.selectedChapters.filter((c) => c !== chapterToRemove);
@@ -96,10 +112,8 @@ export default function FilterSection() {
         e.preventDefault();
         setIsLoading(true);
 
-        // Clear all applied filters before making API call to get fresh data
         dispatch(clearAllFilters());
 
-        // Ensure we have proper default values even if Redux state isn't fully initialized
         const safeFilterState = {
             selectedToggle: filterState.selectedToggle || "import",
             selectedDataType: filterState.selectedDataType || null,
@@ -145,7 +159,7 @@ export default function FilterSection() {
             startDate: moment(safeFilterState.dateRange.from).format("YYYY-MM-DD"),
             endDate: moment(safeFilterState.dateRange.to).format("YYYY-MM-DD"),
             searchType: data.searchType,
-            searchValue: data.searchValue,  // Now a string (joined if array)
+            searchValue: data.searchValue,
             informationOf: data.informationOf,
             page: 1,
             limit: 10,
@@ -164,11 +178,9 @@ export default function FilterSection() {
                 triggerFilterMetadata(data).unwrap()
             ]);
 
-            // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
 
-            // Process and store filter metadata
             if (metadataRes?.metadata) {
                 const metadataMap: Record<string, number> = {};
                 metadataRes.metadata.forEach((item: { displayName: string; uniqueValueCount: number }) => {
@@ -177,7 +189,6 @@ export default function FilterSection() {
                 dispatch(setFilterMetadata(metadataMap));
             }
 
-            // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
             dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
             dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
@@ -247,25 +258,19 @@ export default function FilterSection() {
         setIsLoading(true);
 
         try {
-            // Preserve the current toggle selection
             const currentToggle = filterState.selectedToggle;
 
-            // Clear all dashboard data (graphs, tables, stats)
             dispatch(clearDashboardStats());
             dispatch(clearShipmentTable());
 
-            // Reset all filter state to initial values
             dispatch(resetAllData());
 
-            // Restore the toggle selection
             if (currentToggle === "import" || currentToggle === "export") {
                 dispatch(setSelectedToggle(currentToggle));
             }
 
-            // Clear current input
             setCurrentInput("");
 
-            // Show success message
             toast.success("All data has been reset successfully!");
 
         } catch (err: unknown) {
@@ -276,11 +281,16 @@ export default function FilterSection() {
         }
     };
 
-    // Clear search bar when main filters change (except dates and chapters)
     useEffect(() => {
         setCurrentInput("");
         dispatch(setSelectedSearchItems([]));
-    }, [filterState.selectedDataType, filterState.selectedSearchType, filterState.selectedToggle, dispatch]);
+    }, [
+        filterState.selectedDataType,
+        filterState.selectedSearchType,
+        filterState.selectedToggle,
+        filterState.selectedChapters,
+        dispatch
+    ]);
 
     useEffect(() => {
         if (!currentInput.trim()) return;
@@ -296,7 +306,7 @@ export default function FilterSection() {
         }, 500);
 
         return () => clearTimeout(debounceTimer);
-    }, [currentInput, filterState.selectedToggle, filterState.selectedChapters, filterState.selectedSearchType]);
+    }, [currentInput, filterState.selectedToggle, filterState.selectedChapters, filterState.selectedSearchType, triggerSuggestions]);
 
     return (
         <div className="p-3 w-full">
@@ -327,7 +337,6 @@ export default function FilterSection() {
                     </ToggleGroup>
 
                     <div className="flex flex-row gap-1 flex-wrap sm:flex-nowrap">
-                        {/* Start Date Picker */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -356,7 +365,6 @@ export default function FilterSection() {
                             </PopoverContent>
                         </Popover>
 
-                        {/* End Date Picker */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -439,7 +447,7 @@ export default function FilterSection() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
-                            {chapterOptions.map((chapter) => {
+                            {chapterOptions.map((chapter: number) => {
                                 const isSelected = filterState.selectedChapters.includes(chapter);
 
                                 return (

@@ -3,6 +3,7 @@ import { authApi } from "./api/authApi";
 import { authReducer } from "./reducers/authReducer";
 import { dashboardApi } from "./api/dashboardAPi";
 import { adminApi } from "./api/adminApi";
+import { adminUserApi } from "./api/adminUserApi";
 import { filterReducer } from "./reducers/filterReducer";
 import { dashboardReducer } from "./reducers/dashboardReducer";
 import { shipmentTableReducer } from "./reducers/shipmentReducer";
@@ -13,6 +14,7 @@ export const store = configureStore({
         [authApi.reducerPath]: authApi.reducer,
         [dashboardApi.reducerPath]: dashboardApi.reducer,
         [adminApi.reducerPath]: adminApi.reducer,
+        [adminUserApi.reducerPath]: adminUserApi.reducer,
         [authReducer.name]: authReducer.reducer,
         [filterReducer.name]: filterReducer.reducer,
         [dashboardReducer.name]: dashboardReducer.reducer,
@@ -20,7 +22,7 @@ export const store = configureStore({
         [subscriptionReducer.name]: subscriptionReducer.reducer
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(authApi.middleware, dashboardApi.middleware, adminApi.middleware),
+        getDefaultMiddleware().concat(authApi.middleware, dashboardApi.middleware, adminApi.middleware, adminUserApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

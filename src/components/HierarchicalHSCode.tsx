@@ -8,6 +8,7 @@ import {
     transformHSCodeToHierarchy,
     getSelectedCodesFromHierarchy,
     getParentCheckState,
+    getCountForItem,
     type HSCodeHierarchy
 } from '@/utils/hsCodeUtils';
 
@@ -163,27 +164,32 @@ export default function HierarchicalHSCode({
                         return (
                             <div key={chapter} className="space-y-1">
                                 {/* Chapter Level */}
-                                <div className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded">
-                                    <button
-                                        onClick={() => toggleExpanded(chapterKey)}
-                                        className="p-1 hover:bg-gray-200 rounded"
-                                        disabled={disabled}
-                                    >
-                                        {isChapterExpanded ? (
-                                            <ChevronDown className="h-4 w-4" />
-                                        ) : (
-                                            <ChevronRight className="h-4 w-4" />
-                                        )}
-                                    </button>
-                                    <Checkbox
-                                        checked={chapterCheckState.checked}
-                                        // @ts-ignore
-                                        indeterminate={chapterCheckState.indeterminate}
-                                        onCheckedChange={(checked) => handleSelectionChange(chapter, !!checked)}
-                                        disabled={disabled}
-                                        className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                    />
-                                    <span className="text-sm font-medium">{chapter}</span>
+                                <div className="flex items-center justify-between gap-2 py-1 px-2 hover:bg-gray-50 rounded">
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => toggleExpanded(chapterKey)}
+                                            className="p-1 hover:bg-gray-200 rounded"
+                                            disabled={disabled}
+                                        >
+                                            {isChapterExpanded ? (
+                                                <ChevronDown className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronRight className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                        <Checkbox
+                                            checked={chapterCheckState.checked}
+                                            // @ts-ignore
+                                            indeterminate={chapterCheckState.indeterminate}
+                                            onCheckedChange={(checked) => handleSelectionChange(chapter, !!checked)}
+                                            disabled={disabled}
+                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                        />
+                                        <span className="text-sm font-medium">{chapter}</span>
+                                    </div>
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                        {getCountForItem(hierarchy, chapter)}
+                                    </span>
                                 </div>
 
                                 {/* Headings Level */}
@@ -197,27 +203,32 @@ export default function HierarchicalHSCode({
                                             return (
                                                 <div key={heading} className="space-y-1">
                                                     {/* Heading Level */}
-                                                    <div className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded">
-                                                        <button
-                                                            onClick={() => toggleExpanded(headingKey)}
-                                                            className="p-1 hover:bg-gray-200 rounded"
-                                                            disabled={disabled}
-                                                        >
-                                                            {isHeadingExpanded ? (
-                                                                <ChevronDown className="h-4 w-4" />
-                                                            ) : (
-                                                                <ChevronRight className="h-4 w-4" />
-                                                            )}
-                                                        </button>
-                                                        <Checkbox
-                                                            checked={headingCheckState.checked}
-                                                            // @ts-ignore
-                                                            indeterminate={headingCheckState.indeterminate}
-                                                            onCheckedChange={(checked) => handleSelectionChange(heading, !!checked)}
-                                                            disabled={disabled}
-                                                            className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                        />
-                                                        <span className="text-sm">{heading}</span>
+                                                    <div className="flex items-center justify-between gap-2 py-1 px-2 hover:bg-gray-50 rounded">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => toggleExpanded(headingKey)}
+                                                                className="p-1 hover:bg-gray-200 rounded"
+                                                                disabled={disabled}
+                                                            >
+                                                                {isHeadingExpanded ? (
+                                                                    <ChevronDown className="h-4 w-4" />
+                                                                ) : (
+                                                                    <ChevronRight className="h-4 w-4" />
+                                                                )}
+                                                            </button>
+                                                            <Checkbox
+                                                                checked={headingCheckState.checked}
+                                                                // @ts-ignore
+                                                                indeterminate={headingCheckState.indeterminate}
+                                                                onCheckedChange={(checked) => handleSelectionChange(heading, !!checked)}
+                                                                disabled={disabled}
+                                                                className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                            />
+                                                            <span className="text-sm">{heading}</span>
+                                                        </div>
+                                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                                            {getCountForItem(hierarchy, heading)}
+                                                        </span>
                                                     </div>
 
                                                     {/* Subheadings Level */}
@@ -231,27 +242,32 @@ export default function HierarchicalHSCode({
                                                                 return (
                                                                     <div key={subheading} className="space-y-1">
                                                                         {/* Subheading Level */}
-                                                                        <div className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded">
-                                                                            <button
-                                                                                onClick={() => toggleExpanded(subheadingKey)}
-                                                                                className="p-1 hover:bg-gray-200 rounded"
-                                                                                disabled={disabled}
-                                                                            >
-                                                                                {isSubheadingExpanded ? (
-                                                                                    <ChevronDown className="h-4 w-4" />
-                                                                                ) : (
-                                                                                    <ChevronRight className="h-4 w-4" />
-                                                                                )}
-                                                                            </button>
-                                                                            <Checkbox
-                                                                                checked={subheadingCheckState.checked}
-                                                                                // @ts-ignore
-                                                                                indeterminate={subheadingCheckState.indeterminate}
-                                                                                onCheckedChange={(checked) => handleSelectionChange(subheading, !!checked)}
-                                                                                disabled={disabled}
-                                                                                className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
-                                                                            />
-                                                                            <span className="text-sm">{subheading}</span>
+                                                                        <div className="flex items-center justify-between gap-2 py-1 px-2 hover:bg-gray-50 rounded">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <button
+                                                                                    onClick={() => toggleExpanded(subheadingKey)}
+                                                                                    className="p-1 hover:bg-gray-200 rounded"
+                                                                                    disabled={disabled}
+                                                                                >
+                                                                                    {isSubheadingExpanded ? (
+                                                                                        <ChevronDown className="h-4 w-4" />
+                                                                                    ) : (
+                                                                                        <ChevronRight className="h-4 w-4" />
+                                                                                    )}
+                                                                                </button>
+                                                                                <Checkbox
+                                                                                    checked={subheadingCheckState.checked}
+                                                                                    // @ts-ignore
+                                                                                    indeterminate={subheadingCheckState.indeterminate}
+                                                                                    onCheckedChange={(checked) => handleSelectionChange(subheading, !!checked)}
+                                                                                    disabled={disabled}
+                                                                                    className="data-[state=checked]:border-black data-[state=checked]:bg-black data-[state=checked]:text-white border-gray-300"
+                                                                                />
+                                                                                <span className="text-sm">{subheading}</span>
+                                                                            </div>
+                                                                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                                                                {getCountForItem(hierarchy, subheading)}
+                                                                            </span>
                                                                         </div>
 
                                                                         {/* Individual Codes Level */}

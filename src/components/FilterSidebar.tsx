@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import HierarchicalHSCode from "@/components/HierarchicalHSCode";
 import RangeSlider from "@/components/RangeSlider";
 import { defaultFilterKeys } from "@/constants/config";
+import { transformHSCodeToHierarchy } from "@/utils/hsCodeUtils";
 import { useLazyGetAllTopMetricsQuery, useLazyGetFilterValuesQuery, useLazyGetShipmentTableQuery, useLazyGetSummaryStatsQuery, useLazySearchFiltersQuery, useLazyGetFilterMetadataQuery } from "@/redux/api/dashboardAPi";
 import { convertFiltersToUrlParams, transformSearchTypeForPayload } from "@/utils/helper";
 import {
@@ -132,6 +133,19 @@ export default function FilterSidebar() {
     const filterOptions = useMemo(() => (dashboardData?.filter ?? {}) as { [key: string]: unknown[] | { min: number; max: number } }, [dashboardData?.filter]);
     const filterValues = useMemo(() => filterState.filters || {}, [filterState.filters]);
     const filterMetadata = useMemo(() => dashboardData?.filterMetadata || {}, [dashboardData?.filterMetadata]);
+
+    // Calculate HS Code group count (number of top-level chapters)
+    const hsCodeGroupCount = useMemo(() => {
+        const hsCodeOptions = filterOptions["H S Code"] || [];
+        const hsCodes = Array.isArray(hsCodeOptions) ? hsCodeOptions.map(opt => {
+            if (typeof opt === 'object' && opt !== null && 'value' in opt) {
+                return String((opt as { value: unknown }).value);
+            }
+            return String(opt);
+        }) : [];
+        const hierarchy = transformHSCodeToHierarchy(hsCodes);
+        return Object.keys(hierarchy).length;
+    }, [filterOptions]);
 
     // Filter categories based on selectedDataType: hide CAS Number when Raw is selected
     const visibleFilterKeys = useMemo(() => {
@@ -571,7 +585,7 @@ export default function FilterSidebar() {
                                         <div className="flex items-center justify-between w-full">
                                             <span>{category}</span>
                                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
-                                                ({filterMetadata[category] || 0})
+                                                ({category === "H S Code" ? hsCodeGroupCount : (filterMetadata[category] || 0)})
                                             </span>
                                         </div>
                                     </AccordionTrigger>

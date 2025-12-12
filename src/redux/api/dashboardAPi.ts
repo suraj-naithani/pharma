@@ -113,6 +113,18 @@ export const dashboardApi = createApi({
             }),
             providesTags: ["dashboard"],
         }),
+        getChapters: builder.query({
+            query: ({ informationOf, startDate, endDate }) => ({
+                url: `chapters`,
+                method: "GET",
+                params: {
+                    informationOf,
+                    startDate,
+                    endDate,
+                },
+            }),
+            providesTags: ["dashboard"],
+        }),
     }),
 });
 
@@ -126,4 +138,5 @@ export const {
     useDownloadDataAsCSVMutation,
     useLazySearchFiltersQuery,
     useLazyGetFilterMetadataQuery,
+    useLazyGetChaptersQuery,
 } = dashboardApi;

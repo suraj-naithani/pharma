@@ -25,21 +25,36 @@ import { setShipmentTable } from "@/redux/reducers/shipmentReducer";
 import type { RootState } from "@/redux/store";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import moment from "moment";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import { getParentGroupsFromSelectedCodes, transformHSCodeToHierarchy } from "@/utils/hsCodeUtils";
 
 export default function AppliedFilters() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const filterState = useSelector((state: RootState) => state.filter);
+    const dashboardData = useSelector((state: RootState) => state.dashboard);
     const dispatch = useDispatch();
 
     const [triggerSummaryStats] = useLazyGetSummaryStatsQuery();
     const [triggerAllTopMetrics] = useLazyGetAllTopMetricsQuery();
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
+
+    // Get HS Code hierarchy from filter options
+    const hsCodeHierarchy = useMemo(() => {
+        const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: unknown[] };
+        const hsCodeOptions = filterOptions["H S Code"] || [];
+        const hsCodes = Array.isArray(hsCodeOptions) ? hsCodeOptions.map(opt => {
+            if (typeof opt === 'object' && opt !== null && 'value' in opt) {
+                return String((opt as { value: unknown }).value);
+            }
+            return String(opt);
+        }) : [];
+        return transformHSCodeToHierarchy(hsCodes);
+    }, [dashboardData?.filter]);
 
     // Get grouped filters by category
     const getGroupedFilters = () => {
@@ -63,16 +78,39 @@ export default function AppliedFilters() {
                     );
 
                     if (validValues.length > 0) {
+                        // For HS Code, show parent groups instead of individual codes
+                        let displayValues: string[] = validValues;
+                        if (category === "H S Code") {
+                            displayValues = getParentGroupsFromSelectedCodes(validValues, hsCodeHierarchy);
+                        }
+
                         groupedFilters.push({
                             category,
-                            values: validValues.map(value => ({
-                                value,
+                            values: displayValues.map(displayValue => ({
+                                value: displayValue,
                                 onRemove: () => {
-                                    // Use the same logic as FilterSidebar to ensure consistency
+                                    // For HS Code, we need to remove all codes under the parent group
                                     const currentValues = filterState.filters?.[category] || [];
-                                    // Type guard to ensure it's an array
                                     if (Array.isArray(currentValues)) {
-                                        const updatedValues = currentValues.filter((val: string) => val !== value);
+                                        let updatedValues: string[];
+                                        if (category === "H S Code") {
+                                            // If removing a parent group, remove all codes that start with it
+                                            if (displayValue.length === 2) {
+                                                // Chapter level - remove all codes starting with this chapter
+                                                updatedValues = currentValues.filter((val: string) => !val.startsWith(displayValue));
+                                            } else if (displayValue.length === 4) {
+                                                // Heading level - remove all codes starting with this heading
+                                                updatedValues = currentValues.filter((val: string) => !val.startsWith(displayValue));
+                                            } else if (displayValue.length === 6) {
+                                                // Subheading level - remove all codes starting with this subheading
+                                                updatedValues = currentValues.filter((val: string) => !val.startsWith(displayValue));
+                                            } else {
+                                                // Individual code
+                                                updatedValues = currentValues.filter((val: string) => val !== displayValue);
+                                            }
+                                        } else {
+                                            updatedValues = currentValues.filter((val: string) => val !== displayValue);
+                                        }
                                         dispatch(setFilterValues({ category, values: updatedValues }));
                                         handleFilterChange();
                                     }

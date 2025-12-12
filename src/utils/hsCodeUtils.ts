@@ -152,3 +152,120 @@ export function getParentCheckState(
         indeterminate: isPartiallySelected
     };
 }
+
+/**
+ * Gets the highest level parent groups from selected codes
+ * @param selectedCodes - Array of selected HS Code strings
+ * @param hierarchy - Hierarchical HS Code structure
+ * @returns Array of parent group strings (chapters, headings, or subheadings) to display
+ */
+export function getParentGroupsFromSelectedCodes(
+    selectedCodes: string[],
+    hierarchy: HSCodeHierarchy
+): string[] {
+    if (selectedCodes.length === 0) return [];
+
+    const parentGroups = new Set<string>();
+    const processedCodes = new Set<string>();
+    const selectedCodesSet = new Set(selectedCodes);
+
+    // First, check all chapters to see if they're fully selected
+    Object.keys(hierarchy).forEach(chapter => {
+        const chapterCodes = getSelectedCodesFromHierarchy(hierarchy, [chapter]);
+        if (chapterCodes.length > 0 && chapterCodes.every(c => selectedCodesSet.has(c))) {
+            parentGroups.add(chapter);
+            chapterCodes.forEach(c => processedCodes.add(c));
+        }
+    });
+
+    // Then, check all headings (only those not already covered by chapters)
+    Object.keys(hierarchy).forEach(chapter => {
+        Object.keys(hierarchy[chapter]).forEach(heading => {
+            // Skip if this heading is already covered by a chapter
+            const chapterCodes = getSelectedCodesFromHierarchy(hierarchy, [chapter]);
+            const isChapterSelected = chapterCodes.length > 0 && 
+                chapterCodes.every(c => selectedCodesSet.has(c));
+            
+            if (!isChapterSelected) {
+                const headingCodes = getSelectedCodesFromHierarchy(hierarchy, [heading]);
+                if (headingCodes.length > 0 && 
+                    headingCodes.every(c => selectedCodesSet.has(c)) &&
+                    headingCodes.every(c => !processedCodes.has(c))) {
+                    parentGroups.add(heading);
+                    headingCodes.forEach(c => processedCodes.add(c));
+                }
+            }
+        });
+    });
+
+    // Then, check all subheadings (only those not already covered)
+    Object.keys(hierarchy).forEach(chapter => {
+        Object.keys(hierarchy[chapter]).forEach(heading => {
+            // Check if heading is already selected
+            const headingCodes = getSelectedCodesFromHierarchy(hierarchy, [heading]);
+            const isHeadingSelected = headingCodes.length > 0 && 
+                headingCodes.every(c => selectedCodesSet.has(c)) &&
+                headingCodes.every(c => processedCodes.has(c));
+            
+            if (!isHeadingSelected) {
+                Object.keys(hierarchy[chapter][heading]).forEach(subheading => {
+                    const subheadingCodes = getSelectedCodesFromHierarchy(hierarchy, [subheading]);
+                    if (subheadingCodes.length > 0 && 
+                        subheadingCodes.every(c => selectedCodesSet.has(c)) &&
+                        subheadingCodes.every(c => !processedCodes.has(c))) {
+                        parentGroups.add(subheading);
+                        subheadingCodes.forEach(c => processedCodes.add(c));
+                    }
+                });
+            }
+        });
+    });
+
+    // Finally, add any remaining individual codes
+    selectedCodes.forEach(code => {
+        if (!processedCodes.has(code)) {
+            parentGroups.add(code);
+        }
+    });
+
+    return Array.from(parentGroups).sort();
+}
+
+/**
+ * Counts the total number of codes under a specific item in the hierarchy
+ * @param hierarchy - Hierarchical HS Code structure
+ * @param item - The item to count (chapter, heading, or subheading)
+ * @returns Total count of codes under the item
+ */
+export function getCountForItem(hierarchy: HSCodeHierarchy, item: string): number {
+    if (item.length === 2) {
+        // Chapter level
+        const chapterData = hierarchy[item];
+        if (!chapterData) return 0;
+        let count = 0;
+        Object.values(chapterData).forEach(headingData => {
+            Object.values(headingData).forEach(subheadingCodes => {
+                count += subheadingCodes.length;
+            });
+        });
+        return count;
+    } else if (item.length === 4) {
+        // Heading level
+        const chapter = item.substring(0, 2);
+        const chapterData = hierarchy[chapter];
+        if (!chapterData || !chapterData[item]) return 0;
+        let count = 0;
+        Object.values(chapterData[item]).forEach(subheadingCodes => {
+            count += subheadingCodes.length;
+        });
+        return count;
+    } else if (item.length === 6) {
+        // Subheading level
+        const chapter = item.substring(0, 2);
+        const heading = item.substring(0, 4);
+        const chapterData = hierarchy[chapter];
+        if (!chapterData || !chapterData[heading] || !chapterData[heading][item]) return 0;
+        return chapterData[heading][item].length;
+    }
+    return 0;
+}
