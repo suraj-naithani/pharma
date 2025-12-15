@@ -54,6 +54,7 @@ export interface Summary {
     totalValueUSD: number;
     uniqueBuyers: number;
     uniqueSuppliers: number;
+    uniqueCountry?: number;
 }
 
 export interface Buyer {

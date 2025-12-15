@@ -368,8 +368,8 @@ export default function TableData<TData extends Record<string, any>>({
             </div>
 
             <div className="rounded-lg border border-slate-200">
-                <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    <Table className="min-w-full">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <Table className="min-w-[1200px] w-max">
                         <TableHeader>
                             <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-200">
                                 {visibleColumns.map((column) => {
@@ -383,7 +383,7 @@ export default function TableData<TData extends Record<string, any>>({
                                             )}
                                         >
                                             <div
-                                                className={`flex items-center space-x-2 ${column.enableSorting ? "cursor-pointer select-none hover:text-[#3B82F6]" : ""
+                                                className={`flex items-center space-x-2 group ${column.enableSorting ? "cursor-pointer select-none hover:text-[#3B82F6]" : ""
                                                     }`}
                                                 onClick={() => column.enableSorting && handleSort(column.id as string)}
                                             >
@@ -397,7 +397,7 @@ export default function TableData<TData extends Record<string, any>>({
                                                         ) : isSorted === "asc" ? (
                                                             <ChevronUp className="h-4 w-4 text-[#3B82F6]" />
                                                         ) : (
-                                                            <ChevronsUpDown className="h-4 w-4 text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <ChevronsUpDown className="h-4 w-4 text-[#64748B] opacity-60" />
                                                         )}
                                                     </div>
                                                 )}

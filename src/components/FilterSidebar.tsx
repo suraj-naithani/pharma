@@ -562,7 +562,7 @@ export default function FilterSidebar() {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-0 overflow-y-auto min-h-0">
+                <CardContent className="flex-1 p-0 overflow-y-auto min-h-0 custom-scrollbar">
                     <Accordion
                         type="single"
                         collapsible
@@ -584,9 +584,11 @@ export default function FilterSidebar() {
                                     <AccordionTrigger className="px-4 py-3 text-sm font-normal text-muted-foreground hover:no-underline data-[state=open]:text-foreground cursor-pointer">
                                         <div className="flex items-center justify-between w-full">
                                             <span>{category}</span>
-                                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
-                                                ({category === "H S Code" ? hsCodeGroupCount : (filterMetadata[category] || 0)})
-                                            </span>
+                                            {category !== "Unit Price" && category !== "Quantity" && (
+                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2">
+                                                    ({category === "H S Code" ? hsCodeGroupCount : (filterMetadata[category] || 0)})
+                                                </span>
+                                            )}
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
@@ -710,7 +712,7 @@ export default function FilterSidebar() {
                                                     </Button>
                                                 </div>
 
-                                                <ScrollArea className="max-h-64 overflow-auto">
+                                                <ScrollArea className="max-h-64 overflow-auto scrollbar-hide">
                                                     <div className="p-3 space-y-2">
                                                         {filteredOptions.length > 0 ? (
                                                             <>
@@ -838,24 +840,24 @@ export default function FilterSidebar() {
                 <aside className="w-full">{FilterPanelContent}</aside>
             </div>
             <div className="fixed bottom-4 right-4 z-50 lg:hidden">
-                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                            <Button
-                                variant="default"
-                                size="icon"
-                                className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                                aria-label="Open filters"
-                            >
-                                <Filter className="h-6 w-6" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="default"
+                            size="icon"
+                            className="w-14 h-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                            aria-label="Open filters"
+                        >
+                            <Filter className="h-6 w-6" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent
                         side="right"
                         className="max-h-[100vh] left-1/2 -translate-x-1/2 right-auto md:max-w-2xl border-none outline-none"
-                        >
-                            {FilterPanelContent}
-                        </SheetContent>
-                    </Sheet>
+                    >
+                        {FilterPanelContent}
+                    </SheetContent>
+                </Sheet>
             </div>
             {/* Tooltip Portal */}
             {hoveredOption && (

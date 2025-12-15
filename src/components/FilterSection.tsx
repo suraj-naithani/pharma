@@ -62,6 +62,12 @@ export default function FilterSection() {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
+    // Clear chapters when toggle changes
+    useEffect(() => {
+        dispatch(setSelectedChapters([]));
+    }, [filterState.selectedToggle, dispatch]);
+
+    // Fetch chapters when toggle or dates change
     useEffect(() => {
         if (filterState.selectedToggle && filterState.dateRange.from && filterState.dateRange.to) {
             triggerChapters({
@@ -224,6 +230,12 @@ export default function FilterSection() {
     const addSearchItemHandler = (item: string) => {
         if (!item.trim()) return;
 
+        // Limit to 5 search items
+        if (filterState.selectedSearchItems.length >= 5) {
+            toast.error("You can only add up to 5 search values");
+            return;
+        }
+
         dispatch(addSearchItem(item));
 
         setCurrentInput("");
@@ -242,6 +254,11 @@ export default function FilterSection() {
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && currentInput.trim()) {
             e.preventDefault();
+            // Limit to 5 search items
+            if (filterState.selectedSearchItems.length >= 5) {
+                toast.error("You can only add up to 5 search values");
+                return;
+            }
             addSearchItem(currentInput);
         }
     };
@@ -516,17 +533,8 @@ export default function FilterSection() {
                         >
                             <div
                                 ref={searchContainerRef}
-                                className="search-container flex items-center gap-1 overflow-x-auto h-full pl-3 pr-2"
-                                style={{
-                                    msOverflowStyle: "none",
-                                    scrollbarWidth: "none",
-                                }}
+                                className="search-container custom-scrollbar flex items-center gap-1 overflow-x-auto h-full pl-3 pr-2"
                             >
-                                <style>{`
-                                .search-container::-webkit-scrollbar {
-                                    display: none;
-                                }
-                            `}</style>
 
                                 {filterState.selectedSearchItems.map((item, index) => (
                                     <div
@@ -552,29 +560,30 @@ export default function FilterSection() {
                                 <div className="flex-shrink-0 min-w-[80px] flex-grow">
                                     <input
                                         ref={searchInputRef}
-                                        placeholder={filterState.selectedSearchItems.length > 0 ? "" : "Search"}
+                                        placeholder={filterState.selectedSearchItems.length > 0 ? "" : filterState.selectedSearchItems.length >= 5 ? "Maximum 5 values reached" : "Search"}
                                         className="border-none outline-none p-0 h-8 bg-transparent w-full text-sm focus:ring-0"
                                         value={currentInput}
                                         onChange={(e) => setCurrentInput(e.target.value)}
                                         onKeyDown={handleKeyPress}
                                         onFocus={() => dispatch(setShowSuggestions(true))}
                                         onBlur={() => setTimeout(() => dispatch(setShowSuggestions(false)), 200)}
+                                        disabled={filterState.selectedSearchItems.length >= 5}
                                     />
                                 </div>
                             </div>
 
-                            {filterState.selectedSearchItems.map((item, index) => (
+                            {filterState.selectedSearchItems.length > 0 && (
                                 <button
-                                    key={index}
-                                    className="absolute right-12 top-1/2 -translate-y-1/2 p-1 bg-white z-10 border-none rounded cursor-pointer"
+                                    className="absolute right-12 top-1/2 -translate-y-1/2 p-1 bg-white z-10 border-none rounded cursor-pointer hover:bg-gray-100 transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        dispatch(removeSearchItem(item));
+                                        dispatch(setSelectedSearchItems([]));
                                     }}
+                                    title="Remove all search items"
                                 >
-                                    <X className="h-4 w-4 text-gray-500" />
+                                    <X className="h-4 w-4 text-gray-500 hover:text-gray-900" />
                                 </button>
-                            ))}
+                            )}
                         </div>
 
                         {filterState.showSuggestions && currentInput.trim() !== "" && (
@@ -586,19 +595,26 @@ export default function FilterSection() {
                                     </div>
                                 ) : suggestions?.data?.length > 0 ? (
                                     <>
-                                        {!suggestions?.data?.some(({ title }: { title: string }) => title.toLowerCase() === currentInput.toLowerCase()) && (
-                                            <div
-                                                className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                                onMouseDown={() => addSearchItemHandler(currentInput)}
-                                            >
-                                                {currentInput}
-                                            </div>
-                                        )}
+                                        {!suggestions?.data?.some(({ title }: { title: string }) => title.toLowerCase() === currentInput.toLowerCase()) &&
+                                            filterState.selectedSearchItems.length < 5 && (
+                                                <div
+                                                    className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                                                    onMouseDown={() => addSearchItemHandler(currentInput)}
+                                                >
+                                                    {currentInput}
+                                                </div>
+                                            )}
                                         {suggestions.data.map(({ title }: { title: string }, i: number) => (
                                             <div
                                                 key={i}
-                                                className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
-                                                onMouseDown={() => addSearchItemHandler(title)}
+                                                className={`p-2 text-sm hover:bg-gray-100 ${filterState.selectedSearchItems.length >= 5 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                                onMouseDown={() => {
+                                                    if (filterState.selectedSearchItems.length < 5) {
+                                                        addSearchItemHandler(title);
+                                                    } else {
+                                                        toast.error("You can only add up to 5 search values");
+                                                    }
+                                                }}
                                             >
                                                 {title}
                                             </div>

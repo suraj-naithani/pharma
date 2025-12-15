@@ -43,18 +43,26 @@ export default function AppliedFilters() {
     const [triggerFilterValues] = useLazyGetFilterValuesQuery();
     const [triggerShipmentTable] = useLazyGetShipmentTableQuery();
 
-    // Get HS Code hierarchy from filter options
+    // Get HS Code hierarchy - merge selected codes with filter options to ensure complete hierarchy
     const hsCodeHierarchy = useMemo(() => {
+        const selectedHSCodes = filterState.filters?.["H S Code"] || [];
+        const selectedCodesSet = new Set(Array.isArray(selectedHSCodes) ? selectedHSCodes.map(code => String(code)) : []);
+
+        // Get codes from filter options
         const filterOptions = (dashboardData?.filter ?? {}) as { [key: string]: unknown[] };
         const hsCodeOptions = filterOptions["H S Code"] || [];
-        const hsCodes = Array.isArray(hsCodeOptions) ? hsCodeOptions.map(opt => {
+        const filterCodes = Array.isArray(hsCodeOptions) ? hsCodeOptions.map(opt => {
             if (typeof opt === 'object' && opt !== null && 'value' in opt) {
                 return String((opt as { value: unknown }).value);
             }
             return String(opt);
         }) : [];
-        return transformHSCodeToHierarchy(hsCodes);
-    }, [dashboardData?.filter]);
+
+        // Merge selected codes with filter codes to ensure we have all codes for proper hierarchy
+        const allCodes = Array.from(new Set([...Array.from(selectedCodesSet), ...filterCodes]));
+
+        return transformHSCodeToHierarchy(allCodes);
+    }, [filterState.filters, dashboardData?.filter]);
 
     // Get grouped filters by category
     const getGroupedFilters = () => {
@@ -126,7 +134,8 @@ export default function AppliedFilters() {
     };
 
     const groupedFilters = getGroupedFilters();
-    const totalFilters = groupedFilters.reduce((sum, group) => sum + group.values.length, 0);
+    // Count categories with at least one selection
+    const totalFilters = groupedFilters.length;
 
     const handleFilterChange = async () => {
         setIsLoading(true);
@@ -248,7 +257,7 @@ export default function AppliedFilters() {
                             {groupedFilters.map((group, groupIndex) => (
                                 <div key={groupIndex} className="inline-flex flex-wrap items-center gap-1.5">
                                     <span className="text-[11px] font-medium text-gray-600">
-                                        {group.category}:
+                                        {group.category} ({group.values.length}):
                                     </span>
                                     {group.values.map((item, valueIndex) => (
                                         <Badge
