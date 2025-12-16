@@ -459,17 +459,21 @@ export default function FilterSidebar() {
     );
 
     const handleApplyFilters = useCallback(
-        async () => {
+        async (includeRanges: boolean = false) => {
             setIsLoading(true);
             const toastId = toast.loading("Applying filters...");
 
             try {
-                // Create updated filters with range slider values in correct format
-                const updatedFilters = {
+                // Start with existing filters
+                const updatedFilters: Record<string, string[] | { min: number; max: number }> = {
                     ...filterValues,
-                    "Unit Price": { min: unitPriceRange[0], max: unitPriceRange[1] },
-                    "Quantity": { min: quantityRange[0], max: quantityRange[1] }
                 };
+
+                // Only write range filters when explicitly requested (from their own sections)
+                if (includeRanges) {
+                    updatedFilters["Unit Price"] = { min: unitPriceRange[0], max: unitPriceRange[1] };
+                    updatedFilters["Quantity"] = { min: quantityRange[0], max: quantityRange[1] };
+                }
 
                 await getRecordData(updatedFilters);
                 toast.success("Filters applied successfully!", { id: toastId });
@@ -606,7 +610,7 @@ export default function FilterSidebar() {
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
-                                                        onClick={handleApplyFilters}
+                                                        onClick={() => handleApplyFilters(true)}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -628,7 +632,7 @@ export default function FilterSidebar() {
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
-                                                        onClick={handleApplyFilters}
+                                                        onClick={() => handleApplyFilters(true)}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -641,6 +645,17 @@ export default function FilterSidebar() {
                                             <div className="space-y-3">
                                                 <HierarchicalHSCode
                                                     hsCodes={Array.isArray(options) ? options.map(extractOptionValue) : []}
+                                                    hsCodeCounts={Array.isArray(options)
+                                                        ? options.reduce((acc, option) => {
+                                                            const value = extractOptionValue(option);
+                                                            const countStr = extractOptionCount(option);
+                                                            const count = countStr !== null ? Number(countStr) : NaN;
+                                                            if (value && !Number.isNaN(count)) {
+                                                                acc[value] = (acc[value] || 0) + count;
+                                                            }
+                                                            return acc;
+                                                        }, {} as Record<string, number>)
+                                                        : {}}
                                                     selectedCodes={Array.isArray(filterValues[category]) ? filterValues[category] as string[] : []}
                                                     onSelectionChange={(selectedCodes) => {
                                                         dispatch(setFilterValues({ category, values: selectedCodes }));
@@ -786,7 +801,7 @@ export default function FilterSidebar() {
                                                 {/* Apply Filter Button */}
                                                 <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
                                                     <Button
-                                                        onClick={handleApplyFilters}
+                                                        onClick={() => handleApplyFilters(false)}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >

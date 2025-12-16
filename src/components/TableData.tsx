@@ -302,7 +302,7 @@ export default function TableData<TData extends Record<string, any>>({
                                         className="flex-1 h-8 text-xs border border-slate-200"
                                     >
                                         <Eye className="mr-1 h-3 w-3" />
-                                        Show All
+                                        Select all
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -311,7 +311,7 @@ export default function TableData<TData extends Record<string, any>>({
                                         className="flex-1 h-8 text-xs border border-slate-200"
                                     >
                                         <EyeOff className="mr-1 h-3 w-3" />
-                                        Hide All
+                                        Unselect all
                                     </Button>
                                 </div>
                             </div>
