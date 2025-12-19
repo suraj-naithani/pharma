@@ -47,7 +47,6 @@ import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
-// Custom hook for debouncing
 const useDebounce = (value: string, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -87,7 +86,7 @@ type SearchInputProps = {
 
 const SearchInput = ({ category, value, onChange, onDebouncedSearch }: SearchInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const debouncedValue = useDebounce(value, 300); // 300ms debounce delay
+    const debouncedValue = useDebounce(value, 300);
 
     useEffect(() => {
         if (onDebouncedSearch && debouncedValue !== value) {
@@ -134,7 +133,6 @@ export default function FilterSidebar() {
     const filterValues = useMemo(() => filterState.filters || {}, [filterState.filters]);
     const filterMetadata = useMemo(() => dashboardData?.filterMetadata || {}, [dashboardData?.filterMetadata]);
 
-    // Calculate HS Code group count (number of top-level chapters)
     const hsCodeGroupCount = useMemo(() => {
         const hsCodeOptions = filterOptions["H S Code"] || [];
         const hsCodes = Array.isArray(hsCodeOptions) ? hsCodeOptions.map(opt => {
@@ -147,19 +145,16 @@ export default function FilterSidebar() {
         return Object.keys(hierarchy).length;
     }, [filterOptions]);
 
-    // Filter categories based on selectedDataType: hide CAS Number when Raw is selected
     const visibleFilterKeys = useMemo(() => {
         if (filterState.selectedDataType === "Raw") {
-            return defaultFilterKeys.filter(key => key !== "CAS Number");
+            return defaultFilterKeys.filter(key => key !== "CAS Number" && key !== "Product Name");
         }
         return defaultFilterKeys;
     }, [filterState.selectedDataType]);
 
-    // Update range sliders when filter data changes
     useEffect(() => {
         if (filterOptions["Unit Price"] && typeof filterOptions["Unit Price"] === 'object' && 'min' in filterOptions["Unit Price"] && 'max' in filterOptions["Unit Price"]) {
             const unitPriceData = filterOptions["Unit Price"] as { min: number; max: number };
-            // Only update if the current range is still at default values
             if (unitPriceRange[0] === 0 && unitPriceRange[1] === 1000000) {
                 setUnitPriceRange([unitPriceData.min, unitPriceData.max]);
             }
@@ -167,7 +162,6 @@ export default function FilterSidebar() {
 
         if (filterOptions["Quantity"] && typeof filterOptions["Quantity"] === 'object' && 'min' in filterOptions["Quantity"] && 'max' in filterOptions["Quantity"]) {
             const quantityData = filterOptions["Quantity"] as { min: number; max: number };
-            // Only update if the current range is still at default values
             if (quantityRange[0] === 0 && quantityRange[1] === 1000000) {
                 setQuantityRange([quantityData.min, quantityData.max]);
             }
@@ -187,7 +181,7 @@ export default function FilterSidebar() {
             if (option && typeof option === 'object' && 'min' in option && 'max' in option) {
                 return { min: option.min, max: option.max };
             }
-            return { min: 0, max: 1000000 }; // Default values
+            return { min: 0, max: 1000000 };
         },
         [filterOptions]
     );
@@ -231,11 +225,9 @@ export default function FilterSidebar() {
                 triggerFilterValues(data).unwrap(),
                 triggerFilterMetadata(data).unwrap()
             ]);
-            // Dispatch summary stats and filter data
             dispatch(setSummaryStats(summaryRes.metrics.summaryStats));
             dispatch(setFilterData(filtersRes.filters));
 
-            // Process and store filter metadata
             if (metadataRes?.metadata) {
                 const metadataMap: Record<string, number> = {};
                 metadataRes.metadata.forEach((item: { displayName: string; uniqueValueCount: number }) => {
@@ -244,7 +236,6 @@ export default function FilterSidebar() {
                 dispatch(setFilterMetadata(metadataMap));
             }
 
-            // Dispatch all top metrics data from the single all-top-metrics API
             dispatch(setTopBuyersByQuantity(allTopMetricsRes.metrics.topBuyersByQuantity));
             dispatch(setTopBuyersByValue(allTopMetricsRes.metrics.topBuyersByValue));
             dispatch(setTopYearsByQuantity(allTopMetricsRes.metrics.topYearsByQuantity));
@@ -291,14 +282,12 @@ export default function FilterSidebar() {
 
     const handleCheckboxChange = useCallback(
         (category: string, value: string, checked: boolean) => {
-            // Skip checkbox changes for range-based filters
             if (category === "Unit Price" || category === "Quantity") {
                 return;
             }
 
             const currentValues = filterValues[category];
 
-            // Ensure currentValues is an array
             if (!Array.isArray(currentValues)) {
                 return;
             }
@@ -316,12 +305,10 @@ export default function FilterSidebar() {
         async (category: string, checked: boolean) => {
             const options = filterOptions[category] || [];
 
-            // Skip select all for range-based filters (Unit Price, Quantity)
             if (category === "Unit Price" || category === "Quantity") {
                 return;
             }
 
-            // Ensure options is an array before calling map
             if (!Array.isArray(options)) {
                 return;
             }
@@ -339,13 +326,11 @@ export default function FilterSidebar() {
                     : clearFilterCategory(category)
             );
 
-            // Create updated filters object for API call
             const updatedFilters = {
                 ...filterValues,
                 [category]: newValues
             };
 
-            // Call API immediately with updated filters
             try {
                 await getRecordData(updatedFilters);
             } catch (error) {
@@ -362,13 +347,11 @@ export default function FilterSidebar() {
             try {
                 dispatch(clearFilterCategory(category));
 
-                // Create updated filters object for API call
                 const updatedFilters = {
                     ...filterValues,
                     [category]: []
                 };
 
-                // For range filters, reset to default range
                 if (category === "Unit Price") {
                     const rangeValues = getRangeValues(category);
                     updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
@@ -377,7 +360,6 @@ export default function FilterSidebar() {
                     updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
                 }
 
-                // Call API immediately with updated filters
                 await getRecordData(updatedFilters);
                 toast.success(`${category} filter cleared successfully!`, { id: toastId });
             } catch (error) {
@@ -394,19 +376,15 @@ export default function FilterSidebar() {
             const toastId = toast.loading("Clearing all filters...");
 
             try {
-                // Clear all filter values
                 Object.keys(filterValues).forEach(category => {
                     dispatch(clearFilterCategory(category));
                 });
 
-                // Clear search terms
                 setCategorySearchTerms({});
 
-                // Reset range sliders to default values
                 setUnitPriceRange([0, 1000000]);
                 setQuantityRange([0, 1000000]);
 
-                // Call API with empty filters (initial payload)
                 await getRecordData({});
                 toast.success("All filters cleared successfully!", { id: toastId });
             } catch (error) {
@@ -428,7 +406,6 @@ export default function FilterSidebar() {
 
     const handleDebouncedSearch = useCallback(
         async (searchTerm: string) => {
-            // Only call API if search term has at least 2 characters
             if (!searchTerm.trim() || searchTerm.trim().length < 2) return;
 
             try {
@@ -441,7 +418,6 @@ export default function FilterSidebar() {
 
                 const searchResults = await triggerSearchFilters(searchParams).unwrap();
 
-                // Update filter options with search results if they exist
                 if (searchResults?.filters) {
                     dispatch(setFilterData(searchResults.filters));
                 }
@@ -464,12 +440,10 @@ export default function FilterSidebar() {
             const toastId = toast.loading("Applying filters...");
 
             try {
-                // Start with existing filters
                 const updatedFilters: Record<string, string[] | { min: number; max: number }> = {
                     ...filterValues,
                 };
 
-                // Only write range filters when explicitly requested (from their own sections)
                 if (includeRanges) {
                     updatedFilters["Unit Price"] = { min: unitPriceRange[0], max: unitPriceRange[1] };
                     updatedFilters["Quantity"] = { min: quantityRange[0], max: quantityRange[1] };
@@ -492,8 +466,8 @@ export default function FilterSidebar() {
         []
     );
 
-    const INITIAL_ITEMS = 100; // Initial items to show
-    const LOAD_MORE_COUNT = 50; // Items to load when clicking "Load More"
+    const INITIAL_ITEMS = 100;
+    const LOAD_MORE_COUNT = 50;
 
     const handleLoadMore = useCallback((category: string) => {
         setVisibleItemsCount(prev => ({
@@ -504,24 +478,20 @@ export default function FilterSidebar() {
 
     const getFilteredOptions = useCallback(
         (category: string, options: unknown[] | { min: number; max: number } = []) => {
-            // Skip filtering for range-based filters
             if (category === "Unit Price" || category === "Quantity") {
                 return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
-            // Ensure options is an array before filtering
             if (!Array.isArray(options)) {
                 return { displayed: [], total: 0, hasMore: false, displayedObjects: [] };
             }
 
             const searchTerm = categorySearchTerms[category] || "";
-            // Filter the original options first (preserving objects), then extract values
             const filteredObjects = options.filter((option) => {
                 const value = extractOptionValue(option);
                 return value.toLowerCase().includes(searchTerm.toLowerCase());
             });
 
-            // Extract values from filtered objects for backward compatibility
             const filtered = filteredObjects.map(extractOptionValue);
 
             const limit = visibleItemsCount[category] || INITIAL_ITEMS;
@@ -597,7 +567,6 @@ export default function FilterSidebar() {
                                     </AccordionTrigger>
                                     <AccordionContent className="px-4 pb-4 pt-2">
                                         {category === "Unit Price" ? (
-                                            // Unit Price slider
                                             <div className="space-y-3">
                                                 <RangeSlider
                                                     value={unitPriceRange}
@@ -619,7 +588,6 @@ export default function FilterSidebar() {
                                                 </div>
                                             </div>
                                         ) : category === "Quantity" ? (
-                                            // Quantity slider
                                             <div className="space-y-3">
                                                 <RangeSlider
                                                     value={quantityRange}
@@ -641,7 +609,6 @@ export default function FilterSidebar() {
                                                 </div>
                                             </div>
                                         ) : category === "H S Code" ? (
-                                            // Special hierarchical component for HS Code
                                             <div className="space-y-3">
                                                 <HierarchicalHSCode
                                                     hsCodes={Array.isArray(options) ? options.map(extractOptionValue) : []}
@@ -662,7 +629,6 @@ export default function FilterSidebar() {
                                                     }}
                                                     disabled={isLoading}
                                                 />
-                                                {/* Apply Filter Button for HS Code */}
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
                                                         onClick={handleApplyFilters}
@@ -680,7 +646,6 @@ export default function FilterSidebar() {
                                                 </div>
                                             </div>
                                         ) : (
-                                            // Default filter component for other categories
                                             <>
                                                 <SearchInput
                                                     category={category}
@@ -732,7 +697,6 @@ export default function FilterSidebar() {
                                                         {filteredOptions.length > 0 ? (
                                                             <>
                                                                 {filteredOptions.map((option, index) => {
-                                                                    // Get the original option object from displayedObjects array
                                                                     const originalOption = displayedObjects[index];
                                                                     const count = originalOption ? extractOptionCount(originalOption) : null;
 
@@ -798,7 +762,6 @@ export default function FilterSidebar() {
                                                     </div>
                                                 </ScrollArea>
 
-                                                {/* Apply Filter Button */}
                                                 <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
                                                     <Button
                                                         onClick={() => handleApplyFilters(false)}
@@ -874,7 +837,6 @@ export default function FilterSidebar() {
                     </SheetContent>
                 </Sheet>
             </div>
-            {/* Tooltip Portal */}
             {hoveredOption && (
                 <div
                     className="fixed z-[9999] pointer-events-none"
@@ -889,7 +851,6 @@ export default function FilterSidebar() {
                             {hoveredOption.text}
                         </p>
                     </div>
-                    {/* Tooltip Arrow */}
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45"></div>
                 </div>
             )}

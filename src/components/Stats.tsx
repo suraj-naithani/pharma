@@ -24,21 +24,23 @@ const Stats = () => {
     const statsData = [
         {
             title: "Volume",
-            value: summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0",
+            value: summaryStats?.totalQuantity ? `${formatNumber(summaryStats?.totalQuantity)} kg` : "0 kg",
             icon: TrendingUp,
             color: "text-red-500",
             bgColor: "bg-red-50"
         },
         {
             title: "Value",
-            value: summaryStats?.totalValueUSD ? `$${formatNumber(summaryStats?.totalValueUSD)}` : "$0.0",
+            value: summaryStats?.totalValueUSD ? `US$ ${formatNumber(summaryStats?.totalValueUSD)}` : "US$ 0.0",
             icon: DollarSign,
             color: "text-amber-500",
             bgColor: "bg-amber-50"
         },
         {
             title: "Avg Price",
-            value: summaryStats?.totalQuantity ? (summaryStats?.totalValueUSD / summaryStats?.totalQuantity).toFixed(2) : "0.00",
+            value: summaryStats?.totalQuantity
+                ? `US$ ${(summaryStats?.totalValueUSD / summaryStats?.totalQuantity).toFixed(2)}/kg`
+                : "US$ 0.00/kg",
             icon: BarChart3,
             color: "text-blue-500",
             bgColor: "bg-blue-50"

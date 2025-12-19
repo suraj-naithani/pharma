@@ -145,7 +145,7 @@ export default function AppliedFilters() {
             selectedToggle: filterState.selectedToggle || "import",
             selectedDataType: filterState.selectedDataType || null,
             dateRange: {
-                from: filterState.dateRange?.from || moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                from: filterState.dateRange?.from || (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })(),
                 to: filterState.dateRange?.to || moment(new Date()).format("YYYY-MM-DD")
             },
             selectedChapters: filterState.selectedChapters || [],

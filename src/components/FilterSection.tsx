@@ -118,13 +118,15 @@ export default function FilterSection() {
         e.preventDefault();
         setIsLoading(true);
 
-        dispatch(clearAllFilters());
+        // Reset all data before applying new filters
+        dispatch(clearDashboardStats());
+        dispatch(clearShipmentTable());
 
         const safeFilterState = {
             selectedToggle: filterState.selectedToggle || "import",
             selectedDataType: filterState.selectedDataType || null,
             dateRange: {
-                from: filterState.dateRange?.from || moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                from: filterState.dateRange?.from || (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })(),
                 to: filterState.dateRange?.to || moment(new Date()).format("YYYY-MM-DD")
             },
             selectedChapters: filterState.selectedChapters || [],
@@ -298,9 +300,12 @@ export default function FilterSection() {
         }
     };
 
+    // Reset all data when any filter changes
     useEffect(() => {
         setCurrentInput("");
         dispatch(setSelectedSearchItems([]));
+        dispatch(clearDashboardStats());
+        dispatch(clearShipmentTable());
     }, [
         filterState.selectedDataType,
         filterState.selectedSearchType,
@@ -333,7 +338,12 @@ export default function FilterSection() {
                         type="single"
                         value={filterState.selectedToggle}
                         onValueChange={(value) => {
-                            if (value) dispatch(setSelectedToggle(value as "import" | "export"));
+                            if (value) {
+                                dispatch(setSelectedToggle(value as "import" | "export"));
+                                // Reset all data when toggle changes
+                                dispatch(clearDashboardStats());
+                                dispatch(clearShipmentTable());
+                            }
                         }}
                         className="rounded-lg border border-[#C7D2FE] overflow-hidden"
                     >
@@ -375,7 +385,7 @@ export default function FilterSection() {
                                     selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
                                     defaultMonth={filterState.dateRange.from ? new Date(filterState.dateRange.from) : new Date()}
                                     onSelect={(date) =>
-                                        dispatch(setStartDate(date ? date.toISOString() : moment(new Date(2020, 5, 11)).format("YYYY-MM-DD")))
+                                        dispatch(setStartDate(date ? date.toISOString() : (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })()))
                                     }
                                     initialFocus
                                 />
@@ -464,7 +474,11 @@ export default function FilterSection() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
-                            {chapterOptions.map((chapter: number) => {
+                            {filterState.selectedChapters.length === 0 ? (
+                                <DropdownMenuItem className="text-gray-500 cursor-not-allowed" disabled>
+                                    No chapter
+                                </DropdownMenuItem>
+                            ) : chapterOptions.map((chapter: number) => {
                                 const isSelected = filterState.selectedChapters.includes(chapter);
 
                                 return (
