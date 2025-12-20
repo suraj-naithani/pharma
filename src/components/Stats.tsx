@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { RootState } from "@/redux/store";
 import { formatNumber } from "@/utils/helper";
-import { BarChart3, Building, Building2, DollarSign, Package, TrendingUp } from "lucide-react";
+import { BarChart3, Building, Building2, DollarSign, Package, TrendingUp, Globe2 } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const Stats = () => {
@@ -19,24 +19,28 @@ const Stats = () => {
         ? (summaryStats?.uniqueBuyers ? formatNumber(summaryStats.uniqueBuyers) : "0")
         : (summaryStats?.uniqueSuppliers ? formatNumber(summaryStats.uniqueSuppliers) : "0");
 
+    const uniqueCountriesValue = summaryStats?.uniqueCountry ? formatNumber(summaryStats.uniqueCountry) : "0";
+
     const statsData = [
         {
             title: "Volume",
-            value: summaryStats?.totalQuantity ? formatNumber(summaryStats?.totalQuantity) : "0",
+            value: summaryStats?.totalQuantity ? `${formatNumber(summaryStats?.totalQuantity)} kg` : "0 kg",
             icon: TrendingUp,
             color: "text-red-500",
             bgColor: "bg-red-50"
         },
         {
             title: "Value",
-            value: summaryStats?.totalValueUSD ? `$${formatNumber(summaryStats?.totalValueUSD)}` : "$0.0",
+            value: summaryStats?.totalValueUSD ? `US$ ${formatNumber(summaryStats?.totalValueUSD)}` : "US$ 0.0",
             icon: DollarSign,
             color: "text-amber-500",
             bgColor: "bg-amber-50"
         },
         {
             title: "Avg Price",
-            value: summaryStats?.totalQuantity ? (summaryStats?.totalValueUSD / summaryStats?.totalQuantity).toFixed(2) : "0.00",
+            value: summaryStats?.totalQuantity
+                ? `US$ ${(summaryStats?.totalValueUSD / summaryStats?.totalQuantity).toFixed(2)}/kg`
+                : "US$ 0.00/kg",
             icon: BarChart3,
             color: "text-blue-500",
             bgColor: "bg-blue-50"
@@ -47,6 +51,13 @@ const Stats = () => {
             icon: Package,
             color: "text-purple-500",
             bgColor: "bg-purple-50"
+        },
+        {
+            title: "Countries",
+            value: uniqueCountriesValue,
+            icon: Globe2,
+            color: "text-cyan-600",
+            bgColor: "bg-cyan-50"
         },
         {
             title: "Indian Companies",
@@ -65,7 +76,7 @@ const Stats = () => {
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
             {statsData.map((stat, index) => {
                 const Icon = stat.icon;
                 return (

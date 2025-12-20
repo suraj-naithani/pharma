@@ -17,6 +17,7 @@ interface HierarchicalHSCodeProps {
     selectedCodes: string[];
     onSelectionChange: (selectedCodes: string[]) => void;
     disabled?: boolean;
+    hsCodeCounts?: Record<string, number>;
 }
 
 interface ExpandedState {
@@ -27,13 +28,33 @@ export default function HierarchicalHSCode({
     hsCodes,
     selectedCodes,
     onSelectionChange,
-    disabled = false
+    disabled = false,
+    hsCodeCounts
 }: HierarchicalHSCodeProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [expanded, setExpanded] = useState<ExpandedState>({});
 
     // Transform flat array to hierarchy
     const hierarchy = useMemo(() => transformHSCodeToHierarchy(hsCodes), [hsCodes]);
+
+    // Helper to get summed count for a prefix (chapter / heading / subheading) from API counts
+    const getSumCountForPrefix = useCallback(
+        (prefix: string) => {
+            if (!hsCodeCounts || Object.keys(hsCodeCounts).length === 0) {
+                // Fallback to hierarchy-based counting if no API counts provided
+                return getCountForItem(hierarchy, prefix);
+            }
+
+            let sum = 0;
+            Object.entries(hsCodeCounts).forEach(([code, count]) => {
+                if (code.startsWith(prefix)) {
+                    sum += count;
+                }
+            });
+            return sum;
+        },
+        [hsCodeCounts, hierarchy]
+    );
 
     // Filter hierarchy based on search term
     const filteredHierarchy = useMemo(() => {
@@ -188,7 +209,7 @@ export default function HierarchicalHSCode({
                                         <span className="text-sm font-medium">{chapter}</span>
                                     </div>
                                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                                        {getCountForItem(hierarchy, chapter)}
+                                        {getSumCountForPrefix(chapter)}
                                     </span>
                                 </div>
 
@@ -227,7 +248,7 @@ export default function HierarchicalHSCode({
                                                             <span className="text-sm">{heading}</span>
                                                         </div>
                                                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                                                            {getCountForItem(hierarchy, heading)}
+                                                            {getSumCountForPrefix(heading)}
                                                         </span>
                                                     </div>
 
@@ -266,7 +287,7 @@ export default function HierarchicalHSCode({
                                                                                 <span className="text-sm">{subheading}</span>
                                                                             </div>
                                                                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                                                                                {getCountForItem(hierarchy, subheading)}
+                                                                                {getSumCountForPrefix(subheading)}
                                                                             </span>
                                                                         </div>
 

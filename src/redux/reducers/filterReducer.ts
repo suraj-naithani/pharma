@@ -5,7 +5,7 @@ import moment from "moment";
 
 const initialState: FilterState = {
     dateRange: {
-        from: moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+        from: (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })(),
         to: moment(new Date()).format("YYYY-MM-DD"),
     },
     selectedDataType: null,
@@ -87,7 +87,7 @@ const filterSlice = createSlice({
         setShowSuggestions(state, action: PayloadAction<boolean>) {
             state.showSuggestions = action.payload;
         },
-        setFilter(state, action: PayloadAction<any>) {
+        setFilter(state, action: PayloadAction<Record<string, string[]>>) {
             state.filters = action.payload;
         },
         setFilterValues(state, action: PayloadAction<{ category: string; values: string[] }>) {
@@ -137,7 +137,7 @@ const filterSlice = createSlice({
         resetAllData(state) {
             // Reset to initial state
             state.dateRange = {
-                from: moment(new Date(2020, 5, 11)).format("YYYY-MM-DD"),
+                from: (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })(),
                 to: moment(new Date()).format("YYYY-MM-DD"),
             };
             state.selectedDataType = null;
