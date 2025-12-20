@@ -46,6 +46,8 @@ import { toast } from "sonner"
 export default function FilterSection() {
     const [currentInput, setCurrentInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isStartDateOpen, setIsStartDateOpen] = useState(false);
+    const [isEndDateOpen, setIsEndDateOpen] = useState(false);
 
     const filterState = useSelector((state: RootState) => state.filter);
     const dispatch = useDispatch();
@@ -364,7 +366,7 @@ export default function FilterSection() {
                     </ToggleGroup>
 
                     <div className="flex flex-row gap-1 flex-wrap sm:flex-nowrap">
-                        <Popover>
+                        <Popover open={isStartDateOpen} onOpenChange={setIsStartDateOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -384,15 +386,22 @@ export default function FilterSection() {
                                     mode="single"
                                     selected={filterState.dateRange.from ? new Date(filterState.dateRange.from) : undefined}
                                     defaultMonth={filterState.dateRange.from ? new Date(filterState.dateRange.from) : new Date()}
-                                    onSelect={(date) =>
-                                        dispatch(setStartDate(date ? date.toISOString() : (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })()))
-                                    }
+                                    onSelect={(date) => {
+                                        dispatch(setStartDate(date ? date.toISOString() : (() => { const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); return moment(oneYearAgo).format("YYYY-MM-DD"); })()));
+                                        setIsStartDateOpen(false); // Close the popover after selection
+                                    }}
                                     initialFocus
+                                    className="calendar-selected-date"
+                                    classNames={{
+                                        selected: "calendar-selected-date",
+                                        day_selected: "calendar-selected-date",
+                                        day_button: "[&[data-selected-single=true]]:calendar-selected-date"
+                                    }}
                                 />
                             </PopoverContent>
                         </Popover>
 
-                        <Popover>
+                        <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -412,10 +421,17 @@ export default function FilterSection() {
                                     mode="single"
                                     selected={filterState.dateRange.to ? new Date(filterState.dateRange.to) : undefined}
                                     defaultMonth={filterState.dateRange.to ? new Date(filterState.dateRange.to) : new Date()}
-                                    onSelect={(date) =>
-                                        dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")))
-                                    }
+                                    onSelect={(date) => {
+                                        dispatch(setEndDate(date ? date.toISOString() : moment(new Date()).format("YYYY-MM-DD")));
+                                        setIsEndDateOpen(false); // Close the popover after selection
+                                    }}
                                     initialFocus
+                                    className="calendar-selected-date"
+                                    classNames={{
+                                        selected: "calendar-selected-date",
+                                        day_selected: "calendar-selected-date",
+                                        day_button: "[&[data-selected-single=true]]:calendar-selected-date"
+                                    }}
                                 />
                             </PopoverContent>
                         </Popover>
@@ -474,7 +490,7 @@ export default function FilterSection() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-[140px] bg-white border border-gray-200">
-                            {filterState.selectedChapters.length === 0 ? (
+                            {chaptersData && chaptersData.chapters && chaptersData.chapters.length <= 0 ? (
                                 <DropdownMenuItem className="text-gray-500 cursor-not-allowed" disabled>
                                     No chapter
                                 </DropdownMenuItem>
