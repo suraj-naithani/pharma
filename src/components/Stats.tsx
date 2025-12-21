@@ -53,13 +53,6 @@ const Stats = () => {
             bgColor: "bg-purple-50"
         },
         {
-            title: "Countries",
-            value: uniqueCountriesValue,
-            icon: Globe2,
-            color: "text-cyan-600",
-            bgColor: "bg-cyan-50"
-        },
-        {
             title: "Indian Companies",
             value: indianCompaniesValue,
             icon: Building,
@@ -72,6 +65,13 @@ const Stats = () => {
             icon: Building2,
             color: "text-slate-500",
             bgColor: "bg-slate-50"
+        },
+        {
+            title: "Countries",
+            value: uniqueCountriesValue,
+            icon: Globe2,
+            color: "text-cyan-600",
+            bgColor: "bg-cyan-50"
         }
     ];
 

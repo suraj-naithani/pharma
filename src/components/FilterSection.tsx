@@ -34,7 +34,7 @@ import {
     setTopYearsByValue,
     clearDashboardStats
 } from "@/redux/reducers/dashboardReducer"
-import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedSearchItems, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter, resetAllData, clearAllFilters } from "@/redux/reducers/filterReducer"
+import { addSearchItem, removeSearchItem, setEndDate, setSelectedChapters, setSelectedDataType, setSelectedSearchType, setSelectedSearchItems, setSelectedToggle, setShowSuggestions, setStartDate, toggleChapter } from "@/redux/reducers/filterReducer"
 import { setShipmentTable, clearShipmentTable } from "@/redux/reducers/shipmentReducer"
 import type { RootState } from "@/redux/store"
 import { CalendarDays, ChevronDown, RefreshCw, Search, X } from "lucide-react"
@@ -67,6 +67,9 @@ export default function FilterSection() {
     // Clear chapters when toggle changes
     useEffect(() => {
         dispatch(setSelectedChapters([]));
+        // Reset data when toggle changes but preserve search
+        dispatch(clearDashboardStats());
+        dispatch(clearShipmentTable());
     }, [filterState.selectedToggle, dispatch]);
 
     // Fetch chapters when toggle or dates change
@@ -279,20 +282,11 @@ export default function FilterSection() {
         setIsLoading(true);
 
         try {
-            const currentToggle = filterState.selectedToggle;
-
+            // Only reset dashboard and shipment data, preserve all FilterSection data
             dispatch(clearDashboardStats());
             dispatch(clearShipmentTable());
 
-            dispatch(resetAllData());
-
-            if (currentToggle === "import" || currentToggle === "export") {
-                dispatch(setSelectedToggle(currentToggle));
-            }
-
-            setCurrentInput("");
-
-            toast.success("All data has been reset successfully!");
+            toast.success("Dashboard data has been reset successfully!");
 
         } catch (err: unknown) {
             console.error(err);
@@ -302,17 +296,15 @@ export default function FilterSection() {
         }
     };
 
-    // Reset all data when any filter changes
+    // Reset all data when search type or filter values change (but preserve search bar)
     useEffect(() => {
-        setCurrentInput("");
-        dispatch(setSelectedSearchItems([]));
         dispatch(clearDashboardStats());
         dispatch(clearShipmentTable());
     }, [
-        filterState.selectedDataType,
         filterState.selectedSearchType,
         filterState.selectedToggle,
         filterState.selectedChapters,
+        filterState.selectedDataType,
         dispatch
     ]);
 
@@ -342,9 +334,6 @@ export default function FilterSection() {
                         onValueChange={(value) => {
                             if (value) {
                                 dispatch(setSelectedToggle(value as "import" | "export"));
-                                // Reset all data when toggle changes
-                                dispatch(clearDashboardStats());
-                                dispatch(clearShipmentTable());
                             }
                         }}
                         className="rounded-lg border border-[#C7D2FE] overflow-hidden"
@@ -673,7 +662,7 @@ export default function FilterSection() {
                         className="rounded-lg border border-[#C7D2FE] bg-white hover:bg-[#EEF2FF] text-[#1E293B] transition-colors duration-200 flex-shrink-0"
                         onClick={handleResetAllData}
                         disabled={isLoading}
-                        title="Reset all data (graphs, tables, filters)"
+                        title="Reset dashboard graphs and tables (preserves filter selections)"
                     >
                         <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                     </Button>
