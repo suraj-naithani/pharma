@@ -119,8 +119,15 @@ export default function AppliedFilters() {
                                         } else {
                                             updatedValues = currentValues.filter((val: string) => val !== displayValue);
                                         }
+
+                                        // Create updated filters object with the new values
+                                        const updatedFilters = {
+                                            ...(filterState.filters || {}),
+                                            [category]: updatedValues
+                                        };
+
                                         dispatch(setFilterValues({ category, values: updatedValues }));
-                                        handleFilterChange();
+                                        handleFilterChange(updatedFilters);
                                     }
                                 }
                             }))
@@ -137,8 +144,11 @@ export default function AppliedFilters() {
     // Count categories with at least one selection
     const totalFilters = groupedFilters.length;
 
-    const handleFilterChange = async () => {
+    const handleFilterChange = async (updatedFilters?: Record<string, string[] | { min: number; max: number }>) => {
         setIsLoading(true);
+
+        // Use updated filters if provided, otherwise use current state
+        const filtersToUse = updatedFilters || filterState.filters || {};
 
         // Ensure we have proper default values even if Redux state isn't fully initialized
         const safeFilterState = {
@@ -151,7 +161,7 @@ export default function AppliedFilters() {
             selectedChapters: filterState.selectedChapters || [],
             selectedSearchType: filterState.selectedSearchType || null,
             selectedSearchItems: filterState.selectedSearchItems || [],
-            filters: filterState.filters || {}
+            filters: filtersToUse
         };
 
         const data = {

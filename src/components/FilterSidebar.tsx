@@ -353,11 +353,13 @@ export default function FilterSidebar() {
                 };
 
                 if (category === "Unit Price") {
-                    const rangeValues = getRangeValues(category);
-                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                    // Remove Unit Price filter and also remove Quantity filter
+                    delete updatedFilters["Unit Price"];
+                    delete updatedFilters["Quantity"];
                 } else if (category === "Quantity") {
-                    const rangeValues = getRangeValues(category);
-                    updatedFilters[category] = { min: rangeValues.min, max: rangeValues.max };
+                    // Remove Quantity filter and also remove Unit Price filter
+                    delete updatedFilters["Quantity"];
+                    delete updatedFilters["Unit Price"];
                 }
 
                 await getRecordData(updatedFilters);
@@ -367,7 +369,7 @@ export default function FilterSidebar() {
                 toast.error(`Failed to clear ${category} filter.`, { id: toastId });
             }
         },
-        [dispatch, filterValues, getRecordData, getRangeValues]
+        [dispatch, filterValues, getRecordData]
     );
 
     const handleClearAllFilters = useCallback(
@@ -435,7 +437,7 @@ export default function FilterSidebar() {
     );
 
     const handleApplyFilters = useCallback(
-        async (includeRanges: boolean = false) => {
+        async (rangeFilterType?: "Unit Price" | "Quantity") => {
             setIsLoading(true);
             const toastId = toast.loading("Applying filters...");
 
@@ -444,8 +446,14 @@ export default function FilterSidebar() {
                     ...filterValues,
                 };
 
-                if (includeRanges) {
+                // Remove both range filters first
+                delete updatedFilters["Unit Price"];
+                delete updatedFilters["Quantity"];
+
+                // Only include the specific range filter that was applied
+                if (rangeFilterType === "Unit Price") {
                     updatedFilters["Unit Price"] = { min: unitPriceRange[0], max: unitPriceRange[1] };
+                } else if (rangeFilterType === "Quantity") {
                     updatedFilters["Quantity"] = { min: quantityRange[0], max: quantityRange[1] };
                 }
 
@@ -573,13 +581,13 @@ export default function FilterSidebar() {
                                                     onChange={setUnitPriceRange}
                                                     min={getRangeValues(category).min}
                                                     max={getRangeValues(category).max}
-                                                    step={100}
+                                                    step={1}
                                                     disabled={isLoading}
                                                     formatValue={(val) => `$${val.toLocaleString()}`}
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
-                                                        onClick={() => handleApplyFilters(true)}
+                                                        onClick={() => handleApplyFilters("Unit Price")}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -600,7 +608,7 @@ export default function FilterSidebar() {
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
-                                                        onClick={() => handleApplyFilters(true)}
+                                                        onClick={() => handleApplyFilters("Quantity")}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -631,7 +639,7 @@ export default function FilterSidebar() {
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
                                                     <Button
-                                                        onClick={handleApplyFilters}
+                                                        onClick={() => handleApplyFilters()}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -764,7 +772,7 @@ export default function FilterSidebar() {
 
                                                 <div className="px-3 pt-3 pb-1 border-t border-gray-200 mt-2">
                                                     <Button
-                                                        onClick={() => handleApplyFilters(false)}
+                                                        onClick={() => handleApplyFilters()}
                                                         disabled={isLoading}
                                                         className="w-full bg-[#3B82F6] hover:bg-[#60A5FA] text-white font-medium py-2 px-4 rounded-md transition-colors cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
