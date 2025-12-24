@@ -308,6 +308,16 @@ export default function FilterSection() {
         dispatch
     ]);
 
+    // Clear search bar data when chapter or search type changes
+    useEffect(() => {
+        dispatch(setSelectedSearchItems([]));
+        setCurrentInput("");
+    }, [
+        filterState.selectedChapters,
+        filterState.selectedSearchType,
+        dispatch
+    ]);
+
     useEffect(() => {
         if (!currentInput.trim()) return;
 

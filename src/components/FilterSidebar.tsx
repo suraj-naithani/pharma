@@ -514,7 +514,7 @@ export default function FilterSidebar() {
 
     const FilterPanelContent = useMemo(
         () => (
-            <Card className="rounded-lg shadow-sm border border-gray-200 bg-white text-foreground flex flex-col w-full sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
+            <Card className="rounded-lg gap-0 py-0 pt-4 shadow-sm border border-gray-200 bg-white text-foreground flex flex-col w-full sticky top-5 z-40 max-h-[calc(100vh-2rem)]">
                 <CardHeader className="px-4 border-b border-gray-200 flex-shrink-0 !pb-4 relative">
                     <Button
                         onClick={() => setIsSheetOpen(false)}
@@ -700,7 +700,7 @@ export default function FilterSidebar() {
                                                     </Button>
                                                 </div>
 
-                                                <ScrollArea className="max-h-64 overflow-auto scrollbar-hide">
+                                                <ScrollArea className="max-h-[180px] overflow-auto scrollbar-hide">
                                                     <div className="p-3 space-y-2">
                                                         {filteredOptions.length > 0 ? (
                                                             <>
