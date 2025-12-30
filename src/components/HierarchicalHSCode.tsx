@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, Eraser } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,6 +18,7 @@ interface HierarchicalHSCodeProps {
     onSelectionChange: (selectedCodes: string[]) => void;
     disabled?: boolean;
     hsCodeCounts?: Record<string, number>;
+    onClearAll?: () => void;
 }
 
 interface ExpandedState {
@@ -29,7 +30,8 @@ export default function HierarchicalHSCode({
     selectedCodes,
     onSelectionChange,
     disabled = false,
-    hsCodeCounts
+    hsCodeCounts,
+    onClearAll
 }: HierarchicalHSCodeProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -120,8 +122,12 @@ export default function HierarchicalHSCode({
     }, [filteredHierarchy, selectedCodes, onSelectionChange]);
 
     const handleClearAll = useCallback(() => {
-        onSelectionChange([]);
-    }, [onSelectionChange]);
+        if (onClearAll) {
+            onClearAll();
+        } else {
+            onSelectionChange([]);
+        }
+    }, [onSelectionChange, onClearAll]);
 
     // Calculate select all state
     const selectAllState = useMemo(() => {
@@ -165,12 +171,14 @@ export default function HierarchicalHSCode({
                 </label>
                 <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={handleClearAll}
                     disabled={disabled || selectedCodes.length === 0}
-                    className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                    aria-label="Clear selection"
                 >
-                    Clear All
+                    <Eraser className="h-4 w-4" />
+                    <span className="sr-only">Clear selection</span>
                 </Button>
             </div>
 

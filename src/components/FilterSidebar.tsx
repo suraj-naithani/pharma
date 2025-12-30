@@ -635,6 +635,7 @@ export default function FilterSidebar() {
                                                     onSelectionChange={(selectedCodes) => {
                                                         dispatch(setFilterValues({ category, values: selectedCodes }));
                                                     }}
+                                                    onClearAll={() => handleClearSelection(category)}
                                                     disabled={isLoading}
                                                 />
                                                 <div className="pt-3 border-t border-gray-200">
