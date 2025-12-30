@@ -562,7 +562,7 @@ export default function FilterSection() {
                         >
                             <div
                                 ref={searchContainerRef}
-                                className="search-container custom-scrollbar flex items-center gap-1 overflow-x-auto h-full pl-3 pr-2"
+                                className="search-container custom-scrollbar flex items-center gap-1 overflow-x-auto overflow-y-hidden h-full pl-3 pr-2"
                             >
 
                                 {filterState.selectedSearchItems.map((item, index) => (
