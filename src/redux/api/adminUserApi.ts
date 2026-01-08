@@ -24,10 +24,10 @@ export const adminUserApi = createApi({
     }),
     tagTypes: ["user"],
     endpoints: (builder) => ({
-        // POST /api/auth/register - Register a new user
+        // POST /api/admin/users - Register a new user
         registerUser: builder.mutation<RegisterUserResponse, RegisterUserData>({
             query: (body) => ({
-                url: "register",
+                url: `${server}/api/admin/users`,
                 method: "POST",
                 body,
             }),

@@ -12,8 +12,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRegisterUserMutation } from "@/redux/api/adminUserApi"
+import { useGetCompaniesQuery } from "@/redux/api/adminApi"
 import type { RegisterUserData } from "@/types/users"
 import { toast } from "sonner"
+import { AlertTriangle } from "lucide-react"
 
 interface CreateUserDialogProps {
     isOpen: boolean
@@ -27,6 +29,10 @@ export default function CreateUserDialog({
     onSuccess
 }: CreateUserDialogProps) {
     const [registerUser, { isLoading }] = useRegisterUserMutation()
+    const { data: companiesData, isLoading: isLoadingCompanies } = useGetCompaniesQuery()
+
+    const companies = companiesData?.data || []
+    const hasNoCompanies = !isLoadingCompanies && companies.length === 0
 
     const [formData, setFormData] = useState<RegisterUserData>({
         name: "",
@@ -34,12 +40,14 @@ export default function CreateUserDialog({
         password: "",
         role: "parent",
         mobileNumber: "",
-        partyName: ""
+        partyName: "",
+        companyId: undefined,
+        parentId: null
     })
 
     const [errors, setErrors] = useState<Partial<Record<keyof RegisterUserData, string>>>({})
 
-    const handleInputChange = (field: keyof RegisterUserData, value: string) => {
+    const handleInputChange = (field: keyof RegisterUserData, value: string | number | null) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
@@ -89,12 +97,24 @@ export default function CreateUserDialog({
             newErrors.partyName = "Party name must be at least 2 characters long"
         }
 
+        if (!formData.companyId || formData.companyId <= 0) {
+            newErrors.companyId = "Company is required"
+        }
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (hasNoCompanies) {
+            toast.error("Cannot create user", {
+                description: "Please create a company first before creating a user.",
+                duration: 4000,
+            })
+            return
+        }
 
         if (!validateForm()) {
             return
@@ -105,9 +125,11 @@ export default function CreateUserDialog({
                 name: formData.name.trim(),
                 email: formData.email.trim(),
                 password: formData.password,
-                role: formData.role,
+                role: formData.role.toUpperCase(), // Convert to uppercase (PARENT/KID)
                 mobileNumber: formData.mobileNumber.replace(/\D/g, ""), // Remove non-digits
-                partyName: formData.partyName.trim()
+                partyName: formData.partyName.trim(),
+                companyId: formData.companyId,
+                parentId: formData.parentId || null
             }).unwrap()
 
             toast.success("User created successfully!", {
@@ -146,7 +168,9 @@ export default function CreateUserDialog({
             password: "",
             role: "parent",
             mobileNumber: "",
-            partyName: ""
+            partyName: "",
+            companyId: undefined,
+            parentId: null
         })
         setErrors({})
         onClose()
@@ -261,6 +285,45 @@ export default function CreateUserDialog({
                         )}
                     </div>
 
+                    <div className="grid gap-2">
+                        <Label htmlFor="companyId" className="text-sm font-medium">Company</Label>
+                        {hasNoCompanies ? (
+                            <div className="w-full p-3 bg-amber-50 border border-amber-200 rounded-md">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-amber-800">No companies available</p>
+                                        <p className="text-xs text-amber-700 mt-1">
+                                            Please create a company first before creating a user. You can create a company from the Companies page.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <Select
+                                    value={formData.companyId?.toString() || ""}
+                                    onValueChange={(value) => handleInputChange("companyId", Number(value))}
+                                    disabled={isLoadingCompanies || hasNoCompanies}
+                                >
+                                    <SelectTrigger className={`w-full bg-white text-gray-700 border-gray-300 text-sm h-9 ${errors.companyId ? "border-red-500" : ""}`}>
+                                        <SelectValue placeholder={isLoadingCompanies ? "Loading companies..." : "Select company"} />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white text-gray-700 border-gray-300">
+                                        {companies.map((company) => (
+                                            <SelectItem key={company.id} value={company.id.toString()}>
+                                                {company.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.companyId && (
+                                    <span className="text-sm text-red-500">{errors.companyId}</span>
+                                )}
+                            </>
+                        )}
+                    </div>
+
                     <DialogFooter className="gap-3 pt-4">
                         <Button
                             type="button"
@@ -272,8 +335,8 @@ export default function CreateUserDialog({
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50"
+                            disabled={isLoading || hasNoCompanies}
+                            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Creating..." : "Create User"}
                         </Button>

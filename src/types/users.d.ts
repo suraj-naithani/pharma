@@ -5,6 +5,8 @@ export interface RegisterUserData {
     role: string;
     mobileNumber: string;
     partyName: string;
+    companyId?: number;
+    parentId?: number | null;
 }
 
 export interface User {

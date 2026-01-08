@@ -1,4 +1,4 @@
-import { Home, Upload, Users, ChevronsLeft, ChevronsRight, FileText } from "lucide-react";
+import { Home, Upload, Users, ChevronsLeft, ChevronsRight, FileText, Building2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -24,6 +24,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     const menuItems = [
         { id: "home", label: "Home", icon: Home, path: "/admin-dashboard" },
         { id: "users", label: "Users", icon: Users, path: "/admin-dashboard/users" },
+        { id: "companies", label: "Companies", icon: Building2, path: "/admin-dashboard/companies" },
         { id: "subscriptions", label: "Subscriptions", icon: FileText, path: "/admin-dashboard/subscriptions" },
         { id: "upload", label: "Upload", icon: Upload, path: "/admin-dashboard/upload" },
     ];

@@ -24,6 +24,7 @@ const Dashboard = lazy(() => import("./pages/dashboard"));
 // Admin Pages
 const AdminHomePage = lazy(() => import("./pages/admin/home"));
 const AdminUsersPage = lazy(() => import("./pages/admin/users"));
+const AdminCompaniesPage = lazy(() => import("./pages/admin/companies"));
 const AdminSubscriptionsPage = lazy(() => import("./pages/admin/subscriptions"));
 const AdminUploadPage = lazy(() => import("./pages/admin/upload"));
 
@@ -71,6 +72,14 @@ const App = () => {
             element={
               <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
                 <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-dashboard/companies"
+            element={
+              <ProtectedRoute user={user ?? null} redirect="/signin" requireAuth={true}>
+                <AdminCompaniesPage />
               </ProtectedRoute>
             }
           />

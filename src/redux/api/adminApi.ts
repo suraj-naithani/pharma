@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { server } from "../../constants/config";
 import type { Subscription, SubscriptionResponse } from "@/types/subscription";
+import type { CreateCompanyData, CreateCompanyResponse, CompaniesResponse, UpdateCompanyData, UpdateCompanyResponse } from "@/types/company";
 
 export const adminApi = createApi({
     reducerPath: "adminApi",
@@ -16,7 +17,7 @@ export const adminApi = createApi({
             return headers;
         }
     }),
-    tagTypes: ["subscription"],
+    tagTypes: ["subscription", "company"],
     endpoints: (builder) => ({
         getSubscriptions: builder.query<SubscriptionResponse, void>({
             query: () => ({
@@ -57,6 +58,29 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ["subscription"],
         }),
+        getCompanies: builder.query<CompaniesResponse, void>({
+            query: () => ({
+                url: "admin/companies",
+                method: "GET",
+            }),
+            providesTags: ["company"],
+        }),
+        createCompany: builder.mutation<CreateCompanyResponse, CreateCompanyData>({
+            query: (data) => ({
+                url: "admin/companies",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: ["company"],
+        }),
+        updateCompany: builder.mutation<UpdateCompanyResponse, { id: number; data: UpdateCompanyData }>({
+            query: ({ id, data }) => ({
+                url: `admin/companies/${id}`,
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["company"],
+        }),
     }),
 });
 
@@ -65,5 +89,8 @@ export const {
     useUpdateSubscriptionMutation,
     useCreateSubscriptionMutation,
     useDeleteSubscriptionMutation,
+    useGetCompaniesQuery,
+    useCreateCompanyMutation,
+    useUpdateCompanyMutation,
 } = adminApi;
 
